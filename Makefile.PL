@@ -42,7 +42,7 @@ EDQ
   exit;
 }
 
-if ($] < 5.006) {
+if ($] < 5.006_01) {
   open(TYPEMAP,">typemap");
   print TYPEMAP <<'EOS';
 NV                      T_NV
