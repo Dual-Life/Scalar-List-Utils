@@ -481,6 +481,35 @@ CODE:
 OUTPUT:
   RETVAL
 
+SV*
+set_prototype(subref, proto)
+    SV *subref
+    SV *proto
+PROTOTYPE: &$
+CODE:
+{
+    if (SvROK(subref)) {
+	SV *sv = SvRV(subref);
+	if (SvTYPE(sv) != SVt_PVCV) {
+	    /* not a subroutine reference */
+	    croak("set_prototype: not a subroutine reference");
+	}
+	if (SvPOK(proto)) {
+	    /* set the prototype */
+	    STRLEN len;
+	    char *ptr = SvPV(proto, len);
+	    sv_setpvn(sv, ptr, len);
+	}
+	else {
+	    /* delete the prototype */
+	    SvPOK_off(sv);
+	}
+    }
+    else {
+	croak("set_prototype: not a reference");
+    }
+    XSRETURN(1);
+}
 
 BOOT:
 {
