@@ -1,3 +1,11 @@
+Change 482 on 2000/04/10 by <gbarr@pobox.com> (Graham Barr)
+
+	Check for SvMAGICAL on argument for reftype and blessed
+
+Change 366 on 2000/03/03 by <gbarr@pobox.com> (Graham Barr)
+
+	Release 1.01
+
 Change 365 on 2000/03/03 by <gbarr@pobox.com> (Graham Barr)
 
 	- Added auto-detection for a compiler and install the perl version
