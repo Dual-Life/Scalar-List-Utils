@@ -1,0 +1,11 @@
+The builtin package contains a selection of subroutines that people have
+expressed would be nice to have in the perl core, but the usage would not
+really be high enough to warrant the use of a keyword, and the size so
+small such that being individual extensions would be wasteful.
+
+After unpacking the distribution, to install this module type
+ 
+        perl Makefile.PL
+        make
+        make test
+        make install
