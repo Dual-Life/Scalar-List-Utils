@@ -1,65 +1,58 @@
 #!/usr/bin/env perl
 
 use ExtUtils::MakeMaker;
+use Config qw(%Config);
 
-$no_xs = grep { $_ eq '-pm' } @ARGV;
-
-WriteMakefile(
-	VERSION_FROM	=> "lib/List/Util.pm",
-	NAME            => "List::Util",
-	DISTNAME      	=> "Scalar-List-Utils",
-	clean           => { FILES => 'noxs' },
-	CONFIGURE       => \&init,
-);
+for (@ARGV) {
+  /^-pm/ and $no_xs = 1;
+  /^-xs/ and $no_xs = 0;
+}
 
 sub init {
-  my($self,$hash) = @_;
-
+  my $hash = $_[1];
   if ($no_xs) {
     @{$hash}{XS,C} = ( {}, [] );
-
-    print "\n\n","*"x40,"\n";
-    print "Using perl only implementation\n";
-    print "Some functions will not be avaliable\n";
-    print "*"x40,"\n\n";
-    
-
-    $hash->{PM} = {
-     'noxs/List/Util.pm'   => '$(INST_LIB)/List/Util.pm',
-     'noxs/Scalar/Util.pm' => '$(INST_LIB)/Scalar/Util.pm'
-    };
-    $hash->{MAN3PODS} = {
-     'noxs/List/Util.pm'   => '$(INST_MAN3DIR)/List::Util.3',
-     'noxs/Scalar/Util.pm' => '$(INST_MAN3DIR)/Scalar::Util.3'
-    };
-  
   }
   $hash;
 }
 
-sub MY::postamble {
-
-  return '' unless $no_xs;
-
-<<'ESQ';
-
-NOXS = $(PERL) -p -e 's/^\#(?=.*no-XS)//; s/^(?=.*XS-only)/\#/; s?^__END__??;'
-
-noxs/List/Util.pm : lib/List/Util.pm
-	$(NOXS) lib/List/Util.pm > noxs/List/Util.pm
-
-noxs/Scalar/Util.pm : lib/Scalar/Util.pm
-	$(NOXS) lib/Scalar/Util.pm > noxs/Scalar/Util.pm
-
-config :: noxs/List/.exists noxs/Scalar/.exists
-	@$(NOOP)
-
-noxs/List/.exists :
-	@$(MKPATH) noxs/List
-
-noxs/Scalar/.exists :
-	@$(MKPATH) noxs/Scalar
-
-ESQ
-
+sub write_makefile {
+  WriteMakefile(
+    VERSION_FROM    => "lib/List/Util.pm",
+    NAME            => "List::Util",
+    DISTNAME        => "Scalar-List-Utils",
+    CONFIGURE       => \&init,
+    clean           => {FILES => 'test.c'}
+  );
 }
+
+sub no_cc {
+  $no_xs = 1;
+  print <<"EDQ";
+
+ I cannot determine if you have a C compiler
+ so I will install a perl-only implementation
+
+ You can force installation of the XS version with
+
+    perl Makefile.PL -xs
+
+EDQ
+  write_makefile();
+  exit;
+}
+
+write_makefile();
+
+exit if defined $no_xs;
+
+print "Testing if you have a C compiler\n";
+
+open(F,">test.c") or no_cc();
+print F <<EOF;
+int main() { return 0; }
+EOF
+close(F) or no_cc();
+system("make test$Config{obj_ext}") and no_cc();
+
+

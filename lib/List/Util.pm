@@ -6,20 +6,22 @@
 
 package List::Util;
 
-require DynaLoader; # XS-only
 require Exporter;
 
-#@ISA = qw(Exporter); # no-XS
-@ISA = qw(Exporter DynaLoader); # XS-only
+@ISA = qw(Exporter);
 @EXPORT_OK = qw(first min max minstr maxstr reduce sum);
 $VERSION = $VERSION = "1.01";
 
-bootstrap List::Util $VERSION; # XS-only
+eval {
+  require DynaLoader;
+  local @ISA = qw(DynaLoader);
+  bootstrap List::Util $VERSION;
+  1
+};
 
-1;
+eval <<'ESQ' unless defined &reduce;
 
-__END__
-# The code beyond here is only used if the XS is not installed
+# This code is only compiled if the XS did not load
 
 use vars qw($a $b);
 
@@ -60,6 +62,9 @@ sub first (&@) {
 
   undef;
 }
+ESQ
+
+1;
 
 __END__
 
