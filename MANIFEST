@@ -8,6 +8,7 @@ lib/Scalar/Util.pm
 t/blessed.t
 t/dualvar.t
 t/first.t
+t/isvstring.t
 t/max.t
 t/maxstr.t
 t/min.t

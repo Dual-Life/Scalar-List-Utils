@@ -10,13 +10,17 @@ require Exporter;
 require List::Util; # List::Util loads the XS
 
 @ISA       = qw(Exporter);
-@EXPORT_OK = qw(blessed dualvar reftype weaken isweak tainted readonly openhandle refaddr);
+@EXPORT_OK = qw(blessed dualvar reftype weaken isweak tainted readonly openhandle refaddr isvstring);
 $VERSION   = $VERSION = $List::Util::VERSION;
 
 sub export_fail {
   if (grep { /^(weaken|isweak)$/ } @_ ) {
     require Carp;
     Carp::croak("Weak references are not implemented in the version of perl");
+  }
+  if (grep { /^(isvstring)$/ } @_ ) {
+    require Carp;
+    Carp::croak("Vstrings are not implemented in the version of perl");
   }
   if (grep { /^dualvar$/ } @_ ) {
     require Carp;
@@ -46,7 +50,7 @@ sub openhandle ($) {
 
 eval <<'ESQ' unless defined &dualvar;
 
-push @EXPORT_FAIL, qw(weaken isweak dualvar);
+push @EXPORT_FAIL, qw(weaken isweak dualvar isvstring);
 
 # The code beyond here is only used if the XS is not installed
 
@@ -161,6 +165,14 @@ value STRING in a string context.
     $foo = dualvar 10, "Hello";
     $num = $foo + 2;                    # 12
     $str = $foo . " world";             # Hello world
+
+=item isvstring EXPR
+
+If EXPR is a scalar which was coded as a vstring the result is true.
+
+    $vs   = v49.46.48;
+    $fmt  = isvstring($vs) ? "%vd" : "%s"; #true
+    printf($fmt,$vs);
 
 =item isweak EXPR
 

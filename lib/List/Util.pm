@@ -10,7 +10,7 @@ require Exporter;
 
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(first min max minstr maxstr reduce sum shuffle);
-$VERSION   = $VERSION = "1.07";
+$VERSION   = $VERSION = "1.08";
 
 eval {
   require DynaLoader;

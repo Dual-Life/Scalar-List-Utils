@@ -435,16 +435,34 @@ CODE:
 OUTPUT:
   RETVAL
 
+void
+isvstring(sv)
+       SV *sv
+PROTOTYPE: $
+CODE:
+#ifdef SvVOK
+  ST(0) = boolSV(SvVOK(sv));
+  XSRETURN(1);
+#else
+	croak("vstrings are not implemented in this release of perl");
+#endif
+
+
 BOOT:
 {
-#ifndef SvWEAKREF
+#if !defined(SvWEAKREF) || !defined(SvVOK)
     HV *stash = gv_stashpvn("Scalar::Util", 12, TRUE);
     GV *vargv = *(GV**)hv_fetch(stash, "EXPORT_FAIL", 11, TRUE);
     AV *varav;
     if (SvTYPE(vargv) != SVt_PVGV)
 	gv_init(vargv, stash, "Scalar::Util", 12, TRUE);
     varav = GvAVn(vargv);
+#endif
+#ifndef SvWEAKREF
     av_push(varav, newSVpv("weaken",6));
     av_push(varav, newSVpv("isweak",6));
+#endif
+#ifndef SvVOK
+    av_push(varav, newSVpv("isvstring",9));
 #endif
 }
