@@ -10,6 +10,7 @@ for (@ARGV) {
 }
 
 name		('Scalar-List-Util');
+module_name	('List::Util');
 abstract	('Common Scalar and List utility subroutines');
 author		('Graham Barr <gbarr@cpan.org>');
 version_from	('lib/List/Util.pm');
@@ -21,6 +22,9 @@ makemaker_args	( DEFINE      => "-DPERL_EXT",);
 installdirs	(qw(Scalar::Util List::Util));
 
 check_nmake();      # check and download nmake.exe for Win32
+
+requires( perl => 5.004);
+include_deps('Test::More');
 
 &Makefile->write;
 &Meta->write;
