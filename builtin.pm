@@ -11,7 +11,7 @@ use DynaLoader ();
 use Exporter ();
 use vars qw(@ISA @EXPORT_OK $VERSION);
 
-$VERSION = "0.03";
+$VERSION = "0.04";
 @ISA = qw(Exporter DynaLoader);
 @EXPORT_OK = qw(
 	blessed
