@@ -1,10 +1,13 @@
 Changes
 MANIFEST
+META.yml
 Makefile.PL
 README
+SIGNATURE
 Util.xs
 lib/List/Util.pm
 lib/Scalar/Util.pm
+mytypemap
 t/blessed.t
 t/dualvar.t
 t/first.t

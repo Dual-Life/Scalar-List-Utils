@@ -1,0 +1,16 @@
+# This typemap file is only used for perl < 5.6.1
+NV                      T_NV
+UV                      T_UV
+
+INPUT
+T_NV
+	$var = ($type)SvNV($arg)
+T_UV
+	$var = ($type)SvUV($arg)
+
+OUTPUT
+T_NV
+	sv_setnv($arg, (NV)$var);
+T_UV
+	sv_setuv($arg, (UV)$var);
+

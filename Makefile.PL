@@ -1,82 +1,52 @@
-#!/usr/bin/env perl
+# -*- perl -*-
 
-use ExtUtils::MakeMaker;
-use Config qw(%Config);
+use inc::Module::Install;
+
+my $do_xs = can_cc();
 
 for (@ARGV) {
-  /^-pm/ and $no_xs = 1;
-  /^-xs/ and $no_xs = 0;
+  /^-pm/ and $do_xs = 0;
+  /^-xs/ and $do_xs = 1;
 }
 
-sub init {
-  my $hash = $_[1];
-  if ($no_xs) {
-    @{$hash}{XS,C} = ( {}, [] );
-  }
-  $hash;
+name		('Scalar-List-Util');
+abstract	('Common Scalar and List utility subroutines');
+author		('Graham Barr <gbarr@cpan.org>');
+version_from	('lib/List/Util.pm');
+license		('perl');
+
+makemaker_args	( XS => {}, C => []) unless $do_xs;
+makemaker_args	( DEFINE      => "-DPERL_EXT",);
+
+installdirs	(qw(Scalar::Util List::Util));
+
+check_nmake();      # check and download nmake.exe for Win32
+
+&Makefile->write;
+&Meta->write;
+
+## - - - - - - - -
+
+sub MY::post_constants {
+  return '' if $] >= 5.006_01;
+
+  return <<'POST_CONST';
+
+XSUBPP_EXTRA_ARGS = -typemap mytypemap
+
+POST_CONST
+
 }
 
-sub write_makefile {
-  WriteMakefile(
-    INSTALLDIRS     => ($] >= 5.008 ? 'perl' : 'site'),
-    VERSION_FROM    => "lib/List/Util.pm",
-    NAME            => "List::Util",
-    DISTNAME        => "Scalar-List-Utils",
-    CONFIGURE       => \&init,
-    DEFINE          => "-DPERL_EXT",
-    clean           => {FILES => 'test.c typemap'}
-  );
+sub MY::postamble {
+  return <<'POSTAMBLE';
+
+distdir : manifest run_cpansign
+
+run_cpansign :
+	cpansign -s
+
+POSTAMBLE
+
 }
-
-sub no_cc {
-  $no_xs = 1;
-  print <<"EDQ";
-
- I cannot determine if you have a C compiler
- so I will install a perl-only implementation
-
- You can force installation of the XS version with
-
-    perl Makefile.PL -xs
-
-EDQ
-  write_makefile();
-  exit;
-}
-
-if ($] < 5.006_01) {
-  open(TYPEMAP,">typemap");
-  print TYPEMAP <<'EOS';
-NV                      T_NV
-UV                      T_UV
-
-INPUT
-T_NV
-	$var = ($type)SvNV($arg)
-T_UV
-	$var = ($type)SvUV($arg)
-
-OUTPUT
-T_NV
-	sv_setnv($arg, (NV)$var);
-T_UV
-	sv_setuv($arg, (UV)$var);
-
-EOS
-  close(TYPEMAP);
-}
-
-write_makefile();
-
-exit if defined $no_xs;
-
-print "Testing if you have a C compiler\n";
-
-open(F,">test.c") or no_cc();
-print F <<EOF;
-int main() { return 0; }
-EOF
-close(F) or no_cc();
-system("$Config{make} test$Config{obj_ext}") and no_cc();
-
 
