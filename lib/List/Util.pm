@@ -8,14 +8,16 @@ package List::Util;
 
 require Exporter;
 
-@ISA       = qw(Exporter);
-@EXPORT_OK = qw(first min max minstr maxstr reduce sum shuffle);
-$VERSION   = $VERSION = "1.08";
+@ISA        = qw(Exporter);
+@EXPORT_OK  = qw(first min max minstr maxstr reduce sum shuffle);
+$VERSION    = "1.08";
+$XS_VERSION = $VERSION;
+$VERSION    = eval $VERSION;
 
 eval {
   require DynaLoader;
   local @ISA = qw(DynaLoader);
-  bootstrap List::Util $VERSION;
+  bootstrap List::Util $XS_VERSION;
   1
 };
 
