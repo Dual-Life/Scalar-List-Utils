@@ -76,6 +76,6 @@ print F <<EOF;
 int main() { return 0; }
 EOF
 close(F) or no_cc();
-system("make test$Config{obj_ext}") and no_cc();
+system("$Config{make} test$Config{obj_ext}") and no_cc();
 
 
