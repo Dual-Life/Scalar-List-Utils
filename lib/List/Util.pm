@@ -208,6 +208,12 @@ This function could be implemented using C<reduce> like this
 
 =back
 
+=head1 KNOWN BUGS
+
+With perl versions prior to 5.005 there are some cases where reduce
+will return an incorrect result. This will show up as test 7 of
+reduce.t failing.
+
 =head1 SUGGESTED ADDITIONS
 
 The following are additions that have been requested, but I have been reluctant
