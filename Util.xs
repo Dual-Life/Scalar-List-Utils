@@ -96,8 +96,8 @@ sv_tainted(SV *sv)
 #  endif
 #endif
 
-#ifndef PTR2IV
-#  define PTR2IV(ptr) (IV)(ptr)
+#ifndef PTR2UV
+#  define PTR2UV(ptr) (UV)(ptr)
 #endif
 
 MODULE=List::Util	PACKAGE=List::Util
