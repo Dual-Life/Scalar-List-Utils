@@ -9,7 +9,7 @@ package List::Util;
 require Scalar::DualVar;
 require Exporter;
 @ISA = qw(Exporter);
-@EXPORT_OK = qw(min max minstr maxstr reduce sum);
+@EXPORT_OK = qw(min max minstr maxstr reduce sum forall);
 $VERSION = $Scalar::DualVar::VERSION;
 
 1;
@@ -35,7 +35,32 @@ subroutines defined are
 
 =over 4
 
+=item forall BLOCK LIST
 
+LIST must be a list of array references. BLOCK will be called N times
+when N is the length of the longet array. Each time the elements of
+C<@_> will be aliases to an element from each of the arrays.
+
+If the elements of C<@_> are modified then the input arrays will be modified.
+If called in an array context the results of the block evaluations will be
+returned. In a scalar context returns the number of elements in the largest
+array.
+
+    @a =  qw(H l W l);
+    @b =  qw(e o o d);
+    @c = (qw(l _ r),"\n");
+    @r = forall { $_[0] . $_[1] . $_[2] } \(@a,@b,@c);
+    print @r;
+    # Hello_World
+
+    forall { $_[0] .= $_[1] . $_[2] } \@a, \@b, \@c;
+    print @a;
+    # Hello_World
+
+    $l = forall { $_[0] *= $_[1] } [1,2,3],[4,5,6,7];
+    print $l,"\n";
+    # 4
+    
 =item max LIST
 
 Returns the entry in the list with the highest numerical value. If the
