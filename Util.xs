@@ -8,7 +8,10 @@
 #include <XSUB.h>
 
 #ifndef PERL_VERSION
-#    include "patchlevel.h"
+#    include <patchlevel.h>
+#    if !(defined(PERL_VERSION) || (SUBVERSION > 0 && defined(PATCHLEVEL)))
+#        include <could_not_find_Perl_patchlevel.h>
+#    endif
 #    define PERL_REVISION	5
 #    define PERL_VERSION	PATCHLEVEL
 #    define PERL_SUBVERSION	SUBVERSION
