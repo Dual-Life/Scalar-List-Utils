@@ -1,6 +1,6 @@
 # Scalar::Util.pm
 #
-# Copyright (c) 1997-1999 Graham Barr <gbarr@pobox.com>. All rights reserved.
+# Copyright (c) 1997-2000 Graham Barr <gbarr@pobox.com>. All rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 
@@ -135,7 +135,7 @@ prevent the object being DESTROY-ed at it's usual time.
 
 =head1 COPYRIGHT
 
-Copyright (c) 1997-1999 Graham Barr <gbarr@pobox.com>. All rights reserved.
+Copyright (c) 1997-2000 Graham Barr <gbarr@pobox.com>. All rights reserved.
 This program is free software; you can redistribute it and/or modify it 
 under the same terms as Perl itself.
 

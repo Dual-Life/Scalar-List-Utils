@@ -1,4 +1,4 @@
-/* Copyright (c) 1997-1999 Graham Barr <gbarr@pobox.com>. All rights reserved.
+/* Copyright (c) 1997-2000 Graham Barr <gbarr@pobox.com>. All rights reserved.
  * This program is free software; you can redistribute it and/or
  * modify it under the same terms as Perl itself.
  */
@@ -37,10 +37,18 @@ sv_tainted(SV *sv)
 #  define PERL_CONTEXT struct context
 #endif
 #if (PATCHLEVEL < 5) || (PATCHLEVEL == 5 && SUBVERSION <50)
-#  define PL_tainting tainting
-#  define PL_stack_base stack_base
-#  define PL_stack_sp stack_sp
-#  define PL_ppaddr ppaddr
+#  ifndef PL_tainting
+#    define PL_tainting tainting
+#  endif
+#  ifndef PL_stack_base
+#    define PL_stack_base stack_base
+#  endif
+#  ifndef PL_stack_sp
+#    define PL_stack_sp stack_sp
+#  endif
+#  ifndef PL_ppaddr
+#    define PL_ppaddr ppaddr
+#  endif
 #endif
 
 MODULE=List::Util	PACKAGE=List::Util
