@@ -13,15 +13,18 @@ BEGIN {
     }
 }
 
+use vars qw($skip);
+
 BEGIN {
   require Scalar::Util;
 
   if (grep { /dualvar/ } @Scalar::Util::EXPORT_FAIL) {
     print "1..0\n";
-    exit;
+    $skip=1;
   }
 }
 
+eval <<'EOT' unless $skip;
 use Scalar::Util qw(dualvar);
 
 print "1..6\n";
@@ -49,3 +52,5 @@ print "ok 5\n";
 
 print "not " unless $var2 eq "string";
 print "ok 6\n";
+
+EOT

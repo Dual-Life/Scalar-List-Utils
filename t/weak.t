@@ -13,12 +13,14 @@ BEGIN {
     }
 }
 
+use vars qw($skip);
+
 BEGIN {
   $|=1;
   require Scalar::Util;
   if (grep { /weaken/ } @Scalar::Util::EXPORT_FAIL) {
     print("1..0\n");
-    exit;
+    $skip=1;
   }
 
   $DEBUG = 0;
@@ -31,6 +33,7 @@ BEGIN {
   }
 }
 
+eval <<'EOT' unless $skip;
 use Scalar::Util qw(weaken isweak);
 print "1..17\n";
 
@@ -209,3 +212,4 @@ sub DESTROY {
 	print "INCFLAG\n";
 	${$_[0]{Flag}} ++;
 }
+EOT
