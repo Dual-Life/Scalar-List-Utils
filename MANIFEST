@@ -15,6 +15,7 @@ t/minstr.t
 t/readonly.t
 t/reduce.t
 t/reftype.t
+t/shuffle.t
 t/sum.t
 t/tainted.t
 t/weak.t

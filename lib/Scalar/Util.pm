@@ -9,9 +9,9 @@ package Scalar::Util;
 require Exporter;
 require List::Util; # List::Util loads the XS
 
-$VERSION = $VERSION = $List::Util::VERSION;
-@ISA = qw(Exporter);
+@ISA       = qw(Exporter);
 @EXPORT_OK = qw(blessed dualvar reftype weaken isweak tainted readonly);
+$VERSION   = $VERSION = $List::Util::VERSION;
 
 sub export_fail {
   if (grep { /^(weaken|isweak)$/ } @_ ) {

@@ -98,7 +98,7 @@ Dump($y); Dump($z);
 
 # kill 5,$$;
 
-print "CASE 2:\n";
+print "# CASE 2:\n";
 
 {
 	my $x = "foo";
@@ -113,7 +113,7 @@ print "# AW: \n";
 Dump($y);
 ok( not defined $y  );
 
-print "EXITBLOCK\n";
+print "# EXITBLOCK\n";
 }
 
 # exit(0);
@@ -135,20 +135,20 @@ $flag = 0;
 	$y->{Flag} = \$flag;
 	print "# 3: $y\n";
 	weaken($y->{Self});
-	print "WKED\n";
+	print "# WKED\n";
 	ok( $y ne "" );
-	print "VALS: HASH ",$y,"   SELF ",\$y->{Self},"  Y ",\$y, 
+	print "# VALS: HASH ",$y,"   SELF ",\$y->{Self},"  Y ",\$y, 
 		"    FLAG: ",\$y->{Flag},"\n";
-	print "VPRINT\n";
+	print "# VPRINT\n";
 }
-print "OUT $flag\n";
+print "# OUT $flag\n";
 ok( $flag == 1 );
 
-print "AFTER\n";
+print "# AFTER\n";
 
 undef $flag;
 
-print "FLAGU\n";
+print "# FLAGU\n";
 
 #
 # Case 4: a more complicated circular structure
@@ -176,7 +176,7 @@ ok( $flag == 2 );
 	$z = \$x;
 }
 
-print "CASE5\n";
+print "# CASE5\n";
 Dump($y);
 
 weaken($y);
@@ -209,7 +209,7 @@ ok(!isweak($x->{Z}));
 package Dest;
 
 sub DESTROY {
-	print "INCFLAG\n";
+	print "# INCFLAG\n";
 	${$_[0]{Flag}} ++;
 }
 EOT

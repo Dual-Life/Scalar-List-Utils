@@ -8,9 +8,9 @@ package List::Util;
 
 require Exporter;
 
-@ISA = qw(Exporter);
+@ISA       = qw(Exporter);
 @EXPORT_OK = qw(first min max minstr maxstr reduce sum shuffle);
-$VERSION = $VERSION = "1.03";
+$VERSION   = $VERSION = "1.03";
 
 eval {
   require DynaLoader;
