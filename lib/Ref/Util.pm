@@ -9,8 +9,16 @@ package Ref::Util;
 require Scalar::DualVar;
 require Exporter;
 @ISA = qw(Exporter);
-@EXPORT_OK = qw(blessed reftype);
+@EXPORT_OK = qw(blessed reftype weaken isweak);
 $VERSION = $Scalar::DualVar::VERSION;
+
+sub export_fail {
+  if (grep { /^(weaken|isweak)$/ } @_ ) {
+    require Carp;
+    Carp::croak("Weak references are not implemented in the version of perl");
+  }
+  @_;
+}
 
 1;
 __END__
@@ -21,7 +29,7 @@ Ref::Util - A selection of general-utility reference subroutines
 
 =head1 SYNOPSIS
 
-    use Ref::Util qw(blessed rftype);
+    use Ref::Util qw(blessed rftype weaken isweak);
 
 =head1 DESCRIPTION
 
@@ -40,12 +48,15 @@ subroutines defined are
 If EXPR evaluates to a blessed reference the name of the package
 that it is blessed into is returned. Otherwise C<undef> is returned.
 
+=item isweak EXPR
 
+If EXPR is a scalar which is a weak reference the 
 =item reftype EXPR
 
 If EXPR evaluates to a reference the type of the variable referenced
 is returned. Otherwise C<undef> is returned.
 
+=item weaken EXPR
 
 =back
 
@@ -65,7 +76,20 @@ The sub is very commonly used B<and> needs fast implementation in C.
 =head1 COPYRIGHT
 
 Copyright (c) 1997-1999 Graham Barr <gbarr@pobox.com>. All rights reserved.
-This program is free software; you can redistribute it and/or
-modify it under the same terms as Perl itself.
+This program is free software; you can redistribute it and/or modify it 
+under the same terms as Perl itself.
+
+except weaken and isweak which are
+
+Copyright (c) 1999 Tuomas J. Lukka <lukka@iki.fi>. All rights reserved.
+This program is free software; you can redistribute it and/or modify it
+under the same terms as perl itself.
+
+=head1 BLATANT PLUG
+
+The weanen and isweak subroutines in this module and the patch to the core Perl
+were written in connection  with the APress book `Tuomas J. Lukka's Definitive
+Guide to Object-Oriented Programming in Perl', to avoid explaining why certain
+things would have to be done in cumbersome ways.
 
 =cut

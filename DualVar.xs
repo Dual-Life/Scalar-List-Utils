@@ -20,7 +20,6 @@
 #  define PL_ppaddr ppaddr 
 #endif
 
-
 MODULE=Scalar::DualVar	PACKAGE=List::Util
 
 void
@@ -210,3 +209,40 @@ CODE:
 OUTPUT:
     RETVAL
 
+void
+weaken(sv)
+	SV *sv
+PROTOTYPE: $
+CODE:
+#ifdef SvWEAKREF
+	sv_rvweaken(sv);
+#else
+	croak("weak references are not implemented in this release of perl");
+#endif
+
+SV *
+isweak(sv)
+	SV *sv
+PROTOTYPE: $
+CODE:
+#ifdef SvWEAKREF
+	ST(0) = boolSV(SvROK(sv) && SvWEAKREF(sv));
+	XSRETURN(1);
+#else
+	croak("weak references are not implemented in this release of perl");
+#endif
+
+
+BOOT:
+{
+#ifndef SvWEAKREF
+    HV *stash = gv_stashpvn("Ref::Util", 9, TRUE);
+    GV *vargv = *(GV**)hv_fetch(stash, "EXPORT_FAIL", 11, TRUE);
+    AV *varav;
+    if (SvTYPE(vargv) != SVt_PVGV)
+	gv_init(vargv, stash, "Ref::Util", 9, TRUE);
+    varav = GvAVn(vargv);
+    av_push(varav, newSVpv("weaken",6));
+    av_push(varav, newSVpv("isweak",6));
+#endif
+}
