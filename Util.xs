@@ -175,6 +175,8 @@ CODE:
     PERL_CONTEXT *cx;
     SV** newsp;
     I32 gimme = G_SCALAR;
+    bool oldcatch = CATCH_GET;
+
     if(items <= 1) {
 	XSRETURN_UNDEF;
     }
@@ -191,6 +193,7 @@ CODE:
     SAVETMPS;
     SAVESPTR(PL_op);
     ret = ST(1);
+    CATCH_SET(TRUE);
     PUSHBLOCK(cx, CXt_SUB, SP);
     for(index = 2 ; index < items ; index++) {
 	GvSV(agv) = ret;
@@ -201,6 +204,7 @@ CODE:
     }
     ST(0) = sv_mortalcopy(ret);
     POPBLOCK(cx,PL_curpm);
+    CATCH_SET(oldcatch);
     XSRETURN(1);
 }
 
@@ -218,6 +222,7 @@ CODE:
     PERL_CONTEXT *cx;
     SV** newsp;
     I32 gimme = G_SCALAR;
+    bool oldcatch = CATCH_GET;
 
     if(items <= 1) {
 	XSRETURN_UNDEF;
@@ -231,6 +236,7 @@ CODE:
     PL_curpad = AvARRAY((AV*)AvARRAY(CvPADLIST(cv))[1]);
     SAVETMPS;
     SAVESPTR(PL_op);
+    CATCH_SET(TRUE);
     PUSHBLOCK(cx, CXt_SUB, SP);
     for(index = 1 ; index < items ; index++) {
 	GvSV(PL_defgv) = ST(index);
@@ -239,10 +245,12 @@ CODE:
 	if (SvTRUE(*PL_stack_sp)) {
 	  ST(0) = ST(index);
 	  POPBLOCK(cx,PL_curpm);
+	  CATCH_SET(oldcatch);
 	  XSRETURN(1);
 	}
     }
     POPBLOCK(cx,PL_curpm);
+    CATCH_SET(oldcatch);
     XSRETURN_UNDEF;
 }
 

@@ -16,7 +16,7 @@ BEGIN {
 
 use List::Util qw(reduce min);
 
-print "1..6\n";
+print "1..8\n";
 
 print "not " if defined reduce {};
 print "ok 1\n";
@@ -43,3 +43,10 @@ sub add {
 my $sum = reduce { my $t="$a $b\n"; 0+add($a, $b) } 3, 2, 1;
 print "not " unless $sum == 6;
 print "ok 6\n";
+
+# Check that eval{} inside the block works correctly
+print "not " unless 10 == reduce { eval { die }; $a + $b } 0,1,2,3,4;
+print "ok 7\n";
+
+print "not " if defined eval { reduce { die if $b > 2; $a + $b } 0,1,2,3,4 };
+print "ok 8\n";
