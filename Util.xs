@@ -90,6 +90,10 @@ sv_tainted(SV *sv)
 #  endif
 #endif
 
+#ifndef PTR2IV
+#  define PTR2IV(ptr) (IV)(ptr)
+#endif
+
 MODULE=List::Util	PACKAGE=List::Util
 
 void
@@ -372,6 +376,20 @@ CODE:
 	XSRETURN_UNDEF;
     }
     RETVAL = sv_reftype(SvRV(sv),FALSE);
+}
+OUTPUT:
+    RETVAL
+
+IV
+refaddr(sv)
+    SV * sv
+PROTOTYPE: $
+CODE:
+{
+    if(!SvROK(sv)) {
+	XSRETURN_UNDEF;
+    }
+    RETVAL = PTR2IV(SvRV(sv));
 }
 OUTPUT:
     RETVAL

@@ -10,7 +10,7 @@ require Exporter;
 require List::Util; # List::Util loads the XS
 
 @ISA       = qw(Exporter);
-@EXPORT_OK = qw(blessed dualvar reftype weaken isweak tainted readonly openhandle);
+@EXPORT_OK = qw(blessed dualvar reftype weaken isweak tainted readonly openhandle refaddr);
 $VERSION   = $VERSION = $List::Util::VERSION;
 
 sub export_fail {
@@ -58,6 +58,14 @@ sub blessed ($) {
   length(ref($_[0]))
     ? eval { $_[0]->a_sub_not_likely_to_be_here }
     : undef
+}
+
+sub refaddr($) {
+  my $pkg = ref($_[0]) or return undef;
+  bless $_[0], 'Scalar::Util::Fake';
+  my $i = int($_[0]);
+  bless $_[0], $pkg;
+  $i;
 }
 
 sub reftype ($) {
@@ -117,7 +125,7 @@ Scalar::Util - A selection of general-utility scalar subroutines
 
 =head1 SYNOPSIS
 
-    use Scalar::Util qw(blessed dualvar isweak readonly reftype tainted weaken);
+    use Scalar::Util qw(blessed dualvar isweak readonly refaddr reftype tainted weaken);
 
 =head1 DESCRIPTION
 
@@ -181,6 +189,18 @@ Returns true if SCALAR is readonly.
 
     $readonly = foo($bar);              # false
     $readonly = foo(0);                 # true
+
+=item refaddr EXPR
+
+If EXPR evaluates to a reference the internal memory address of
+the referenced value is returned. Otherwise C<undef> is returned.
+
+    $addr = refaddr "string";           # undef
+    $addr = refaddr \$var;              # eg 12345678
+    $addr = refaddr [];                 # eg 23456784
+
+    $obj  = bless {}, "Foo";
+    $addr = refaddr $obj;               # eg 88123488
 
 =item reftype EXPR
 
