@@ -22,7 +22,7 @@ sub write_makefile {
     NAME            => "List::Util",
     DISTNAME        => "Scalar-List-Utils",
     CONFIGURE       => \&init,
-    clean           => {FILES => 'test.c'}
+    clean           => {FILES => 'test.c typemap'}
   );
 }
 
@@ -40,6 +40,23 @@ sub no_cc {
 EDQ
   write_makefile();
   exit;
+}
+
+if ($] < 5.006) {
+  open(TYPEMAP,">typemap");
+  print TYPEMAP <<'EOS';
+NV                      T_NV
+
+INPUT
+T_NV
+	$var = ($type)SvNV($arg)
+
+OUTPUT
+T_NV
+	sv_setnv($arg, (NV)$var);
+
+EOS
+  close(TYPEMAP);
 }
 
 write_makefile();

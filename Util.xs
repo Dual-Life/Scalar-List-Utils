@@ -6,9 +6,24 @@
 #include <EXTERN.h>
 #include <perl.h>
 #include <XSUB.h>
-#include <patchlevel.h>
 
-#if PATCHLEVEL < 5
+#ifndef PERL_VERSION
+#    include "patchlevel.h"
+#    define PERL_REVISION	5
+#    define PERL_VERSION	PATCHLEVEL
+#    define PERL_SUBVERSION	SUBVERSION
+#endif
+
+#ifndef aTHX
+#  define aTHX
+#endif
+
+#if PERL_VERSION < 6
+#  define NV double
+#endif
+
+
+#if PERL_VERSION < 5
 #  ifndef gv_stashpvn
 #    define gv_stashpvn(n,l,c) gv_stashpv(n,c)
 #  endif
@@ -36,7 +51,7 @@ sv_tainted(SV *sv)
 #  define PL_sv_undef sv_undef
 #  define PERL_CONTEXT struct context
 #endif
-#if (PATCHLEVEL < 5) || (PATCHLEVEL == 5 && SUBVERSION <50)
+#if (PERL_VERSION < 5) || (PERL_VERSION == 5 && PERL_SUBVERSION <50)
 #  ifndef PL_tainting
 #    define PL_tainting tainting
 #  endif
@@ -62,7 +77,7 @@ ALIAS:
 CODE:
 {
     int index;
-    double retval;
+    NV retval;
     SV *retsv;
     if(!items) {
 	XSRETURN_UNDEF;
@@ -71,7 +86,7 @@ CODE:
     retval = SvNV(retsv);
     for(index = 1 ; index < items ; index++) {
 	SV *stacksv = ST(index);
-	double val = SvNV(stacksv);
+	NV val = SvNV(stacksv);
 	if(val < retval ? !ix : ix) {
 	    retsv = stacksv;
 	    retval = val;
@@ -83,13 +98,12 @@ CODE:
 
 
 
-double
+NV
 sum(...)
 PROTOTYPE: @
 CODE:
 {
     int index;
-    double ret;
     if(!items) {
 	XSRETURN_UNDEF;
     }
@@ -154,11 +168,13 @@ CODE:
 {
     SV *ret;
     int index;
-    I32 markix;
     GV *agv,*bgv,*gv;
     HV *stash;
     CV *cv;
     OP *reducecop;
+    PERL_CONTEXT *cx;
+    SV** newsp;
+    I32 gimme = G_SCALAR;
     if(items <= 1) {
 	XSRETURN_UNDEF;
     }
@@ -175,15 +191,16 @@ CODE:
     SAVETMPS;
     SAVESPTR(PL_op);
     ret = ST(1);
-    markix = sp - PL_stack_base;
+    PUSHBLOCK(cx, CXt_SUB, SP);
     for(index = 2 ; index < items ; index++) {
 	GvSV(agv) = ret;
 	GvSV(bgv) = ST(index);
 	PL_op = reducecop;
-	CALLRUNOPS();
+	CALLRUNOPS(aTHX);
 	ret = *PL_stack_sp;
     }
-    ST(0) = ret;
+    ST(0) = sv_mortalcopy(ret);
+    POPBLOCK(cx,PL_curpm);
     XSRETURN(1);
 }
 
@@ -193,13 +210,15 @@ first(block,...)
 PROTOTYPE: &@
 CODE:
 {
-    SV *ret;
     int index;
-    I32 markix;
     GV *gv;
     HV *stash;
     CV *cv;
     OP *reducecop;
+    PERL_CONTEXT *cx;
+    SV** newsp;
+    I32 gimme = G_SCALAR;
+
     if(items <= 1) {
 	XSRETURN_UNDEF;
     }
@@ -212,16 +231,18 @@ CODE:
     PL_curpad = AvARRAY((AV*)AvARRAY(CvPADLIST(cv))[1]);
     SAVETMPS;
     SAVESPTR(PL_op);
-    markix = sp - PL_stack_base;
+    PUSHBLOCK(cx, CXt_SUB, SP);
     for(index = 1 ; index < items ; index++) {
 	GvSV(PL_defgv) = ST(index);
 	PL_op = reducecop;
-	CALLRUNOPS();
+	CALLRUNOPS(aTHX);
 	if (SvTRUE(*PL_stack_sp)) {
 	  ST(0) = ST(index);
+	  POPBLOCK(cx,PL_curpm);
 	  XSRETURN(1);
 	}
     }
+    POPBLOCK(cx,PL_curpm);
     XSRETURN_UNDEF;
 }
 
@@ -237,7 +258,7 @@ CODE:
     STRLEN len;
     char *ptr = SvPV(str,len);
     ST(0) = sv_newmortal();
-    SvUPGRADE(ST(0),SVt_PVNV);
+    (void)SvUPGRADE(ST(0),SVt_PVNV);
     sv_setpvn(ST(0),ptr,len);
     if(SvNOKp(num) || !SvIOKp(num)) {
 	SvNVX(ST(0)) = SvNV(num);
@@ -295,7 +316,7 @@ CODE:
 	croak("weak references are not implemented in this release of perl");
 #endif
 
-SV *
+void
 isweak(sv)
 	SV *sv
 PROTOTYPE: $
