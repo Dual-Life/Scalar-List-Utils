@@ -10,7 +10,7 @@ require Exporter;
 require List::Util; # List::Util loads the XS
 
 @ISA       = qw(Exporter);
-@EXPORT_OK = qw(blessed dualvar reftype weaken isweak tainted readonly);
+@EXPORT_OK = qw(blessed dualvar reftype weaken isweak tainted readonly openhandle);
 $VERSION   = $VERSION = $List::Util::VERSION;
 
 sub export_fail {
@@ -24,6 +24,24 @@ sub export_fail {
   }
 
   @_;
+}
+
+sub openhandle ($) {
+  my $fh = shift;
+  my $rt = reftype($fh) || '';
+
+  return defined(fileno($fh)) ? $fh : undef
+    if $rt eq 'IO';
+
+  if (reftype(\$fh) eq 'GLOB') { # handle  openhandle(*DATA)
+    $fh = \(my $tmp=$fh);
+  }
+  elsif ($rt ne 'GLOB') {
+    return undef;
+  }
+
+  (tied(*$fh) or defined(fileno($fh)))
+    ? $fh : undef;
 }
 
 eval <<'ESQ' unless defined &dualvar;
@@ -145,6 +163,16 @@ If EXPR is a scalar which is a weak reference the result is true.
     weaken($ref);
     $weak = isweak($ref);               # true
 
+=item openhandle FH
+
+Returns FH if FH may be used as a filehandle and is open, or FH is a tied
+handle. Otherwise C<undef> is returned.
+
+    $fh = openhandle(*STDIN);		# \*STDIN
+    $fh = openhandle(\*STDIN);		# \*STDIN
+    $fh = openhandle(*NOTOPEN);		# undef
+    $fh = openhandle("scalar");		# undef
+    
 =item readonly SCALAR
 
 Returns true if SCALAR is readonly.

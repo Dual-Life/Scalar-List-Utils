@@ -12,6 +12,7 @@ t/max.t
 t/maxstr.t
 t/min.t
 t/minstr.t
+t/openhan.t
 t/readonly.t
 t/reduce.t
 t/reftype.t
