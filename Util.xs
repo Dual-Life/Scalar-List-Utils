@@ -43,6 +43,12 @@ my_cxinc(pTHX)
 #    define NV double
 #endif
 
+#ifdef SVf_IVisUV
+#  define slu_sv_value(sv) (NV)(SvIOK(sv) ? SvIOK_UV(sv) ? SvUVX(sv) : SvIVX(sv) : SvNV(sv))
+#else
+#  define slu_sv_value(sv) (NV)(SvIOK(sv) ? SvIVX(sv) : SvNV(sv))
+#endif
+
 #ifndef Drand01
 #    define Drand01()		((rand() & 0x7FFF) / (double) ((unsigned long)1 << 15))
 #endif
@@ -111,10 +117,10 @@ CODE:
 	XSRETURN_UNDEF;
     }
     retsv = ST(0);
-    retval = SvNV(retsv);
+    retval = slu_sv_value(retsv);
     for(index = 1 ; index < items ; index++) {
 	SV *stacksv = ST(index);
-	NV val = SvNV(stacksv);
+	NV val = slu_sv_value(stacksv);
 	if(val < retval ? !ix : ix) {
 	    retsv = stacksv;
 	    retval = val;
@@ -131,13 +137,16 @@ sum(...)
 PROTOTYPE: @
 CODE:
 {
+    SV *sv;
     int index;
     if(!items) {
 	XSRETURN_UNDEF;
     }
-    RETVAL = SvNV(ST(0));
+    sv = ST(0);
+    RETVAL = slu_sv_value(sv);
     for(index = 1 ; index < items ; index++) {
-	RETVAL += SvNV(ST(index));
+	sv = ST(index);
+	RETVAL += slu_sv_value(sv);
     }
 }
 OUTPUT:
@@ -203,6 +212,7 @@ CODE:
     PERL_CONTEXT *cx;
     SV** newsp;
     I32 gimme = G_SCALAR;
+    I32 hasargs = 0;
     bool oldcatch = CATCH_GET;
 
     if(items <= 1) {
@@ -222,7 +232,10 @@ CODE:
     SAVESPTR(PL_op);
     ret = ST(1);
     CATCH_SET(TRUE);
-    PUSHBLOCK(cx, CXt_NULL, SP);
+    PUSHBLOCK(cx, CXt_SUB, SP);
+    PUSHSUB(cx);
+    if (!CvDEPTH(cv))
+        (void)SvREFCNT_inc(cv);
     for(index = 2 ; index < items ; index++) {
 	GvSV(agv) = ret;
 	GvSV(bgv) = ST(index);
@@ -250,6 +263,7 @@ CODE:
     PERL_CONTEXT *cx;
     SV** newsp;
     I32 gimme = G_SCALAR;
+    I32 hasargs = 0;
     bool oldcatch = CATCH_GET;
 
     if(items <= 1) {
@@ -265,7 +279,11 @@ CODE:
     SAVETMPS;
     SAVESPTR(PL_op);
     CATCH_SET(TRUE);
-    PUSHBLOCK(cx, CXt_NULL, SP);
+    PUSHBLOCK(cx, CXt_SUB, SP);
+    PUSHSUB(cx);
+    if (!CvDEPTH(cv))
+        (void)SvREFCNT_inc(cv);
+
     for(index = 1 ; index < items ; index++) {
 	GvSV(PL_defgv) = ST(index);
 	PL_op = reducecop;
