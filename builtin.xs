@@ -1,3 +1,8 @@
+/* Copyright (c) 1997-1999 Graham Barr <gbarr@pobox.com>. All rights reserved.
+ * This program is free software; you can redistribute it and/or
+ * modify it under the same terms as Perl itself.
+ */
+
 #include <EXTERN.h>
 #include <perl.h>
 #include <XSUB.h>
@@ -19,7 +24,13 @@
 #if PATCHLEVEL < 5
 #  define PL_op op
 #  define PL_curpad curpad
-#  define CALLRUNOPS runops()
+#  define CALLRUNOPS runops
+#endif
+#if (PATCHLEVEL < 5) || (PATCHLEVEL == 5 && SUBVERSION <50)
+#  define PL_tainting tainting
+#  define PL_stack_base stack_base
+#  define PL_stack_sp stack_sp
+#  define PL_ppaddr ppaddr 
 #endif
 
 #if defined(HAS_CLOCK_GETTIME) && !defined(PERL_CLOCK)
@@ -137,7 +148,7 @@ CODE:
 	SvIVX(ST(0)) = SvIV(num);
 	SvIOK_on(ST(0));
     }
-    if(tainting && (SvTAINTED(num) || SvTAINTED(str)))
+    if(PL_tainting && (SvTAINTED(num) || SvTAINTED(str)))
 	SvTAINTED_on(ST(0));
     XSRETURN(1);
 }
@@ -241,65 +252,6 @@ CODE:
     SV *ret;
     int index;
     I32 markix;
-    if(items <= 1) {
-	XSRETURN_UNDEF;
-    }
-    ret = ST(1);
-    markix = sp - stack_base;
-    for(index = 2 ; index < items ; index++) {
-	dSP;
-	EXTEND(sp,2);
-	PUSHMARK(sp);
-	PUSHs(ret);
-	PUSHs(ST(index));
-	PUTBACK;
-	perl_call_sv(block,G_SCALAR);
-	ret = *stack_sp;
-	stack_sp = stack_base + markix;
-    }
-    ST(0) = ret;
-    XSRETURN(1);
-}
-
-void
-reduceab(block,...)
-    SV * block
-PROTOTYPE: &@
-CODE:
-{
-    SV *ret;
-    int index;
-    I32 markix;
-    GV *agv,*bgv;
-    if(items <= 1) {
-	XSRETURN_UNDEF;
-    }
-    agv = gv_fetchpv("a", TRUE, SVt_PV);
-    bgv = gv_fetchpv("b", TRUE, SVt_PV);
-    SAVESPTR(GvSV(agv));
-    SAVESPTR(GvSV(bgv));
-    ret = ST(1);
-    markix = sp - stack_base;
-    for(index = 2 ; index < items ; index++) {
-	PUSHMARK(sp);
-	GvSV(agv) = ret;
-	GvSV(bgv) = ST(index);
-	perl_call_sv(block,G_SCALAR|G_NOARGS);
-	ret = *stack_sp;
-    }
-    ST(0) = ret;
-    XSRETURN(1);
-}
-
-void
-reduceab2(block,...)
-    SV * block
-PROTOTYPE: &@
-CODE:
-{
-    SV *ret;
-    int index;
-    I32 markix;
     GV *agv,*bgv,*gv;
     HV *stash;
     CV *cv;
@@ -314,64 +266,19 @@ CODE:
     cv = sv_2cv(block, &stash, &gv, 0);
     	    reducecop = CvSTART(cv);
 	    SAVESPTR(CvROOT(cv)->op_ppaddr);
-	    CvROOT(cv)->op_ppaddr = ppaddr[OP_NULL];
+	    CvROOT(cv)->op_ppaddr = PL_ppaddr[OP_NULL];
 	    SAVESPTR(PL_curpad);
 	    PL_curpad = AvARRAY((AV*)AvARRAY(CvPADLIST(cv))[1]);
 	    SAVETMPS;
 	    SAVESPTR(PL_op);
     ret = ST(1);
-    markix = sp - stack_base;
+    markix = sp - PL_stack_base;
     for(index = 2 ; index < items ; index++) {
 	GvSV(agv) = ret;
 	GvSV(bgv) = ST(index);
 	PL_op = reducecop;
-	CALLRUNOPS;
-	ret = *stack_sp;
-    }
-    ST(0) = ret;
-    XSRETURN(1);
-}
-
-void
-reduce2(block,...)
-    SV * block
-PROTOTYPE: &@
-CODE:
-{
-    SV *ret;
-    int index;
-    I32 markix;
-    GV *agv,*bgv,*gv;
-    HV *stash;
-    CV *cv;
-    OP *reducecop;
-    AV *av;
-    SV **asv, **bsv;
-    if(items <= 1) {
-	XSRETURN_UNDEF;
-    }
-    agv = gv_fetchpv("_", TRUE, SVt_PV);
-    av = GvAV(agv);
-    asv = av_fetch(av,0,1);
-    bsv = av_fetch(av,1,1);
-    cv = sv_2cv(block, &stash, &gv, 0);
-    	    reducecop = CvSTART(cv);
-	    SAVESPTR(CvROOT(cv)->op_ppaddr);
-	    CvROOT(cv)->op_ppaddr = ppaddr[OP_NULL];
-	    SAVESPTR(PL_curpad);
-	    PL_curpad = AvARRAY((AV*)AvARRAY(CvPADLIST(cv))[1]);
-	    SAVETMPS;
-	    SAVESPTR(PL_op);
-    ret = ST(1);
-    markix = sp - stack_base;
-    for(index = 2 ; index < items ; index++) {
-	*asv = ret;
-	*bsv = ST(index);
-	PL_op = reducecop;
-	CALLRUNOPS;
-
-	ret = *stack_sp;
-	stack_sp = stack_base + markix;
+	CALLRUNOPS();
+	ret = *PL_stack_sp;
     }
     ST(0) = ret;
     XSRETURN(1);
@@ -387,6 +294,20 @@ CODE:
 	XSRETURN_UNDEF;
     }
     RETVAL = sv_reftype(SvRV(sv),TRUE);
+}
+OUTPUT:
+    RETVAL
+
+char *
+reftype(sv)
+    SV * sv
+PROTOTYPE: $
+CODE:
+{
+    if(!SvROK(sv)) {
+	XSRETURN_UNDEF;
+    }
+    RETVAL = sv_reftype(SvRV(sv),FALSE);
 }
 OUTPUT:
     RETVAL

@@ -1,6 +1,6 @@
 # builtin.pm
 #
-# Copyright (c) 1997 Graham Barr <gbarr@pobox.com>. All rights reserved.
+# Copyright (c) 1997-1999 Graham Barr <gbarr@pobox.com>. All rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 
@@ -24,6 +24,7 @@ $VERSION = "0.04";
 	sum
 	clock
 	readonly
+	reftype
 );
 
 bootstrap builtin $VERSION;
@@ -79,7 +80,7 @@ list is empty then C<undef> is returned.
 
 This function could be implemented using C<reduce> like this
 
-    $foo = reduce { $_[0] > $_[1] ? $_[0] : $_[1] } 1..10
+    $foo = reduce { $a > $b ? $a : $b } 1..10
 
 =item maxstr LIST
 
@@ -93,7 +94,7 @@ If the list is empty then C<undef> is returned.
 
 This function could be implemented using C<reduce> like this
 
-    $foo = reduce { $_[0] gt $_[1] ? $_[0] : $_[1] } 'A'..'Z'
+    $foo = reduce { $a gt $b ? $a : $b } 'A'..'Z'
 
 =item min LIST
 
@@ -106,7 +107,7 @@ numerical value. If the list is empty then C<undef> is returned.
 
 This function could be implemented using C<reduce> like this
 
-    $foo = reduce { $_[0] < $_[1] ? $_[0] : $_[1] } 1..10
+    $foo = reduce { $a < $b ? $a : $b } 1..10
 
 =item minstr LIST
 
@@ -120,11 +121,9 @@ If the list is empty then C<undef> is returned.
 
 This function could be implemented using C<reduce> like this
 
-    $foo = reduce { $_[0] lt $_[1] ? $_[0] : $_[1] } 'A'..'Z'
+    $foo = reduce { $a lt $b ? $a : $b } 'A'..'Z'
 
 =item reduce BLOCK LIST
-
-=item reduce SUBREF, LIST
 
 Reduces LIST by calling BLOCK, or the sub referenced by SUBREF,
 multiple times with two arguments. The first call will be with the
@@ -136,10 +135,15 @@ Returns the result of the last call to BLOCK. If LIST is empty then
 C<undef> is returned. If LIST only contains one element then that
 element is returned and BLOCK is not executed.
 
-    $foo = reduce { $_[0] < $_[1] ? $_[0] : $_[1] } 1..10       # min
-    $foo = reduce { $_[0] lt $_[1] ? $_[0] : $_[1] } 'aa'..'zz' # minstr
-    $foo = reduce { $_[0] + $_[1] } 1 .. 10                     # sum
-    $foo = reduce { $_[0] . $_[1] } @bar                        # concat
+    $foo = reduce { $a < $b ? $a : $b } 1..10       # min
+    $foo = reduce { $a lt $b ? $a : $b } 'aa'..'zz' # minstr
+    $foo = reduce { $a + $b } 1 .. 10                     # sum
+    $foo = reduce { $a . $b } @bar                        # concat
+
+=item reftype EXPR
+
+If EXPR evaluates to a reference the type of the variable referenced
+is returned. Otherwise C<undef> is returned.
 
 =item sum LIST
 
@@ -151,7 +155,7 @@ Returns the sum of all the elements in LIST.
 
 This function could be implemented using C<reduce> like this
 
-    $foo = reduce { $_[0] + $_[1] } 1..10
+    $foo = reduce { $a + $b } 1..10
 
 =item clock
 
@@ -182,7 +186,7 @@ The sub is very commonly used B<and> needs fast implementation in C.
 
 =head1 COPYRIGHT
 
-Copyright (c) 1997 Graham Barr <gbarr@pobox.com>. All rights reserved.
+Copyright (c) 1997-1999 Graham Barr <gbarr@pobox.com>. All rights reserved.
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
