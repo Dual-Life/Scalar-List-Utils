@@ -9,7 +9,7 @@ package List::Util;
 require Exporter;
 
 @ISA = qw(Exporter);
-@EXPORT_OK = qw(first min max minstr maxstr reduce sum);
+@EXPORT_OK = qw(first min max minstr maxstr reduce sum shuffle);
 $VERSION = $VERSION = "1.03";
 
 eval {
@@ -62,6 +62,17 @@ sub first (&@) {
 
   undef;
 }
+
+sub shuffle (@) {
+  my @a=\(@_);
+  my $n;
+  my $i=@_;
+  map {
+    $n = rand($i--);
+    (${$a[$n]}, $a[$n] = $a[$i])[0];
+  } @_;
+}
+
 ESQ
 
 1;
@@ -176,6 +187,10 @@ element is returned and BLOCK is not executed.
     $foo = reduce { $a lt $b ? $a : $b } 'aa'..'zz' # minstr
     $foo = reduce { $a + $b } 1 .. 10               # sum
     $foo = reduce { $a . $b } @bar                  # concat
+
+=item shuffle LIST
+
+Returns the elements of LIST in a random order
 
 =item sum LIST
 

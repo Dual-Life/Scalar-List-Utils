@@ -19,9 +19,12 @@
 #endif
 
 #if PERL_VERSION < 6
-#  define NV double
+#    define NV double
 #endif
 
+#ifndef Drand01
+#    define Drand01()		((rand() & 0x7FFF) / (double) ((unsigned long)1 << 15))
+#endif
 
 #if PERL_VERSION < 5
 #  ifndef gv_stashpvn
@@ -253,6 +256,38 @@ CODE:
     CATCH_SET(oldcatch);
     XSRETURN_UNDEF;
 }
+
+void
+shuffle(...)
+PROTOTYPE: @
+CODE:
+{
+    int index;
+    struct op dmy_op;
+    struct op *old_op = PL_op;
+    SV *my_pad[2];
+    SV **old_curpad = PL_curpad;
+
+    /* We call pp_rand here so that Drand01 get initialized if rand()
+       or srand() has not already been called
+    */
+    my_pad[1] = sv_newmortal();
+    memzero((char*)(&dmy_op), sizeof(struct op));
+    dmy_op.op_targ = 1;
+    PL_op = &dmy_op;
+    PL_curpad = (SV **)&my_pad;
+    pp_rand();
+    PL_op = old_op;
+    PL_curpad = old_curpad;
+    for (index = items ; index > 1 ; ) {
+	int swap = (int)(Drand01() * (double)(index--));
+	SV *tmp = ST(swap);
+	ST(swap) = ST(index);
+	ST(index) = tmp;
+    }
+    XSRETURN(items);
+}
+
 
 MODULE=List::Util	PACKAGE=Scalar::Util
 
