@@ -18,6 +18,7 @@ sub init {
 
 sub write_makefile {
   WriteMakefile(
+    INSTALLDIRS     => ($] >= 5.008 ? 'perl' : 'site'),
     VERSION_FROM    => "lib/List/Util.pm",
     NAME            => "List::Util",
     DISTNAME        => "Scalar-List-Utils",
