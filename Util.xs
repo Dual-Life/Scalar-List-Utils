@@ -197,7 +197,7 @@ CODE:
     SAVESPTR(PL_op);
     ret = ST(1);
     CATCH_SET(TRUE);
-    PUSHBLOCK(cx, CXt_SUB, SP);
+    PUSHBLOCK(cx, CXt_NULL, SP);
     for(index = 2 ; index < items ; index++) {
 	GvSV(agv) = ret;
 	GvSV(bgv) = ST(index);
@@ -240,7 +240,7 @@ CODE:
     SAVETMPS;
     SAVESPTR(PL_op);
     CATCH_SET(TRUE);
-    PUSHBLOCK(cx, CXt_SUB, SP);
+    PUSHBLOCK(cx, CXt_NULL, SP);
     for(index = 1 ; index < items ; index++) {
 	GvSV(PL_defgv) = ST(index);
 	PL_op = reducecop;
@@ -276,7 +276,7 @@ CODE:
     dmy_op.op_targ = 1;
     PL_op = &dmy_op;
     PL_curpad = (SV **)&my_pad;
-    pp_rand();
+    *(PL_ppaddr[OP_RAND])();
     PL_op = old_op;
     PL_curpad = old_curpad;
     for (index = items ; index > 1 ; ) {
