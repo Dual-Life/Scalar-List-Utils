@@ -1,12 +1,11 @@
 
 BEGIN {
-  require Ref::Util;
   $|=1;
-  if (grep { /weaken/ } @Ref::Util::EXPORT_FAIL) {
+  require Scalar::Util;
+  if (grep { /weaken/ } @Scalar::Util::EXPORT_FAIL) {
     print("1..0\n");
     exit;
   }
-  Ref::Util->import( qw(weaken isweak));
 
   $DEBUG = 0;
 
@@ -18,6 +17,7 @@ BEGIN {
   }
 }
 
+use Scalar::Util qw(weaken isweak);
 print "1..17\n";
 
 ######################### End of black magic.

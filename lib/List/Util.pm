@@ -5,14 +5,62 @@
 # modify it under the same terms as Perl itself.
 
 package List::Util;
-# DualVar loads the XS
-require Scalar::DualVar;
+
+require DynaLoader; # XS-only
 require Exporter;
-@ISA = qw(Exporter);
-@EXPORT_OK = qw(min max minstr maxstr reduce sum);
-$VERSION = $Scalar::DualVar::VERSION;
+
+#@ISA = qw(Exporter); # no-XS
+@ISA = qw(Exporter DynaLoader); # XS-only
+@EXPORT_OK = qw(first min max minstr maxstr reduce sum);
+$VERSION = $VERSION = "1.01";
+
+bootstrap List::Util $VERSION; # XS-only
 
 1;
+
+__END__
+# The code beyond here is only used if the XS is not installed
+
+use vars qw($a $b);
+
+sub reduce (&@) {
+  my $code = shift;
+
+  return shift unless @_ > 1;
+
+  my $caller = caller;
+  local(*{$caller."::a"}) = \my $a;
+  local(*{$caller."::b"}) = \my $b;
+
+  $a = shift;
+  foreach (@_) {
+    $b = $_;
+    $a = &{$code}();
+  }
+
+  $a;
+}
+
+sub sum (@) { reduce { $a + $b } @_ }
+
+sub min (@) { reduce { $a < $b ? $a : $b } @_ }
+
+sub max (@) { reduce { $a > $b ? $a : $b } @_ }
+
+sub minstr (@) { reduce { $a lt $b ? $a : $b } @_ }
+
+sub maxstr (@) { reduce { $a gt $b ? $a : $b } @_ }
+
+sub first (&@) {
+  my $code = shift;
+
+  foreach (@_) {
+    return $_ if &{$code}();
+  }
+
+  undef;
+}
+
 __END__
 
 =head1 NAME
@@ -21,7 +69,7 @@ List::Util - A selection of general-utility list subroutines
 
 =head1 SYNOPSIS
 
-    use List::Util qw(sum min max minstr maxstr reduce);
+    use List::Util qw(first sum min max minstr maxstr reduce);
 
 =head1 DESCRIPTION
 
@@ -34,6 +82,24 @@ By default C<List::Util> does not export any subroutines. The
 subroutines defined are
 
 =over 4
+
+=item first BLOCK LIST
+
+Similar to C<grep> in that it evaluates BLOCK setting C<$_> to each element
+of LIST in turn. C<first> returns the first element where the result from
+BLOCK is a true value. If BLOCK never returns true or LIST was empty then
+C<undef> is returned.
+
+    $foo = first { defined($_) } @list    # first defined value in @list
+    $foo = first { $_ > $value } @list    # first value in @list which
+                                          # is greater than $value
+    
+This function could be implemented using C<reduce> like this
+
+    $foo = reduce { defined($a) ? $a : wanted($b) ? $b : undef } undef, @list
+
+for example wanted() could be defined() which would return the first
+defined value in @list
 
 =item max LIST
 
@@ -91,11 +157,11 @@ This function could be implemented using C<reduce> like this
 
 =item reduce BLOCK LIST
 
-Reduces LIST by calling BLOCK, or the sub referenced by SUBREF,
-multiple times with two arguments. The first call will be with the
-first two elements of the list, subsequent calls will be done by
-passing the result of the previous call and the next element in the
-list. 
+Reduces LIST by calling BLOCK multiple times, setting C<$a> and C<$b>
+each time. The first call will be with C<$a> and C<$b> set to the first
+two elements of the list, subsequent calls will be done by
+setting C<$a> to the result of the previous call and C<$b> to the next
+element in the list. 
 
 Returns the result of the last call to BLOCK. If LIST is empty then
 C<undef> is returned. If LIST only contains one element then that
@@ -103,9 +169,8 @@ element is returned and BLOCK is not executed.
 
     $foo = reduce { $a < $b ? $a : $b } 1..10       # min
     $foo = reduce { $a lt $b ? $a : $b } 'aa'..'zz' # minstr
-    $foo = reduce { $a + $b } 1 .. 10                     # sum
-    $foo = reduce { $a . $b } @bar                        # concat
-
+    $foo = reduce { $a + $b } 1 .. 10               # sum
+    $foo = reduce { $a . $b } @bar                  # concat
 
 =item sum LIST
 
@@ -120,19 +185,6 @@ This function could be implemented using C<reduce> like this
     $foo = reduce { $a + $b } 1..10
 
 =back
-
-=head1 NOTE
-
-It should be noted that this module is not intended to be a
-I<bit bucket> for any sub that some person thinks might be useful.
-Some general guidelines are to consider if a particular sub should
-be included in C<List::Util> are
-
-The sub is of general use B<and> cannot be implemented in perl.
-
-or
-
-The sub is very commonly used B<and> needs fast implementation in C.
 
 =head1 COPYRIGHT
 

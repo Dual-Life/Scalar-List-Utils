@@ -1,5 +1,6 @@
 
-use Ref::Util qw(reftype);
+
+use Scalar::Util qw(reftype);
 use vars qw($t $y $x *F);
 
 print "1..7\n";

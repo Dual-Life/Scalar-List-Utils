@@ -9,6 +9,26 @@
 #include <patchlevel.h>
 
 #if PATCHLEVEL < 5
+#  ifndef gv_stashpvn
+#    define gv_stashpvn(n,l,c) gv_stashpv(n,c)
+#  endif
+#  ifndef SvTAINTED
+
+static bool
+sv_tainted(SV *sv)
+{
+    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
+	MAGIC *mg = mg_find(sv, 't');
+	if (mg && ((mg->mg_len & 1) || (mg->mg_len & 2) && mg->mg_obj == sv))
+	    return TRUE;
+    }
+    return FALSE;
+}
+
+#    define SvTAINTED_on(sv) sv_magic((sv), Nullsv, 't', Nullch, 0)
+#    define SvTAINTED(sv) (SvMAGICAL(sv) && sv_tainted(sv))
+#  endif
+#  define PL_defgv defgv
 #  define PL_op op
 #  define PL_curpad curpad
 #  define CALLRUNOPS runops
@@ -23,7 +43,7 @@
 #  define PL_ppaddr ppaddr
 #endif
 
-MODULE=Scalar::DualVar	PACKAGE=List::Util
+MODULE=List::Util	PACKAGE=List::Util
 
 void
 min(...)
@@ -94,6 +114,7 @@ CODE:
     */
     ix -= 1;
     left = ST(0);
+#ifdef OPpLOCALE
     if(MAXARG & OPpLOCALE) {
 	for(index = 1 ; index < items ; index++) {
 	    SV *right = ST(index);
@@ -102,12 +123,15 @@ CODE:
 	}
     }
     else {
+#endif
 	for(index = 1 ; index < items ; index++) {
 	    SV *right = ST(index);
 	    if(sv_cmp(left, right) == ix)
 		left = right;
 	}
+#ifdef OPpLOCALE
     }
+#endif
     ST(0) = left;
     XSRETURN(1);
 }
@@ -155,7 +179,45 @@ CODE:
     XSRETURN(1);
 }
 
-MODULE=Scalar::DualVar	PACKAGE=Scalar::DualVar
+void
+first(block,...)
+    SV * block
+PROTOTYPE: &@
+CODE:
+{
+    SV *ret;
+    int index;
+    I32 markix;
+    GV *gv;
+    HV *stash;
+    CV *cv;
+    OP *reducecop;
+    if(items <= 1) {
+	XSRETURN_UNDEF;
+    }
+    SAVESPTR(GvSV(PL_defgv));
+    cv = sv_2cv(block, &stash, &gv, 0);
+    reducecop = CvSTART(cv);
+    SAVESPTR(CvROOT(cv)->op_ppaddr);
+    CvROOT(cv)->op_ppaddr = PL_ppaddr[OP_NULL];
+    SAVESPTR(PL_curpad);
+    PL_curpad = AvARRAY((AV*)AvARRAY(CvPADLIST(cv))[1]);
+    SAVETMPS;
+    SAVESPTR(PL_op);
+    markix = sp - PL_stack_base;
+    for(index = 1 ; index < items ; index++) {
+	GvSV(PL_defgv) = ST(index);
+	PL_op = reducecop;
+	CALLRUNOPS();
+	if (SvTRUE(*PL_stack_sp)) {
+	  ST(0) = ST(index);
+	  XSRETURN(1);
+	}
+    }
+    XSRETURN_UNDEF;
+}
+
+MODULE=List::Util	PACKAGE=Scalar::Util
 
 void
 dualvar(num,str)
@@ -181,8 +243,6 @@ CODE:
 	SvTAINTED_on(ST(0));
     XSRETURN(1);
 }
-
-MODULE=Scalar::DualVar	PACKAGE=Ref::Util
 
 char *
 blessed(sv)
@@ -235,15 +295,32 @@ CODE:
 	croak("weak references are not implemented in this release of perl");
 #endif
 
+int
+readonly(sv)
+	SV *sv
+PROTOTYPE: $
+CODE:
+  RETVAL = SvREADONLY(sv);
+OUTPUT:
+  RETVAL
+
+int
+tainted(sv)
+	SV *sv
+PROTOTYPE: $
+CODE:
+  RETVAL = SvTAINTED(sv);
+OUTPUT:
+  RETVAL
 
 BOOT:
 {
 #ifndef SvWEAKREF
-    HV *stash = gv_stashpvn("Ref::Util", 9, TRUE);
+    HV *stash = gv_stashpvn("Scalar::Util", 12, TRUE);
     GV *vargv = *(GV**)hv_fetch(stash, "EXPORT_FAIL", 11, TRUE);
     AV *varav;
     if (SvTYPE(vargv) != SVt_PVGV)
-	gv_init(vargv, stash, "Ref::Util", 9, TRUE);
+	gv_init(vargv, stash, "Scalar::Util", 12, TRUE);
     varav = GvAVn(vargv);
     av_push(varav, newSVpv("weaken",6));
     av_push(varav, newSVpv("isweak",6));

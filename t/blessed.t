@@ -1,5 +1,5 @@
 
-use Ref::Util qw(blessed);
+use Scalar::Util qw(blessed);
 use vars qw($t $y $x);
 
 print "1..7\n";
