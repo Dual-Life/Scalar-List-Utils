@@ -1,6 +1,6 @@
 
 
-use builtin qw(minstr);
+use List::Util qw(minstr);
 
 print "1..5\n";
 

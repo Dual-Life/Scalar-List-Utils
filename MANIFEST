@@ -1,11 +1,8 @@
 ChangeLog
 MANIFEST
 Makefile.PL
-builtin.pm
-builtin.xs
 README
 t/blessed.t
-t/clock.t
 t/dualvar.t
 t/max.t
 t/maxstr.t
@@ -13,4 +10,8 @@ t/min.t
 t/minstr.t
 t/reduce.t
 t/sum.t
-t/readonly.t
+t/reftype.t
+DualVar.xs
+lib/List/Util.pm
+lib/Ref/Util.pm
+lib/Scalar/DualVar.pm

@@ -1,6 +1,6 @@
 
 
-use builtin qw(sum);
+use List::Util qw(sum);
 
 print "1..3\n";
 

@@ -1,6 +1,6 @@
 
 
-use builtin qw(maxstr);
+use List::Util qw(maxstr);
 
 print "1..5\n";
 

@@ -1,5 +1,5 @@
 
-use builtin qw(dualvar);
+use Scalar::DualVar;
 
 print "1..6\n";
 

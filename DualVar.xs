@@ -6,19 +6,6 @@
 #include <EXTERN.h>
 #include <perl.h>
 #include <XSUB.h>
-#ifdef I_TIME
-#  include <time.h>
-#endif
-#ifdef I_SYS_TIMES
-#  include <sys/times.h>
-#endif
-#ifdef I_SYS_TIME
-#  include <sys/time.h>
-#endif
-#ifdef I_SYS_TIMEB
-#  include <sys/timeb.h>
-#endif
-
 #include <patchlevel.h>
 
 #if PATCHLEVEL < 5
@@ -33,126 +20,8 @@
 #  define PL_ppaddr ppaddr 
 #endif
 
-#if defined(HAS_CLOCK_GETTIME) && !defined(PERL_CLOCK)
 
-#define PERL_CLOCK
-
-static double
-perl_clock()
-{
-    struct timespec ts;
-
-    if(clock_gettime(CLOCK_REALTIME,&ts) < 0)
-	return (double)-1;
-
-    return (double)(ts.tv_sec) + ((double)(ts.tv_nsec) / 1000000000.0);
-}
-
-#endif
-
-
-
-
-
-#if defined(HAS_GETTIMEOFDAY) && !defined(PERL_CLOCK)
-
-#define PERL_CLOCK
-
-static double
-perl_clock()
-{
-    struct timeval tb;
-
-    if(gettimeofday(&tb,NULL) < 0)
-	return (double)-1;
-
-    return (double)(tb.tv_sec) + ((double)(tb.tv_usec) / 1000000.0);
-}
-#endif
-
-
-
-#if defined(HAS_FTIME) && !defined(PERL_CLOCK)
-
-#define PERL_CLOCK
-
-static double
-perl_clock()
-{
-    struct timeb tb;
-
-    ftime(&tb);
-
-    return (double)(tb.time) + ((double)(tb.millitm) / 1000.0);
-}
-#endif
-
-
-
-
-#if defined(HAS_TIMES) && !defined(PERL_CLOCK)
-
-#define PERL_CLOCK
-
-static double
-perl_clock()
-{
-    struct tms buf;
-    clock_t ct;
-    time_t t;
-    double tck;
-
-    if(((ct = times(&buf)) < 0) || ((t = time(NULL)) < 0))
-	return (double)-1;
-
-    return ((double)(ct % CLK_TCK) / (double)CLK_TCK) + (double)t;
-}
-#endif
-
-
-#ifndef PERL_CLOCK
-#define perl_clock() (double)time(Null(Time_t*))
-#endif
-
-
-
-
-
-MODULE=builtin	PACKAGE=builtin	PREFIX=perl_
-
-
-
-double
-perl_clock()
-PROTOTYPE:
-
-
-
-void
-dualvar(num,str)
-    SV *	num
-    SV *	str
-PROTOTYPE: $$
-CODE:
-{
-    STRLEN len;
-    char *ptr = SvPV(str,len);
-    ST(0) = sv_newmortal();
-    SvUPGRADE(ST(0),SVt_PVNV);
-    sv_setpvn(ST(0),ptr,len);
-    if(SvNOKp(num) || !SvIOKp(num)) {
-	SvNVX(ST(0)) = SvNV(num);
-	SvNOK_on(ST(0));
-    }
-    else {
-	SvIVX(ST(0)) = SvIV(num);
-	SvIOK_on(ST(0));
-    }
-    if(PL_tainting && (SvTAINTED(num) || SvTAINTED(str)))
-	SvTAINTED_on(ST(0));
-    XSRETURN(1);
-}
-
+MODULE=Scalar::DualVar	PACKAGE=List::Util
 
 void
 min(...)
@@ -264,13 +133,13 @@ CODE:
     SAVESPTR(GvSV(agv));
     SAVESPTR(GvSV(bgv));
     cv = sv_2cv(block, &stash, &gv, 0);
-    	    reducecop = CvSTART(cv);
-	    SAVESPTR(CvROOT(cv)->op_ppaddr);
-	    CvROOT(cv)->op_ppaddr = PL_ppaddr[OP_NULL];
-	    SAVESPTR(PL_curpad);
-	    PL_curpad = AvARRAY((AV*)AvARRAY(CvPADLIST(cv))[1]);
-	    SAVETMPS;
-	    SAVESPTR(PL_op);
+    reducecop = CvSTART(cv);
+    SAVESPTR(CvROOT(cv)->op_ppaddr);
+    CvROOT(cv)->op_ppaddr = PL_ppaddr[OP_NULL];
+    SAVESPTR(PL_curpad);
+    PL_curpad = AvARRAY((AV*)AvARRAY(CvPADLIST(cv))[1]);
+    SAVETMPS;
+    SAVESPTR(PL_op);
     ret = ST(1);
     markix = sp - PL_stack_base;
     for(index = 2 ; index < items ; index++) {
@@ -283,6 +152,35 @@ CODE:
     ST(0) = ret;
     XSRETURN(1);
 }
+
+MODULE=Scalar::DualVar	PACKAGE=Scalar::DualVar
+
+void
+dualvar(num,str)
+    SV *	num
+    SV *	str
+PROTOTYPE: $$
+CODE:
+{
+    STRLEN len;
+    char *ptr = SvPV(str,len);
+    ST(0) = sv_newmortal();
+    SvUPGRADE(ST(0),SVt_PVNV);
+    sv_setpvn(ST(0),ptr,len);
+    if(SvNOKp(num) || !SvIOKp(num)) {
+	SvNVX(ST(0)) = SvNV(num);
+	SvNOK_on(ST(0));
+    }
+    else {
+	SvIVX(ST(0)) = SvIV(num);
+	SvIOK_on(ST(0));
+    }
+    if(PL_tainting && (SvTAINTED(num) || SvTAINTED(str)))
+	SvTAINTED_on(ST(0));
+    XSRETURN(1);
+}
+
+MODULE=Scalar::DualVar	PACKAGE=Ref::Util
 
 char *
 blessed(sv)
@@ -312,14 +210,3 @@ CODE:
 OUTPUT:
     RETVAL
 
-void
-readonly(sv)
-    SV * sv
-PROTOTYPE: $
-CODE:
-{
-    if(SvREADONLY(sv)) {
-	XSRETURN_YES;
-    }
-    XSRETURN_NO;
-}
