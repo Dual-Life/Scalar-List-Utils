@@ -10,7 +10,7 @@ require Exporter;
 require List::Util; # List::Util loads the XS
 
 @ISA       = qw(Exporter);
-@EXPORT_OK = qw(blessed dualvar reftype weaken isweak tainted readonly openhandle refaddr isvstring);
+@EXPORT_OK = qw(blessed dualvar reftype weaken isweak tainted readonly openhandle refaddr isvstring looks_like_number);
 $VERSION   = $VERSION = $List::Util::VERSION;
 
 sub export_fail {
@@ -117,6 +117,15 @@ sub readonly {
   !eval { $_[0] = $tmp; 1 };
 }
 
+sub looks_like_number {
+  local $_ = shift;
+  # checks from perlfaq4
+  return 1 if (/^[+-]?\d+$/); # is a +/- integer
+  return 1 if (/^([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?$/); # a C float
+  return 1 if (/^(Inf(inity)?|NaN)$/);
+  0;
+}
+
 ESQ
 
 1;
@@ -129,7 +138,7 @@ Scalar::Util - A selection of general-utility scalar subroutines
 
 =head1 SYNOPSIS
 
-    use Scalar::Util qw(blessed dualvar isweak readonly refaddr reftype tainted weaken);
+    use Scalar::Util qw(blessed dualvar isweak readonly refaddr reftype tainted weaken isvstring looks_like_number);
 
 =head1 DESCRIPTION
 
@@ -182,6 +191,11 @@ If EXPR is a scalar which is a weak reference the result is true.
     $weak = isweak($ref);               # false
     weaken($ref);
     $weak = isweak($ref);               # true
+
+=item looks_like_number EXPR
+
+Returns true if perl thinks EXPR is a number. See
+L<perlapi/looks_like_number>.
 
 =item openhandle FH
 

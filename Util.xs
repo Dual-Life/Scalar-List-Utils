@@ -469,6 +469,15 @@ CODE:
 	croak("vstrings are not implemented in this release of perl");
 #endif
 
+int
+looks_like_number(sv)
+	SV *sv
+PROTOTYPE: $
+CODE:
+  RETVAL = Perl_looks_like_number(sv);
+OUTPUT:
+  RETVAL
+
 
 BOOT:
 {
