@@ -46,14 +46,19 @@ if ($] < 5.006_01) {
   open(TYPEMAP,">typemap");
   print TYPEMAP <<'EOS';
 NV                      T_NV
+UV                      T_UV
 
 INPUT
 T_NV
 	$var = ($type)SvNV($arg)
+T_UV
+	$var = ($type)SvUV($arg)
 
 OUTPUT
 T_NV
 	sv_setnv($arg, (NV)$var);
+T_UV
+	sv_setuv($arg, (UV)$var);
 
 EOS
   close(TYPEMAP);
