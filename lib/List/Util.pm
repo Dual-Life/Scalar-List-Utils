@@ -15,6 +15,9 @@ $XS_VERSION = $VERSION;
 $VERSION    = eval $VERSION;
 
 eval {
+  # PERL_DL_NONLAZY must be false, or any errors in loading will just
+  # cause the perl code to be tested
+  local $ENV{PERL_DL_NONLAZY} = 0 if $ENV{PERL_DL_NONLAZY};
   require DynaLoader;
   local @ISA = qw(DynaLoader);
   bootstrap List::Util $XS_VERSION;
