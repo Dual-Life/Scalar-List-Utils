@@ -2,6 +2,7 @@ Changes
 MANIFEST
 Makefile.PL
 README
+SIGNATURE
 Util.xs
 lib/List/Util.pm
 lib/Scalar/Util.pm
@@ -24,3 +25,4 @@ t/shuffle.t
 t/sum.t
 t/tainted.t
 t/weak.t
+META.yml                                 Module meta-data (added by MakeMaker)

@@ -1,0 +1,50 @@
+This file contains message digests of all files listed in MANIFEST,
+signed via the Module::Signature module, version 0.38.
+
+To verify the content in this distribution, first make sure you have
+Module::Signature installed, then type:
+
+    % cpansign -v
+
+It would check each file's integrity, as well as the signature's
+validity.  If "==> Signature verified OK! <==" is not displayed,
+the distribution may already have been compromised, and you should
+not run its Makefile.PL or Build.PL.
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+SHA1 7ef2bf5c74b685f2f1309927bddf91c8b722032a Changes
+SHA1 842c4c83c26dd26169baa2818b6b2b7fc87a32ba MANIFEST
+SHA1 2c4fde69361b0bcdb7ab899f589f3bf676bb17e3 META.yml
+SHA1 f83bcc00051ded25c111614c5cb7b0c2e733636c Makefile.PL
+SHA1 84c94ef8e4a99355ce13bd7780c070b0714048c2 README
+SHA1 01bedc50c81d571028f6163ede9a0d6d364ee033 Util.xs
+SHA1 346fae28747a82d688cf19b7ef93703fde44f08c lib/List/Util.pm
+SHA1 f2ca8d9efa12b70ea13e111852d5a4ce86aa82ad lib/Scalar/Util.pm
+SHA1 449f0466c8cb6e1e954fb6fed251194cdd4c8e56 t/blessed.t
+SHA1 69b4a0a12efe3098ae2316868df2457f758c9c65 t/dualvar.t
+SHA1 6a1c0a35d9a55e57a1982038d048f71535496d26 t/first.t
+SHA1 6f9851bfb0c9eb8c549b71455722f71cc0c95b38 t/isvstring.t
+SHA1 b2f719688dbb32c009d220363f907f22d4bedb52 t/lln.t
+SHA1 1ec8a5566baee79293d08973aed21ffbcc1c6c19 t/max.t
+SHA1 c9d77466a57159d26583ea56da4895bb6a89c489 t/maxstr.t
+SHA1 f36d60008db4609aac6ba8c6429b469797ca609d t/min.t
+SHA1 5ccb117f1bb9d356f728f1d576b8f50ed08ccc23 t/minstr.t
+SHA1 a50927413c56cca63297da0816c4552fd6f096b9 t/openhan.t
+SHA1 e0ddbad50921d2f466f99ebda38009b05aa1a123 t/proto.t
+SHA1 2b03830f2d2ce176aa8a5dd11e01f230b1f84f9a t/readonly.t
+SHA1 661e107bcd3f77cbf1b0f0a066aed2adccbc697b t/reduce.t
+SHA1 32b9c7d20af3cdd336438f7ce99b7174b3f34a2f t/refaddr.t
+SHA1 0ce306fb85152ad53dd4df37295a6b252ccd21ea t/reftype.t
+SHA1 273dcc96008eed30454032d8069707fad4f8bafa t/shuffle.t
+SHA1 32884c835e0337580a5293a7a17b9a34c9010cea t/sum.t
+SHA1 072d14df90c4d7a3505fe10d8fbe4b05ac061fdf t/tainted.t
+SHA1 e672fb666b30d838a8a089202276f4f6b2fc2d2b t/weak.t
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.2.3 (Darwin)
+
+iD8DBQFArwUoR0BL4gbYw3QRAquBAJ9B54134WHIu93FCxLsvGMFO5QC1ACgi4fj
+QUTppQZjlUk+65R7AkfaEB8=
+=jI5M
+-----END PGP SIGNATURE-----
