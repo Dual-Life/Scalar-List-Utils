@@ -22,6 +22,7 @@ sub write_makefile {
     NAME            => "List::Util",
     DISTNAME        => "Scalar-List-Utils",
     CONFIGURE       => \&init,
+    DEFINE          => "-DPERL_EXT",
     clean           => {FILES => 'test.c typemap'}
   );
 }
