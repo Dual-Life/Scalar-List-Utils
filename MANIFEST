@@ -15,6 +15,7 @@ t/maxstr.t
 t/min.t
 t/minstr.t
 t/openhan.t
+t/proto.t
 t/readonly.t
 t/reduce.t
 t/refaddr.t
