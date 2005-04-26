@@ -274,6 +274,25 @@ prevent the object being DESTROY-ed at its usual time.
     }
     # $ref is now undef
 
+Note that if you take a copy of a scalar with a weakened reference,
+the copy will be a strong reference.
+
+    my $var;
+    my $foo = \$var;
+    weaken($foo);                       # Make $foo a weak reference
+    my $bar = $foo;                     # $bar is now a strong reference
+
+This may be less obvious in other situations, such as C<grep()>, for instance
+when grepping through a list of weakened references to objects that may have
+been destroyed already:
+
+    @object = grep { defined } @object;
+
+This will indeed remove all references to destroyed objects, but the remaining
+references to objects will be strong, causing the remaining objects to never
+be destroyed because there is now always a strong reference to them in the
+@object array.
+
 =back
 
 =head1 KNOWN BUGS
