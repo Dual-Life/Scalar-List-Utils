@@ -107,6 +107,24 @@ sv_tainted(SV *sv)
 #  define SvUV_set(sv, val) (((XPVUV*)SvANY(sv))->xuv_uv = (val))
 #endif
 
+#ifdef HASATTRIBUTE
+#  if (defined(__GNUC__) && defined(__cplusplus)) || defined(__INTEL_COMPILER)
+#    define PERL_UNUSED_DECL
+#  else
+#    define PERL_UNUSED_DECL __attribute__((unused))
+#  endif
+#else
+#  define PERL_UNUSED_DECL
+#endif
+
+#ifndef dNOOP
+#define dNOOP extern int Perl___notused PERL_UNUSED_DECL
+#endif
+
+#ifndef dVAR
+#define dVAR dNOOP
+#endif
+
 MODULE=List::Util	PACKAGE=List::Util
 
 void
@@ -210,6 +228,7 @@ reduce(block,...)
 PROTOTYPE: &@
 CODE:
 {
+    dVAR;
     SV *ret = sv_newmortal();
     int index;
     GV *agv,*bgv,*gv;
@@ -264,6 +283,7 @@ first(block,...)
 PROTOTYPE: &@
 CODE:
 {
+    dVAR;
     int index;
     GV *gv;
     HV *stash;
@@ -318,6 +338,7 @@ shuffle(...)
 PROTOTYPE: @
 CODE:
 {
+    dVAR;
     int index;
     struct op dmy_op;
     struct op *old_op = PL_op;
