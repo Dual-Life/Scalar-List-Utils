@@ -314,8 +314,6 @@ CODE:
     CATCH_SET(TRUE);
     PUSHBLOCK(cx, CXt_SUB, SP);
     PUSHSUB(cx);
-    if (!CvDEPTH(cv))
-        (void)SvREFCNT_inc(cv);
 
     for(index = 1 ; index < items ; index++) {
 	GvSV(PL_defgv) = ST(index);
