@@ -1,0 +1,77 @@
+This file contains message digests of all files listed in MANIFEST,
+signed via the Module::Signature module, version 0.38.
+
+To verify the content in this distribution, first make sure you have
+Module::Signature installed, then type:
+
+    % cpansign -v
+
+It would check each file's integrity, as well as the signature's
+validity.  If "==> Signature verified OK! <==" is not displayed,
+the distribution may already have been compromised, and you should
+not run its Makefile.PL or Build.PL.
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+SHA1 c302f76f343643631923314083c215ca06f9087a Changes
+SHA1 5014f26a5f4bb69b3b75b122e3c51baf9468998c MANIFEST
+SHA1 1dbb979dc97ab6134b49d1fd9fcbe3301106bbb7 META.yml
+SHA1 b9678e737438e687d1faaac938e188a834f62e06 Makefile.PL
+SHA1 84c94ef8e4a99355ce13bd7780c070b0714048c2 README
+SHA1 3bd87031348ae7f724b85ecbf0648d2ef5c3ba74 Util.xs
+SHA1 70b3a06d728c3812ff0653b92bb6e91b9c39553c inc/Module/Install.pm
+SHA1 00eea093a9eef87a8eb4e90fba31ec1426300c30 inc/Module/Install/Base.pm
+SHA1 770008c5f1f2065ddf116974105c4ef5daeb5b19 inc/Module/Install/Can.pm
+SHA1 e581cb5d73c4dcd33dd7d8b649714750a1bc9f8e inc/Module/Install/Fetch.pm
+SHA1 15e74d1d34058239673571acb0f4e4e11151d6ea inc/Module/Install/Include.pm
+SHA1 0cdc7ff71547903f4258454c54ab068ca3b1f1e1 inc/Module/Install/InstallDirs.pm
+SHA1 d0f06bfc7857fe895a0cfe1537b081f3c788fc41 inc/Module/Install/Makefile.pm
+SHA1 de3962cbec3ed5c027dcc82642efe12825fccbac inc/Module/Install/Metadata.pm
+SHA1 e99a3f64ebcc35371e3f7ba10a1d1487231c724b inc/Module/Install/Win32.pm
+SHA1 a485e469ac64908d7e965ae726b6a58682d74d8e inc/Test/Builder.pm
+SHA1 2e86c1ac237e606c365cfde0965bd662c86b6b35 inc/Test/More.pm
+SHA1 137096ec835109ed9f3bd41337607d455225e4ac lib/List/Util.pm
+SHA1 8f70bc3e7393636b402381788efc8116a4e6a27c lib/Scalar/Util.pm
+SHA1 0edd9a2a7285afe6549f12c4d71377e28f9845a3 mytypemap
+SHA1 5add3404aad187e8e9f119c7c3defcb18886143b t/blessed.t
+SHA1 74d19e0c0bb55a913e6ceebc4d08a1711257d7d8 t/dualvar.t
+SHA1 49a21cf7917e0789170f554ad034c7e15c308244 t/first.t
+SHA1 8c5cc4ac342118b5251e69060b9fef4027d28eb4 t/isvstring.t
+SHA1 020b769a553e72484374aed2c867a948749b959f t/lln.t
+SHA1 ab5ca88237f132daa6a404adfbad8569b891a4bd t/max.t
+SHA1 9dc923c7b6dda504fb6e1cf78e7e2d315e69c3aa t/maxstr.t
+SHA1 ca59cf2da067129eb2c9bd391930aa0dbcc3162a t/min.t
+SHA1 f9e7198d610277d124d03f21008f290961c6d7bd t/minstr.t
+SHA1 c8f8f6f0650d187647af094956456a874ffd4f81 t/openhan.t
+SHA1 bf6958a2dab5d5278b1be325fc1a5caab1679881 t/p_blessed.t
+SHA1 c7f018d1232b4b4a8eae198fd5d6be0b81bb8ec1 t/p_first.t
+SHA1 bdfdbb48fb7e416f8ff8764551d00eacbc5f43fa t/p_lln.t
+SHA1 9d4546f8b809777b139efca5f3e706ff5ba710c2 t/p_max.t
+SHA1 e3f4f372dab71a421dff26eded9eee7cddc4c906 t/p_maxstr.t
+SHA1 3255bc84a32e0786bccb7e6a05046e7d3f17c522 t/p_min.t
+SHA1 a27fb82fbdeea5d1039eea5be8d6bdf77431231e t/p_minstr.t
+SHA1 b56124a85a1c667ab8e2ef52f5b6085088f1d66c t/p_openhan.t
+SHA1 a370ffa35bc33638649a25366c7170dd2c3072e2 t/p_readonly.t
+SHA1 f426f08fd37c860510e137f23734017261370e8a t/p_reduce.t
+SHA1 e10c86302c8cf701fdc291fb56a7f2fc7ec5a438 t/p_refaddr.t
+SHA1 0473567ca803469893c1fb5c22b378db44476342 t/p_reftype.t
+SHA1 3393f17be34535c22a52aa415d4d562df36a4249 t/p_shuffle.t
+SHA1 45fc05e91e6ad1324fbbc2ff59efa87835595435 t/p_sum.t
+SHA1 a82b8199872cb8a96b3e3de3e768650012feb7f6 t/p_tainted.t
+SHA1 7809e3b5c0177599cbc1f22ea00760e0ef0c6b7b t/proto.t
+SHA1 d3ae75414b91e1ca342bf5efaf730882efdb7f4c t/readonly.t
+SHA1 37457bd809bf2c21702b1637bcac59b8ab900386 t/reduce.t
+SHA1 091da1228abbd3dfa274dbc0fe6ef1474b11a93e t/refaddr.t
+SHA1 e9cf5530ad1e260f84bcde6254d2c0f071ec5eca t/reftype.t
+SHA1 841e0a7d5d1d4ad5a4678cabd3af62043d050938 t/shuffle.t
+SHA1 2ad4f3171fd1036be444f6e7a8063133e8a1215c t/sum.t
+SHA1 a6f9f5d4b4b89c53f7e203ede3965f3d11807f17 t/tainted.t
+SHA1 7295a341abaa9d622fcb61936baa459821d2a26b t/weak.t
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.2.4 (Darwin)
+
+iD8DBQFChNJtR0BL4gbYw3QRAhb1AJ4jG7qcgbVtvGgK5NOjj7DKZP/o/gCfRlEg
+oxrMIyEiwutO9Jywwwshsoo=
+=2EeR
+-----END PGP SIGNATURE-----
