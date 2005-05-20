@@ -3,4 +3,5 @@
 # force perl-only version to be tested
 sub List::Util::bootstrap {}
 
-do 't/reduce.t';
+(my $f = __FILE__) =~ s/p_//;
+do $f;

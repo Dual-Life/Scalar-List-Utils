@@ -9,7 +9,7 @@ for (@ARGV) {
   /^-xs/ and $do_xs = 1;
 }
 
-name		('Scalar-List-Util');
+name		('Scalar-List-Utils');
 module_name	('List::Util');
 abstract	('Common Scalar and List utility subroutines');
 author		('Graham Barr <gbarr@cpan.org>');
@@ -45,7 +45,7 @@ POST_CONST
 sub MY::postamble {
   return <<'POSTAMBLE';
 
-distdir : manifest run_cpansign
+mydist : manifest run_cpansign dist
 
 run_cpansign :
 	cpansign -s
