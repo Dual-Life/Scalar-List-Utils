@@ -1,3 +1,8 @@
+1.17 -- Mon May 23 08:55:26 CDT 2005
+
+Bug Fixes
+  * Update XS code to declare PERL_UNUSED_DECL conditionally
+
 1.16 -- Fri May 20 10:22:49 CDT 2005
 
 Bug Fixes
