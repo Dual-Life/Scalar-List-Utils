@@ -275,6 +275,7 @@ CODE:
     }
     ST(0) = ret;
     POPBLOCK(cx,PL_curpm);
+    LEAVESUB(cv);
     CATCH_SET(oldcatch);
     XSRETURN(1);
 }
@@ -324,11 +325,13 @@ CODE:
 	if (SvTRUE(*PL_stack_sp)) {
 	  ST(0) = ST(index);
 	  POPBLOCK(cx,PL_curpm);
+	  LEAVESUB(cv);
 	  CATCH_SET(oldcatch);
 	  XSRETURN(1);
 	}
     }
     POPBLOCK(cx,PL_curpm);
+    LEAVESUB(cv);
     CATCH_SET(oldcatch);
     XSRETURN_UNDEF;
 }
