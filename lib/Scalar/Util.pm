@@ -67,10 +67,15 @@ sub blessed ($) {
 
 sub refaddr($) {
   my $pkg = ref($_[0]) or return undef;
-  bless $_[0], 'Scalar::Util::Fake';
+  if (blessed($_[0])) {
+    bless $_[0], 'Scalar::Util::Fake';
+  }
+  else {
+    $pkg = undef;
+  }
   "$_[0]" =~ /0x(\w+)/;
   my $i = do { local $^W; hex $1 };
-  bless $_[0], $pkg;
+  bless $_[0], $pkg if defined $pkg;
   $i;
 }
 
