@@ -2,7 +2,7 @@
 
 use inc::Module::Install;
 
-my $do_xs = can_cc();
+my $do_xs = ($] >= 5.006) && can_cc();
 
 for (@ARGV) {
   /^-pm/ and $do_xs = 0;
@@ -36,7 +36,7 @@ sub MY::post_constants {
 
   return <<'POST_CONST';
 
-XSUBPP_EXTRA_ARGS = -typemap mytypemap
+XSUBPPARGS +=  -typemap mytypemap
 
 POST_CONST
 

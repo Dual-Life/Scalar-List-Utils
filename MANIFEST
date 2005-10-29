@@ -54,3 +54,4 @@ t/sum.t
 t/tainted.t
 t/weak.t
 Util.xs
+multicall.h

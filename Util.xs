@@ -7,6 +7,8 @@
 #include <perl.h>
 #include <XSUB.h>
 
+#include "multicall.h"
+
 #ifndef PERL_VERSION
 #    include <patchlevel.h>
 #    if !(defined(PERL_VERSION) || (SUBVERSION > 0 && defined(PATCHLEVEL)))
@@ -230,53 +232,32 @@ reduce(block,...)
 PROTOTYPE: &@
 CODE:
 {
-    dVAR;
+    dVAR; dMULTICALL;
     SV *ret = sv_newmortal();
     int index;
     GV *agv,*bgv,*gv;
     HV *stash;
-    CV *cv;
-    OP *reducecop;
-    PERL_CONTEXT *cx;
-    SV** newsp;
     I32 gimme = G_SCALAR;
-    U8 hasargs = 0;
-    bool oldcatch = CATCH_GET;
+    SV **args = &PL_stack_base[ax];
 
     if(items <= 1) {
 	XSRETURN_UNDEF;
     }
+    cv = sv_2cv(block, &stash, &gv, 0);
+    PUSH_MULTICALL;
     agv = gv_fetchpv("a", TRUE, SVt_PV);
     bgv = gv_fetchpv("b", TRUE, SVt_PV);
     SAVESPTR(GvSV(agv));
     SAVESPTR(GvSV(bgv));
     GvSV(agv) = ret;
-    cv = sv_2cv(block, &stash, &gv, 0);
-    reducecop = CvSTART(cv);
-    SAVESPTR(CvROOT(cv)->op_ppaddr);
-    CvROOT(cv)->op_ppaddr = PL_ppaddr[OP_NULL];
-#ifdef PAD_SET_CUR
-    PAD_SET_CUR(CvPADLIST(cv),1);
-#else
-    SAVESPTR(PL_curpad);
-    PL_curpad = AvARRAY((AV*)AvARRAY(CvPADLIST(cv))[1]);
-#endif
-    SAVETMPS;
-    SAVESPTR(PL_op);
-    SvSetSV(ret, ST(1));
-    CATCH_SET(TRUE);
-    PUSHBLOCK(cx, CXt_SUB, SP);
-    PUSHSUB(cx);
+    SvSetSV(ret, args[1]);
     for(index = 2 ; index < items ; index++) {
-	GvSV(bgv) = ST(index);
-	PL_op = reducecop;
-	CALLRUNOPS(aTHX);
+	GvSV(bgv) = args[index];
+	MULTICALL;
 	SvSetSV(ret, *PL_stack_sp);
     }
+    POP_MULTICALL;
     ST(0) = ret;
-    POPBLOCK(cx,PL_curpm);
-    LEAVESUB(cv);
-    CATCH_SET(oldcatch);
     XSRETURN(1);
 }
 
@@ -286,53 +267,30 @@ first(block,...)
 PROTOTYPE: &@
 CODE:
 {
-    dVAR;
+    dVAR; dMULTICALL;
     int index;
     GV *gv;
     HV *stash;
-    CV *cv;
-    OP *reducecop;
-    PERL_CONTEXT *cx;
-    SV** newsp;
     I32 gimme = G_SCALAR;
-    U8 hasargs = 0;
-    bool oldcatch = CATCH_GET;
+    SV **args = &PL_stack_base[ax];
 
     if(items <= 1) {
 	XSRETURN_UNDEF;
     }
-    SAVESPTR(GvSV(PL_defgv));
     cv = sv_2cv(block, &stash, &gv, 0);
-    reducecop = CvSTART(cv);
-    SAVESPTR(CvROOT(cv)->op_ppaddr);
-    CvROOT(cv)->op_ppaddr = PL_ppaddr[OP_NULL];
-#ifdef PAD_SET_CUR
-    PAD_SET_CUR(CvPADLIST(cv),1);
-#else
-    SAVESPTR(PL_curpad);
-    PL_curpad = AvARRAY((AV*)AvARRAY(CvPADLIST(cv))[1]);
-#endif
-    SAVETMPS;
-    SAVESPTR(PL_op);
-    CATCH_SET(TRUE);
-    PUSHBLOCK(cx, CXt_SUB, SP);
-    PUSHSUB(cx);
+    PUSH_MULTICALL;
+    SAVESPTR(GvSV(PL_defgv));
 
     for(index = 1 ; index < items ; index++) {
-	GvSV(PL_defgv) = ST(index);
-	PL_op = reducecop;
-	CALLRUNOPS(aTHX);
+	GvSV(PL_defgv) = args[index];
+	MULTICALL;
 	if (SvTRUE(*PL_stack_sp)) {
+	  POP_MULTICALL;
 	  ST(0) = ST(index);
-	  POPBLOCK(cx,PL_curpm);
-	  LEAVESUB(cv);
-	  CATCH_SET(oldcatch);
 	  XSRETURN(1);
 	}
     }
-    POPBLOCK(cx,PL_curpm);
-    LEAVESUB(cv);
-    CATCH_SET(oldcatch);
+    POP_MULTICALL;
     XSRETURN_UNDEF;
 }
 
