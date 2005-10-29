@@ -6,6 +6,8 @@
 
 package Scalar::Util;
 
+use strict;
+use vars qw(@ISA @EXPORT_OK $VERSION);
 require Exporter;
 require List::Util; # List::Util loads the XS
 
@@ -51,6 +53,7 @@ sub openhandle ($) {
 
 eval <<'ESQ' unless defined &dualvar;
 
+use vars qw(@EXPORT_FAIL);
 push @EXPORT_FAIL, qw(weaken isweak dualvar isvstring set_prototype);
 
 # The code beyond here is only used if the XS is not installed
@@ -148,7 +151,8 @@ Scalar::Util - A selection of general-utility scalar subroutines
 
 =head1 SYNOPSIS
 
-    use Scalar::Util qw(blessed dualvar isweak readonly refaddr reftype tainted weaken isvstring looks_like_number set_prototype);
+    use Scalar::Util qw(blessed dualvar isweak readonly refaddr reftype tainted
+                        weaken isvstring looks_like_number set_prototype);
 
 =head1 DESCRIPTION
 

@@ -6,6 +6,8 @@
 
 package List::Util;
 
+use strict;
+use vars qw(@ISA @EXPORT_OK $VERSION $XS_VERSION);
 require Exporter;
 
 @ISA        = qw(Exporter);
@@ -32,6 +34,7 @@ use vars qw($a $b);
 
 sub reduce (&@) {
   my $code = shift;
+  no strict 'refs';
 
   return shift unless @_ > 1;
 
