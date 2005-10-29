@@ -6,13 +6,28 @@
  *
  */
 
-#ifndef dMULTICALL
+#ifdef dMULTICALL
+#define REAL_MULTICALL
+#else
+#undef REAL_MULTICALL
 
 /* In versions of perl where MULTICALL is not defined (i.e. prior
  * to 5.9.4), Perl_pad_push is not exported either. It also has
  * an extra argument in older versions; certainly in the 5.8 series.
  * So we redefine it here.
  */
+
+#ifndef AVf_REIFY
+#  ifdef SVpav_REIFY
+#    define AVf_REIFY SVpav_REIFY
+#  else
+#    error Neither AVf_REIFY nor SVpav_REIFY is defined
+#  endif
+#endif
+
+#ifndef AvFLAGS
+#  define AvFLAGS SvFLAGS
+#endif
 
 static void
 multicall_pad_push(pTHX_ AV *padlist, int depth)
@@ -74,11 +89,39 @@ multicall_pad_push(pTHX_ AV *padlist, int depth)
     CV *cv;								\
     OP *multicall_cop;							\
     bool multicall_oldcatch;						\
-    U8 hasargs = 0;
+    U8 hasargs = 0
 
-#ifndef PUSHSUB_BASE
-#  define PUSHSUB_BASE PUSHSUB
+/* Between 5.9.1 and 5.9.2 the retstack was removed, and the
+   return op is now stored on the cxstack. */
+#define HAS_RETSTACK (\
+  PERL_REVISION < 5 || \
+  (PERL_REVISION == 5 && PERL_VERSION < 9) || \
+  (PERL_REVISION == 5 && PERL_VERSION == 9 && PERL_SUBVERSION < 2) \
+)
+
+
+/* PUSHSUB is defined so differently on different versions of perl
+ * that it's easier to define our own version than code for all the
+ * different possibilities.
+ */
+#if HAS_RETSTACK
+#  define PUSHSUB_RETSTACK(cx)
+#else
+#  define PUSHSUB_RETSTACK(cx) cx->blk_sub.retop = Nullop;
 #endif
+#undef PUSHSUB
+#define PUSHSUB(cx)                                                     \
+        cx->blk_sub.cv = cv;                                            \
+        cx->blk_sub.olddepth = CvDEPTH(cv);                             \
+        cx->blk_sub.hasargs = hasargs;                                  \
+        cx->blk_sub.lval = PL_op->op_private &                          \
+                              (OPpLVAL_INTRO|OPpENTERSUB_INARGS);	\
+	PUSHSUB_RETSTACK(cx)						\
+        if (!CvDEPTH(cv)) {                                             \
+            (void)SvREFCNT_inc(cv);                                     \
+            (void)SvREFCNT_inc(cv);                                     \
+            SAVEFREESV(cv);                                             \
+        }
 
 #define PUSH_MULTICALL \
     STMT_START {							\
@@ -91,13 +134,8 @@ multicall_pad_push(pTHX_ AV *padlist, int depth)
 	CATCH_SET(TRUE);						\
 	PUSHSTACKi(PERLSI_SORT);					\
 	PUSHBLOCK(cx, CXt_SUB, PL_stack_sp);				\
-	PUSHSUB_BASE(cx);						\
-	if (!CvDEPTH(cv)) {                                             \
-	    (void)SvREFCNT_inc(cv);                                     \
-	    (void)SvREFCNT_inc(cv);                                     \
-	    SAVEFREESV(cv);                                             \
-	}								\
-	 if (++CvDEPTH(cv) >= 2) {					\
+	PUSHSUB(cx);							\
+	if (++CvDEPTH(cv) >= 2) {					\
 	    PERL_STACK_OVERFLOW_CHECK();				\
 	    multicall_pad_push(aTHX_ padlist, CvDEPTH(cv));		\
 	}								\

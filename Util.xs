@@ -129,6 +129,10 @@ sv_tainted(SV *sv)
 #define dVAR dNOOP
 #endif
 
+#ifndef GvSVn
+#  define GvSVn GvSV
+#endif
+
 MODULE=List::Util	PACKAGE=List::Util
 
 void
@@ -499,19 +503,30 @@ CODE:
 
 BOOT:
 {
+    HV *lu_stash = gv_stashpvn("List::Util", 10, TRUE);
+    GV *rmcgv = *(GV**)hv_fetch(lu_stash, "REAL_MULTICALL", 14, TRUE);
+    SV *rmcsv;
 #if !defined(SvWEAKREF) || !defined(SvVOK)
-    HV *stash = gv_stashpvn("Scalar::Util", 12, TRUE);
-    GV *vargv = *(GV**)hv_fetch(stash, "EXPORT_FAIL", 11, TRUE);
+    HV *su_stash = gv_stashpvn("Scalar::Util", 12, TRUE);
+    GV *vargv = *(GV**)hv_fetch(su_stash, "EXPORT_FAIL", 11, TRUE);
     AV *varav;
     if (SvTYPE(vargv) != SVt_PVGV)
-	gv_init(vargv, stash, "Scalar::Util", 12, TRUE);
+	gv_init(vargv, su_stash, "Scalar::Util", 12, TRUE);
     varav = GvAVn(vargv);
 #endif
+    if (SvTYPE(rmcgv) != SVt_PVGV)
+	gv_init(rmcgv, lu_stash, "List::Util", 12, TRUE);
+    rmcsv = GvSVn(rmcgv);
 #ifndef SvWEAKREF
     av_push(varav, newSVpv("weaken",6));
     av_push(varav, newSVpv("isweak",6));
 #endif
 #ifndef SvVOK
     av_push(varav, newSVpv("isvstring",9));
+#endif
+#ifdef REAL_MULTICALL
+    sv_setsv(rmcsv, &PL_sv_yes);
+#else
+    sv_setsv(rmcsv, &PL_sv_no);
 #endif
 }

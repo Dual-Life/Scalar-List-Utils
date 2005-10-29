@@ -128,7 +128,7 @@ SKIP: {
 if (!$::PERL_ONLY) { SKIP: {
 
     skip("Poor man's MULTICALL can't cope", 2)
-      if $] < 5.009003;
+      if !$List::Util::REAL_MULTICALL;
 
     # Can we goto a label from the reduction sub?
     eval {()=reduce{goto foo} 1,2; foo: 1};
