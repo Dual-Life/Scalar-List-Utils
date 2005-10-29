@@ -14,7 +14,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 12;
+use Test::More tests => 14;
 use Scalar::Util qw(looks_like_number);
 
 foreach my $num (qw(1 -1 +1 1.0 +1.0 -1.0 -1.0e-12)) {
@@ -25,6 +25,8 @@ is(!!looks_like_number("Inf"),	    $] >= 5.006001,	'Inf');
 is(!!looks_like_number("Infinity"), $] >= 5.008,	'Infinity');
 is(!!looks_like_number("NaN"),	    $] >= 5.008,	'NaN');
 is(!!looks_like_number("foo"),	    '',			'foo');
-is(!!looks_like_number(undef),	    $] < 5.008005,	'undef');
+is(!!looks_like_number(undef),	    '',           	'undef');
+is(!!looks_like_number({}),	    '',			'HASH Ref');
+is(!!looks_like_number([]),	    '',			'ARRAY Ref');
 
 # We should copy some of perl core tests like t/base/num.t here

@@ -131,7 +131,7 @@ sub looks_like_number {
   local $_ = shift;
 
   # checks from perlfaq4
-  return $] < 5.008005 unless defined;
+  return 0 unless defined;
   return 1 if (/^[+-]?\d+$/); # is a +/- integer
   return 1 if (/^([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?$/); # a C float
   return 1 if ($] >= 5.008 and /^(Inf(inity)?|NaN)$/i) or ($] >= 5.006001 and /^Inf$/i);
