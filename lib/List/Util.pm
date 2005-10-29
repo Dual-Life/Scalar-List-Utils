@@ -7,7 +7,7 @@
 package List::Util;
 
 use strict;
-use vars qw(@ISA @EXPORT_OK $VERSION $XS_VERSION);
+use vars qw(@ISA @EXPORT_OK $VERSION $XS_VERSION $TESTING_PERL_ONLY);
 require Exporter;
 
 @ISA        = qw(Exporter);
@@ -20,11 +20,16 @@ eval {
   # PERL_DL_NONLAZY must be false, or any errors in loading will just
   # cause the perl code to be tested
   local $ENV{PERL_DL_NONLAZY} = 0 if $ENV{PERL_DL_NONLAZY};
-  require DynaLoader;
-  local @ISA = qw(DynaLoader);
-  bootstrap List::Util $XS_VERSION;
-  1
-};
+  eval {
+    require XSLoader;
+    XSLoader::load('List::Util', $XS_VERSION);
+    1;
+  } or do {
+    require DynaLoader;
+    local @ISA = qw(DynaLoader);
+    bootstrap List::Util $XS_VERSION;
+  };
+} unless $TESTING_PERL_ONLY;
 
 eval <<'ESQ' unless defined &reduce;
 
@@ -204,7 +209,8 @@ Returns the elements of LIST in a random order
 
 =item sum LIST
 
-Returns the sum of all the elements in LIST.
+Returns the sum of all the elements in LIST. If LIST is empty then
+C<undef> is returned.
 
     $foo = sum 1..10                # 55
     $foo = sum 3,9,12               # 24
