@@ -206,6 +206,11 @@ If EXPR is a scalar which is a weak reference the result is true.
     weaken($ref);
     $weak = isweak($ref);               # true
 
+B<NOTE>: Copying a weak reference creates a normal, strong, reference.
+
+    $copy = $ref;
+    $weak = isweak($ref);               # false
+
 =item looks_like_number EXPR
 
 Returns true if perl thinks EXPR is a number. See
