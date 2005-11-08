@@ -305,6 +305,7 @@ CODE:
 {
     dVAR;
     int index;
+#if (PERL_VERSION < 8) || (PERL_VERSION == 8 && PERL_SUBVERSION <1)
     struct op dmy_op;
     struct op *old_op = PL_op;
 
@@ -317,6 +318,16 @@ CODE:
     PL_op = &dmy_op;
     (void)*(PL_ppaddr[OP_RAND])(aTHX);
     PL_op = old_op;
+#else
+    /* Initialize Drand01 if rand() or srand() has
+       not already been called
+    */
+    if (!PL_srand_called) {
+        (void)seedDrand01((Rand_seed_t)Perl_seed(aTHX));
+        PL_srand_called = TRUE;
+    }
+#endif
+
     for (index = items ; index > 1 ; ) {
 	int swap = (int)(Drand01() * (double)(index--));
 	SV *tmp = ST(swap);
