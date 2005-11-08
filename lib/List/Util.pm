@@ -31,17 +31,20 @@ eval {
   };
 } unless $TESTING_PERL_ONLY;
 
-eval <<'ESQ' unless defined &reduce;
 
 # This code is only compiled if the XS did not load
+# of for perl < 5.6.0
 
-use vars qw($a $b);
+if (!defined &reduce) {
+eval <<'ESQ' 
 
 sub reduce (&@) {
   my $code = shift;
   no strict 'refs';
 
   return shift unless @_ > 1;
+
+  use vars qw($a $b);
 
   my $caller = caller;
   local(*{$caller."::a"}) = \my $a;
@@ -56,16 +59,6 @@ sub reduce (&@) {
   $a;
 }
 
-sub sum (@) { reduce { $a + $b } @_ }
-
-sub min (@) { reduce { $a < $b ? $a : $b } @_ }
-
-sub max (@) { reduce { $a > $b ? $a : $b } @_ }
-
-sub minstr (@) { reduce { $a lt $b ? $a : $b } @_ }
-
-sub maxstr (@) { reduce { $a gt $b ? $a : $b } @_ }
-
 sub first (&@) {
   my $code = shift;
 
@@ -75,6 +68,24 @@ sub first (&@) {
 
   undef;
 }
+
+ESQ
+}
+
+# This code is only compiled if the XS did not load
+eval <<'ESQ' if !defined &sum;
+
+use vars qw($a $b);
+
+sub sum (@) { reduce { $a + $b } @_ }
+
+sub min (@) { reduce { $a < $b ? $a : $b } @_ }
+
+sub max (@) { reduce { $a > $b ? $a : $b } @_ }
+
+sub minstr (@) { reduce { $a lt $b ? $a : $b } @_ }
+
+sub maxstr (@) { reduce { $a gt $b ? $a : $b } @_ }
 
 sub shuffle (@) {
   my @a=\(@_);

@@ -2,7 +2,7 @@
 
 use inc::Module::Install;
 
-my $do_xs = ($] >= 5.006) && can_cc();
+my $do_xs = can_cc();
 
 for (@ARGV) {
   /^-pm/ and $do_xs = 0;

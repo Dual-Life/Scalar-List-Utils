@@ -7,8 +7,6 @@
 #include <perl.h>
 #include <XSUB.h>
 
-#include "multicall.h"
-
 #ifndef PERL_VERSION
 #    include <patchlevel.h>
 #    if !(defined(PERL_VERSION) || (SUBVERSION > 0 && defined(PATCHLEVEL)))
@@ -19,11 +17,14 @@
 #    define PERL_SUBVERSION	SUBVERSION
 #endif
 
+#if PERL_VERSION >= 6
+#  include "multicall.h"
+#endif
+
 #ifndef aTHX
 #  define aTHX
 #  define pTHX
 #endif
-
 /* Some platforms have strict exports. And before 5.7.3 cxinc (or Perl_cxinc)
    was not exported. Therefore platforms like win32, VMS etc have problems
    so we redefine it here -- GMB
@@ -230,6 +231,8 @@ CODE:
 
 
 
+#ifdef dMULTICALL
+
 void
 reduce(block,...)
     SV * block
@@ -299,6 +302,8 @@ CODE:
     POP_MULTICALL;
     XSRETURN_UNDEF;
 }
+
+#endif
 
 void
 shuffle(...)
