@@ -243,12 +243,13 @@ CODE:
     HV *stash;
     I32 gimme = G_SCALAR;
     SV **args = &PL_stack_base[ax];
+    CV *cv;
 
     if(items <= 1) {
 	XSRETURN_UNDEF;
     }
     cv = sv_2cv(block, &stash, &gv, 0);
-    PUSH_MULTICALL;
+    PUSH_MULTICALL(cv);
     agv = gv_fetchpv("a", TRUE, SVt_PV);
     bgv = gv_fetchpv("b", TRUE, SVt_PV);
     SAVESPTR(GvSV(agv));
@@ -277,12 +278,13 @@ CODE:
     HV *stash;
     I32 gimme = G_SCALAR;
     SV **args = &PL_stack_base[ax];
+    CV *cv;
 
     if(items <= 1) {
 	XSRETURN_UNDEF;
     }
     cv = sv_2cv(block, &stash, &gv, 0);
-    PUSH_MULTICALL;
+    PUSH_MULTICALL(cv);
     SAVESPTR(GvSV(PL_defgv));
 
     for(index = 1 ; index < items ; index++) {
