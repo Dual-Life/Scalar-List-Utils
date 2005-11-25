@@ -1,0 +1,79 @@
+This file contains message digests of all files listed in MANIFEST,
+signed via the Module::Signature module, version 0.50.
+
+To verify the content in this distribution, first make sure you have
+Module::Signature installed, then type:
+
+    % cpansign -v
+
+It will check each file's integrity, as well as the signature's
+validity.  If "==> Signature verified OK! <==" is not displayed,
+the distribution may already have been compromised, and you should
+not run its Makefile.PL or Build.PL.
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+SHA1 bcdac065aeec048c947d9b4d521c05c0d211a469 Changes
+SHA1 3f3f139fa0c77857ded426ce3d474ff8cc6066a0 MANIFEST
+SHA1 dd174662f417c737cc8e034b09af877bf1779e25 META.yml
+SHA1 db208cc1b48a9d8dbe96e1d3b991b7cdcd76a786 Makefile.PL
+SHA1 10cf50f3fe7892f87f990fe0ecccf324c4117fc4 README
+SHA1 543cd3fc57bb27db65fea078bf242c0d761cf2a6 Util.xs
+SHA1 4c89b7f2479289a00eaf9ae57d9c122540fd9cd3 inc/Module/Install.pm
+SHA1 13826150f529598f2c3eb2dc6e6ff9dbedea719a inc/Module/Install/Base.pm
+SHA1 43a82b58bba1e9a62847272a77b8a36e3024d2d6 inc/Module/Install/Can.pm
+SHA1 adacb128dc656e2279706970b3557e4cbeb8824d inc/Module/Install/Fetch.pm
+SHA1 f7f83139bba2a6be9c0e25df363ab4734360e70b inc/Module/Install/Include.pm
+SHA1 bb688c06aab1194026ac15f2c35ad5ee82fe3110 inc/Module/Install/InstallDirs.pm
+SHA1 d9eea60368c5d41d7b646ce53121ca0dca17c118 inc/Module/Install/Makefile.pm
+SHA1 8424be1a0a8df45820d05825a778e39c323edb0f inc/Module/Install/Metadata.pm
+SHA1 5295c32def7d784450ed1dabbe818a02b6d8d4d5 inc/Module/Install/Win32.pm
+SHA1 a485e469ac64908d7e965ae726b6a58682d74d8e inc/Test/Builder.pm
+SHA1 2e86c1ac237e606c365cfde0965bd662c86b6b35 inc/Test/More.pm
+SHA1 01cefb66f3e394ac538ad6debf2861252ea3ce74 lib/List/Util.pm
+SHA1 bbdf496436a8a8cdbc5b66de1c61d64e23b8ae09 lib/Scalar/Util.pm
+SHA1 cfc8fde170fba2d23908aedeb75fc0bbbeab1087 multicall.h
+SHA1 0edd9a2a7285afe6549f12c4d71377e28f9845a3 mytypemap
+SHA1 2be0420a308bc1a5d06d9ee4b8ca25d8f55c682f t/00version.t
+SHA1 5add3404aad187e8e9f119c7c3defcb18886143b t/blessed.t
+SHA1 74d19e0c0bb55a913e6ceebc4d08a1711257d7d8 t/dualvar.t
+SHA1 55ab8be1b810f350afe8a4e12eb03d67def93f81 t/first.t
+SHA1 8c5cc4ac342118b5251e69060b9fef4027d28eb4 t/isvstring.t
+SHA1 ddc30d05c813fc7378215be07cd371eab26cc502 t/lln.t
+SHA1 ab5ca88237f132daa6a404adfbad8569b891a4bd t/max.t
+SHA1 9dc923c7b6dda504fb6e1cf78e7e2d315e69c3aa t/maxstr.t
+SHA1 ca59cf2da067129eb2c9bd391930aa0dbcc3162a t/min.t
+SHA1 f9e7198d610277d124d03f21008f290961c6d7bd t/minstr.t
+SHA1 c8f8f6f0650d187647af094956456a874ffd4f81 t/openhan.t
+SHA1 af131d820cd538c9a45d9ce971b2329d85301c39 t/p_blessed.t
+SHA1 7885d3f19d728f7330e451e72734543d0646635e t/p_first.t
+SHA1 af131d820cd538c9a45d9ce971b2329d85301c39 t/p_lln.t
+SHA1 af131d820cd538c9a45d9ce971b2329d85301c39 t/p_max.t
+SHA1 af131d820cd538c9a45d9ce971b2329d85301c39 t/p_maxstr.t
+SHA1 af131d820cd538c9a45d9ce971b2329d85301c39 t/p_min.t
+SHA1 af131d820cd538c9a45d9ce971b2329d85301c39 t/p_minstr.t
+SHA1 af131d820cd538c9a45d9ce971b2329d85301c39 t/p_openhan.t
+SHA1 af131d820cd538c9a45d9ce971b2329d85301c39 t/p_readonly.t
+SHA1 7885d3f19d728f7330e451e72734543d0646635e t/p_reduce.t
+SHA1 af131d820cd538c9a45d9ce971b2329d85301c39 t/p_refaddr.t
+SHA1 af131d820cd538c9a45d9ce971b2329d85301c39 t/p_reftype.t
+SHA1 af131d820cd538c9a45d9ce971b2329d85301c39 t/p_shuffle.t
+SHA1 af131d820cd538c9a45d9ce971b2329d85301c39 t/p_sum.t
+SHA1 2ade75fb02762fc2f5f1e1224cd407d297888340 t/p_tainted.t
+SHA1 7809e3b5c0177599cbc1f22ea00760e0ef0c6b7b t/proto.t
+SHA1 d3ae75414b91e1ca342bf5efaf730882efdb7f4c t/readonly.t
+SHA1 b9e2881cb997231841f5dd70d7af03f1a6ff8b7b t/reduce.t
+SHA1 06b59d5ab705d84a7fc3cd669081bb7a65e985c3 t/refaddr.t
+SHA1 e9cf5530ad1e260f84bcde6254d2c0f071ec5eca t/reftype.t
+SHA1 841e0a7d5d1d4ad5a4678cabd3af62043d050938 t/shuffle.t
+SHA1 2ad4f3171fd1036be444f6e7a8063133e8a1215c t/sum.t
+SHA1 0eea44585f74f033212ae82865366a7cff4b7dfd t/tainted.t
+SHA1 7295a341abaa9d622fcb61936baa459821d2a26b t/weak.t
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.2.6 (GNU/Linux)
+
+iD8DBQFDhzjGR0BL4gbYw3QRAgywAKCRytawfOResZgu2pyy6Y5fbNqxQgCeJYug
+WEd61Ze52/eEDk4mkIFJCpQ=
+=fk5D
+-----END PGP SIGNATURE-----
