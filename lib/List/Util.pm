@@ -197,11 +197,11 @@ This function could be implemented using C<reduce> like this
 
 =item reduce BLOCK LIST
 
-Reduces LIST by calling BLOCK multiple times, setting C<$a> and C<$b>
-each time. The first call will be with C<$a> and C<$b> set to the first
-two elements of the list, subsequent calls will be done by
-setting C<$a> to the result of the previous call and C<$b> to the next
-element in the list.
+Reduces LIST by calling BLOCK, in a scalar context, multiple times,
+setting C<$a> and C<$b> each time. The first call will be with C<$a>
+and C<$b> set to the first two elements of the list, subsequent
+calls will be done by setting C<$a> to the result of the previous
+call and C<$b> to the next element in the list.
 
 Returns the result of the last call to BLOCK. If LIST is empty then
 C<undef> is returned. If LIST only contains one element then that
