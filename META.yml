@@ -1,0 +1,14 @@
+abstract: Common Scalar and List utility subroutines
+author: 'Graham Barr <gbarr@cpan.org>'
+distribution_type: module
+generated_by: Module::Install version 0.64
+license: perl
+module_name: List::Util
+name: Scalar-List-Utils
+no_index:
+  directory:
+    - inc
+    - t
+requires:
+  perl: 5.004
+version: 1.19

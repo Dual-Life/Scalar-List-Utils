@@ -9,12 +9,14 @@ inc/Module/Install/Makefile.pm
 inc/Module/Install/Metadata.pm
 inc/Module/Install/Win32.pm
 inc/Test/Builder.pm
+inc/Test/Builder/Module.pm
 inc/Test/More.pm
 lib/List/Util.pm
 lib/Scalar/Util.pm
 Makefile.PL
 MANIFEST
 META.yml
+multicall.h
 mytypemap
 README
 SIGNATURE
@@ -54,4 +56,3 @@ t/sum.t
 t/tainted.t
 t/weak.t
 Util.xs
-multicall.h

@@ -1,0 +1,80 @@
+This file contains message digests of all files listed in MANIFEST,
+signed via the Module::Signature module, version 0.55.
+
+To verify the content in this distribution, first make sure you have
+Module::Signature installed, then type:
+
+    % cpansign -v
+
+It will check each file's integrity, as well as the signature's
+validity.  If "==> Signature verified OK! <==" is not displayed,
+the distribution may already have been compromised, and you should
+not run its Makefile.PL or Build.PL.
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+SHA1 378aff0cf4766c525fa043429bd36287df09f94f Changes
+SHA1 3bf4a8460de1701aec5d44f704600c6dc481df96 MANIFEST
+SHA1 735ddfb6b161c93f4d2cb270264cb74a382c53ed META.yml
+SHA1 810cfd3d98ba3f7a7707df62c070c215e4b98449 Makefile.PL
+SHA1 9ab2ca5f2af3bd41a763382158f2c6bc1ba36f41 README
+SHA1 93ee68a6c82ec9e503ceea1f6e70790291f044c4 Util.xs
+SHA1 9b2f9d83bcf77860f53a0c07c90a4a59ad9f5df1 inc/Module/Install.pm
+SHA1 abe32855d75ab13747cf65765af9947b7a8c3057 inc/Module/Install/Base.pm
+SHA1 95b81d1e91bd634467bf633571eff4420e9c04eb inc/Module/Install/Can.pm
+SHA1 1fe98c63cf9d7271c8cb4183ba230f152df69e26 inc/Module/Install/Fetch.pm
+SHA1 0606a8b02a420600bc3e2b65ab82f70266784926 inc/Module/Install/Include.pm
+SHA1 78b032d06077ea0b9dca5187bd53646e10e08c14 inc/Module/Install/InstallDirs.pm
+SHA1 2249171a2b72cd73ff2c0a06597d29f86e5df456 inc/Module/Install/Makefile.pm
+SHA1 381bb98ea3877bba49ae85e7a7ea130645fd3dbf inc/Module/Install/Metadata.pm
+SHA1 0c2118868ef82ac517eb6d9c3bd93e6eb9bbf83e inc/Module/Install/Win32.pm
+SHA1 f0ebc594cf8ba858ee9a840c344d9b7ea2c3c6f4 inc/Test/Builder.pm
+SHA1 a9037004a2c3096d77169a16da95743eeb813539 inc/Test/Builder/Module.pm
+SHA1 07c750f370de7a44ee7b0ed9ec30a7e89c24c9b9 inc/Test/More.pm
+SHA1 7ef77f6ff8d4fa18bb0d296f74f75937b6e121e7 lib/List/Util.pm
+SHA1 421e455f4452f4256adbd30848d7e486ac39da7d lib/Scalar/Util.pm
+SHA1 cfc8fde170fba2d23908aedeb75fc0bbbeab1087 multicall.h
+SHA1 0edd9a2a7285afe6549f12c4d71377e28f9845a3 mytypemap
+SHA1 2be0420a308bc1a5d06d9ee4b8ca25d8f55c682f t/00version.t
+SHA1 5add3404aad187e8e9f119c7c3defcb18886143b t/blessed.t
+SHA1 74d19e0c0bb55a913e6ceebc4d08a1711257d7d8 t/dualvar.t
+SHA1 55ab8be1b810f350afe8a4e12eb03d67def93f81 t/first.t
+SHA1 8c5cc4ac342118b5251e69060b9fef4027d28eb4 t/isvstring.t
+SHA1 ddc30d05c813fc7378215be07cd371eab26cc502 t/lln.t
+SHA1 ab5ca88237f132daa6a404adfbad8569b891a4bd t/max.t
+SHA1 9dc923c7b6dda504fb6e1cf78e7e2d315e69c3aa t/maxstr.t
+SHA1 ca59cf2da067129eb2c9bd391930aa0dbcc3162a t/min.t
+SHA1 f9e7198d610277d124d03f21008f290961c6d7bd t/minstr.t
+SHA1 c8f8f6f0650d187647af094956456a874ffd4f81 t/openhan.t
+SHA1 af131d820cd538c9a45d9ce971b2329d85301c39 t/p_blessed.t
+SHA1 7885d3f19d728f7330e451e72734543d0646635e t/p_first.t
+SHA1 af131d820cd538c9a45d9ce971b2329d85301c39 t/p_lln.t
+SHA1 af131d820cd538c9a45d9ce971b2329d85301c39 t/p_max.t
+SHA1 af131d820cd538c9a45d9ce971b2329d85301c39 t/p_maxstr.t
+SHA1 af131d820cd538c9a45d9ce971b2329d85301c39 t/p_min.t
+SHA1 af131d820cd538c9a45d9ce971b2329d85301c39 t/p_minstr.t
+SHA1 af131d820cd538c9a45d9ce971b2329d85301c39 t/p_openhan.t
+SHA1 af131d820cd538c9a45d9ce971b2329d85301c39 t/p_readonly.t
+SHA1 7885d3f19d728f7330e451e72734543d0646635e t/p_reduce.t
+SHA1 af131d820cd538c9a45d9ce971b2329d85301c39 t/p_refaddr.t
+SHA1 af131d820cd538c9a45d9ce971b2329d85301c39 t/p_reftype.t
+SHA1 af131d820cd538c9a45d9ce971b2329d85301c39 t/p_shuffle.t
+SHA1 af131d820cd538c9a45d9ce971b2329d85301c39 t/p_sum.t
+SHA1 a4752920a9d78fe79cb118aa306b6413376d8eec t/p_tainted.t
+SHA1 7809e3b5c0177599cbc1f22ea00760e0ef0c6b7b t/proto.t
+SHA1 4c8b290754eeeb20f31dc47e1147c6e7a94a6dac t/readonly.t
+SHA1 b9e2881cb997231841f5dd70d7af03f1a6ff8b7b t/reduce.t
+SHA1 06b59d5ab705d84a7fc3cd669081bb7a65e985c3 t/refaddr.t
+SHA1 e9cf5530ad1e260f84bcde6254d2c0f071ec5eca t/reftype.t
+SHA1 841e0a7d5d1d4ad5a4678cabd3af62043d050938 t/shuffle.t
+SHA1 2ad4f3171fd1036be444f6e7a8063133e8a1215c t/sum.t
+SHA1 0eea44585f74f033212ae82865366a7cff4b7dfd t/tainted.t
+SHA1 7295a341abaa9d622fcb61936baa459821d2a26b t/weak.t
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+
+iD8DBQFFfDBBR0BL4gbYw3QRAttPAKCBDUIje3E29MuTymUcvqe1GAOFigCeMUMH
+XubDYLHqtzwgMadWOIcW0UM=
+=eur6
+-----END PGP SIGNATURE-----
