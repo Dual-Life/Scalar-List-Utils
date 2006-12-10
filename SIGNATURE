@@ -34,7 +34,7 @@ SHA1 a9037004a2c3096d77169a16da95743eeb813539 inc/Test/Builder/Module.pm
 SHA1 07c750f370de7a44ee7b0ed9ec30a7e89c24c9b9 inc/Test/More.pm
 SHA1 7ef77f6ff8d4fa18bb0d296f74f75937b6e121e7 lib/List/Util.pm
 SHA1 421e455f4452f4256adbd30848d7e486ac39da7d lib/Scalar/Util.pm
-SHA1 cfc8fde170fba2d23908aedeb75fc0bbbeab1087 multicall.h
+SHA1 b0fa4782bf655d5d6356b200d3a0375d31b6ec15 multicall.h
 SHA1 0edd9a2a7285afe6549f12c4d71377e28f9845a3 mytypemap
 SHA1 2be0420a308bc1a5d06d9ee4b8ca25d8f55c682f t/00version.t
 SHA1 5add3404aad187e8e9f119c7c3defcb18886143b t/blessed.t
@@ -74,7 +74,7 @@ SHA1 7295a341abaa9d622fcb61936baa459821d2a26b t/weak.t
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.6 (GNU/Linux)
 
-iD8DBQFFfDBBR0BL4gbYw3QRAttPAKCBDUIje3E29MuTymUcvqe1GAOFigCeMUMH
-XubDYLHqtzwgMadWOIcW0UM=
-=eur6
+iD8DBQFFfDR1R0BL4gbYw3QRAoqJAKCTXbm+5lhIbpHvN0uausarUTXhRQCdHbLL
+Foh6dLWDo+/UiCF6fXEUmhY=
+=/ipH
 -----END PGP SIGNATURE-----
