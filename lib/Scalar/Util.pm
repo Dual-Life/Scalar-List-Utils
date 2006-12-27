@@ -7,7 +7,7 @@
 package Scalar::Util;
 
 use strict;
-use vars qw(@ISA @EXPORT_OK $VERSION);
+use vars qw(@ISA @EXPORT_OK $VERSION @EXPORT_FAIL);
 require Exporter;
 require List::Util; # List::Util loads the XS
 
@@ -17,17 +17,22 @@ $VERSION    = "1.19";
 $VERSION   = eval $VERSION;
 
 sub export_fail {
+  if (grep { /dualvar/ } @EXPORT_FAIL) { # no XS loaded
+    my $pat = join("|", @EXPORT_FAIL);
+    if (my ($err) = grep { /^($pat)$/ } @_ ) {
+      require Carp;
+      Carp::croak("$err is only avaliable with the XS version of Scalar::Util");
+    }
+  }
+
   if (grep { /^(weaken|isweak)$/ } @_ ) {
     require Carp;
     Carp::croak("Weak references are not implemented in the version of perl");
   }
+
   if (grep { /^(isvstring)$/ } @_ ) {
     require Carp;
     Carp::croak("Vstrings are not implemented in the version of perl");
-  }
-  if (grep { /^(dualvar|set_prototype)$/ } @_ ) {
-    require Carp;
-    Carp::croak("$1 is only avaliable with the XS version");
   }
 
   @_;
@@ -307,6 +312,30 @@ This will indeed remove all references to destroyed objects, but the remaining
 references to objects will be strong, causing the remaining objects to never
 be destroyed because there is now always a strong reference to them in the
 @object array.
+
+=back
+
+=head1 DIAGNOSTICS
+
+Module use may give one of the following errors during import.
+
+=over
+
+=item Weak references are not implemented in the version of perl
+
+The version of perl that you are using does not implement weak references, to use
+C<isweak> or C<weaken> you will need to use a newer release of perl.
+
+=item Vstrings are not implemented in the version of perl
+
+The version of perl that you are using does not implement Vstrings, to use
+C<isvstring> you will need to use a newer release of perl.
+
+=item C<NAME> is only avaliable with the XS version of Scalar::Util
+
+C<Scalar::Util> contains both perl and C implementations of many of its functions
+so that those without access to a C compiler may still use it. However some of the functions
+are only available when a C compiler was available to compile the XS version of the extension.
 
 =back
 
