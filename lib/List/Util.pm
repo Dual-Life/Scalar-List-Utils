@@ -212,6 +212,12 @@ element is returned and BLOCK is not executed.
     $foo = reduce { $a + $b } 1 .. 10               # sum
     $foo = reduce { $a . $b } @bar                  # concat
 
+If your algorithm requires that C<reduce> produce an identity value, then
+make sure that you always pass that identity value as the first argument to prevent
+C<undef> being returned
+
+  $foo = reduce { $a + $b } 0, @values;             # sum with 0 identity value
+
 =item shuffle LIST
 
 Returns the elements of LIST in a random order
@@ -230,6 +236,12 @@ C<undef> is returned.
 This function could be implemented using C<reduce> like this
 
     $foo = reduce { $a + $b } 1..10
+
+If your algorithm requires that C<sum> produce an identity of 0, then
+make sure that you always pass C<0> as the first argument to prevent
+C<undef> being returned
+
+  $foo = sum 0, @values;
 
 =back
 
