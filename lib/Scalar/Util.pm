@@ -1,6 +1,6 @@
 # Scalar::Util.pm
 #
-# Copyright (c) 1997-2006 Graham Barr <gbarr@pobox.com>. All rights reserved.
+# Copyright (c) 1997-2007 Graham Barr <gbarr@pobox.com>. All rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 
@@ -13,7 +13,7 @@ require List::Util; # List::Util loads the XS
 
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(blessed dualvar reftype weaken isweak tainted readonly openhandle refaddr isvstring looks_like_number set_prototype);
-$VERSION    = "1.19";
+$VERSION    = "1.20";
 $VERSION   = eval $VERSION;
 
 sub export_fail {
@@ -63,28 +63,28 @@ push @EXPORT_FAIL, qw(weaken isweak dualvar isvstring set_prototype);
 
 # The code beyond here is only used if the XS is not installed
 
-# Hope nobody defines a sub by this name
-sub UNIVERSAL::a_sub_not_likely_to_be_here { ref($_[0]) }
-
 sub blessed ($) {
   local($@, $SIG{__DIE__}, $SIG{__WARN__});
   length(ref($_[0]))
-    ? eval { $_[0]->a_sub_not_likely_to_be_here }
-    : undef
+    ? eval { $_[0]->UNIVERSAL::can('can') && ref($_[0]) }
+    : undef;
 }
 
 sub refaddr($) {
-  my $pkg = ref($_[0]) or return undef;
-  if (blessed($_[0])) {
-    bless $_[0], 'Scalar::Util::Fake';
+  return undef unless length(ref($_[0]));
+
+  my $addr;
+  if(defined(my $pkg = blessed($_[0]))) {
+    $addr .= bless $_[0], 'Scalar::Util::Fake';
+    bless $_[0], $pkg;
   }
   else {
-    $pkg = undef;
+    $addr .= $_[0]
   }
-  "$_[0]" =~ /0x(\w+)/;
-  my $i = do { local $^W; hex $1 };
-  bless $_[0], $pkg if defined $pkg;
-  $i;
+
+  $addr =~ /0x(\w+)/;
+  local $^W;
+  hex($1);
 }
 
 sub reftype ($) {
@@ -95,7 +95,7 @@ sub reftype ($) {
   length($t = ref($r)) or return undef;
 
   # This eval will fail if the reference is not blessed
-  eval { $r->a_sub_not_likely_to_be_here; 1 }
+  eval { $r->UNIVERSAL::can('can') }
     ? do {
       $t = eval {
 	  # we have a GLOB or an IO. Stringify a GLOB gives it's name
@@ -350,7 +350,7 @@ L<List::Util>
 
 =head1 COPYRIGHT
 
-Copyright (c) 1997-2006 Graham Barr <gbarr@pobox.com>. All rights reserved.
+Copyright (c) 1997-2007 Graham Barr <gbarr@pobox.com>. All rights reserved.
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 
