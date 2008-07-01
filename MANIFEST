@@ -1,4 +1,5 @@
 Changes
+inc/attributes.pm
 inc/Module/Install.pm
 inc/Module/Install/Base.pm
 inc/Module/Install/Can.pm
@@ -9,12 +10,14 @@ inc/Module/Install/Makefile.pm
 inc/Module/Install/Metadata.pm
 inc/Module/Install/Win32.pm
 inc/Test/Builder.pm
+inc/Test/Builder/Module.pm
 inc/Test/More.pm
 lib/List/Util.pm
 lib/Scalar/Util.pm
 Makefile.PL
 MANIFEST
 META.yml
+multicall.h
 mytypemap
 README
 SIGNATURE
@@ -29,6 +32,7 @@ t/maxstr.t
 t/min.t
 t/minstr.t
 t/openhan.t
+t/proto.t
 t/p_blessed.t
 t/p_first.t
 t/p_lln.t
@@ -44,7 +48,6 @@ t/p_reftype.t
 t/p_shuffle.t
 t/p_sum.t
 t/p_tainted.t
-t/proto.t
 t/readonly.t
 t/reduce.t
 t/refaddr.t
@@ -54,4 +57,3 @@ t/sum.t
 t/tainted.t
 t/weak.t
 Util.xs
-multicall.h
