@@ -252,6 +252,9 @@ CODE:
 	XSRETURN_UNDEF;
     }
     cv = sv_2cv(block, &stash, &gv, 0);
+    if (cv == Nullcv) {
+       croak("Not a subroutine reference");
+    }
     PUSH_MULTICALL(cv);
     agv = gv_fetchpv("a", TRUE, SVt_PV);
     bgv = gv_fetchpv("b", TRUE, SVt_PV);
