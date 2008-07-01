@@ -36,10 +36,14 @@ eval {
 # of for perl < 5.6.0
 
 if (!defined &reduce) {
-eval <<'ESQ' 
+eval <<'ESQ' or die $@;
 
 sub reduce (&@) {
   my $code = shift;
+  unless(ref($code)) {
+    require Carp;
+    Carp::croak("Not a subroutine reference");
+  }
   no strict 'refs';
 
   return shift unless @_ > 1;
@@ -68,6 +72,8 @@ sub first (&@) {
 
   undef;
 }
+
+1;
 
 ESQ
 }
