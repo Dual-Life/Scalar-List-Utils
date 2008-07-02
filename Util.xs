@@ -147,18 +147,38 @@ CODE:
     int index;
     NV retval;
     SV *retsv;
+    int magic;
     if(!items) {
 	XSRETURN_UNDEF;
     }
     retsv = ST(0);
-    retval = slu_sv_value(retsv);
+    magic = SvAMAGIC(retsv);
+    if (!magic) {
+      retval = slu_sv_value(retsv);
+    }
     for(index = 1 ; index < items ; index++) {
 	SV *stacksv = ST(index);
-	NV val = slu_sv_value(stacksv);
-	if(val < retval ? !ix : ix) {
-	    retsv = stacksv;
-	    retval = val;
-	}
+        SV *tmpsv;
+        if ((magic || SvAMAGIC(stacksv)) && (tmpsv = amagic_call(retsv, stacksv, gt_amg, 0))) {
+             if (SvTRUE(tmpsv) ? !ix : ix) {
+                  retsv = stacksv;
+                  magic = SvAMAGIC(retsv);
+                  if (!magic) {
+                      retval = slu_sv_value(retsv);
+                  }
+             }
+        }
+        else {
+            NV val = slu_sv_value(stacksv);
+            if (magic) {
+                retval = slu_sv_value(retsv);
+                magic = 0;
+            }
+            if(val < retval ? !ix : ix) {
+                retsv = stacksv;
+                retval = val;
+            }
+        }
     }
     ST(0) = retsv;
     XSRETURN(1);
