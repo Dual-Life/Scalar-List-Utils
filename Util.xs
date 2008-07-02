@@ -186,25 +186,49 @@ CODE:
 
 
 
-NV
+void
 sum(...)
 PROTOTYPE: @
 CODE:
 {
     SV *sv;
+    SV *retsv = NULL;
     int index;
+    int magic;
+    NV retval = 0;
     if(!items) {
 	XSRETURN_UNDEF;
     }
     sv = ST(0);
-    RETVAL = slu_sv_value(sv);
+    if (SvAMAGIC(sv)) {
+        retsv = sv_newmortal();
+        sv_setsv(retsv, sv);
+    }
+    else {
+        retval = slu_sv_value(sv);
+    }
     for(index = 1 ; index < items ; index++) {
 	sv = ST(index);
-	RETVAL += slu_sv_value(sv);
+        if (retsv || SvAMAGIC(sv)) {
+            if (!retsv) {
+                retsv = sv_newmortal();
+                sv_setnv(retsv,retval);
+            }
+            if (!amagic_call(retsv, sv, add_amg, AMGf_assign)) {
+                sv_setnv(retsv, SvNV(retsv) + SvNV(sv));
+            }
+        }
+        else {
+          retval += slu_sv_value(sv);
+        }
     }
+    if (!retsv) {
+        retsv = sv_newmortal();
+        sv_setnv(retsv,retval);
+    }
+    ST(0) = retsv;
+    XSRETURN(1);
 }
-OUTPUT:
-    RETVAL
 
 
 void
