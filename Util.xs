@@ -532,6 +532,13 @@ looks_like_number(sv)
 	SV *sv
 PROTOTYPE: $
 CODE:
+  SV *tempsv;
+  if (SvAMAGIC(sv) && (tempsv = AMG_CALLun(sv, numer))) {
+    sv = tempsv;
+  }
+  else if (SvMAGICAL(sv)) {
+      SvGETMAGIC(sv);
+  }
 #if (PERL_VERSION < 8) || (PERL_VERSION == 8 && PERL_SUBVERSION <5)
   if (SvPOK(sv) || SvPOKp(sv)) {
     RETVAL = looks_like_number(sv);
