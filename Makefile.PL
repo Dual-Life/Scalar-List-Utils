@@ -16,7 +16,7 @@ abstract	('Common Scalar and List utility subroutines');
 author		('Graham Barr <gbarr@cpan.org>');
 version_from	('lib/List/Util.pm');
 license		('perl');
-repository      ('git://git.goingon.net/Scalar-List-Utils.git');
+repository      ('http://git.goingon.net/?p=Scalar-List-Utils.git;a=summary');
 
 makemaker_args	( XS => {}, C => []) unless $do_xs;
 makemaker_args	( DEFINE      => "-DPERL_EXT",);

@@ -19,5 +19,5 @@ no_index:
 requires:
   perl: 5.005
 resources:
-  repository: git://git.goingon.net/Scalar-List-Utils.git
+  repository: http://git.goingon.net/?p=Scalar-List-Utils.git;a=summary
 version: 1.20
