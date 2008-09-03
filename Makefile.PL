@@ -20,9 +20,9 @@ repository      ('git://git.goingon.net/Scalar-List-Utils.git');
 
 makemaker_args	( XS => {}, C => []) unless $do_xs;
 makemaker_args	( DEFINE      => "-DPERL_EXT",);
+makemaker_args	( PL_FILES => { 'xs_version.PL' => '__FORCE__' });
 
 installdirs	('perl');
-
 
 check_nmake();      # check and download nmake.exe for Win32
 

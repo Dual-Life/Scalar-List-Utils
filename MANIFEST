@@ -1,3 +1,4 @@
+.gitignore
 Changes
 inc/attributes.pm
 inc/Module/Install.pm
@@ -13,6 +14,7 @@ inc/Test/Builder.pm
 inc/Test/Builder/Module.pm
 inc/Test/More.pm
 lib/List/Util.pm
+lib/List/Util/XS.pm
 lib/Scalar/Util.pm
 Makefile.PL
 MANIFEST
@@ -32,7 +34,6 @@ t/maxstr.t
 t/min.t
 t/minstr.t
 t/openhan.t
-t/proto.t
 t/p_blessed.t
 t/p_first.t
 t/p_lln.t
@@ -48,6 +49,7 @@ t/p_reftype.t
 t/p_shuffle.t
 t/p_sum.t
 t/p_tainted.t
+t/proto.t
 t/readonly.t
 t/reduce.t
 t/refaddr.t
@@ -57,3 +59,4 @@ t/sum.t
 t/tainted.t
 t/weak.t
 Util.xs
+xs_version.PL
