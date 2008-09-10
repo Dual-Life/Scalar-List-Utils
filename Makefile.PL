@@ -9,7 +9,7 @@ for (@ARGV) {
   /^-xs/ and $do_xs = 1;
 }
 
-perl_version    5.005;
+perl_version    5.006001;
 name		('Scalar-List-Utils');
 module_name	('List::Util');
 abstract	('Common Scalar and List utility subroutines');
