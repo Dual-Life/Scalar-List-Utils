@@ -58,13 +58,15 @@ sub openhandle ($) {
 
 eval <<'ESQ' unless defined &dualvar;
 
-use vars qw(@EXPORT_FAIL);
+use vars qw(@EXPORT_FAIL $recurse);
 push @EXPORT_FAIL, qw(weaken isweak dualvar isvstring set_prototype);
 
 # The code beyond here is only used if the XS is not installed
 
 sub blessed ($) {
   local($@, $SIG{__DIE__}, $SIG{__WARN__});
+  return ref($_[0]) if $recurse;
+  local $recurse = 1; # protect against recursion if user has used UNIVERSAL::can from CPAN
   length(ref($_[0]))
     ? eval { $_[0]->UNIVERSAL::can('can') && ref($_[0]) }
     : undef;
