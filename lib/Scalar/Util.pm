@@ -344,6 +344,8 @@ C<Scalar::Util> contains both perl and C implementations of many of its function
 so that those without access to a C compiler may still use it. However some of the functions
 are only available when a C compiler was available to compile the XS version of the extension.
 
+At present that list is: weaken, isweak, dualvar, isvstring, set_prototype
+
 =back
 
 =head1 KNOWN BUGS
