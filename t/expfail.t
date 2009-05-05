@@ -26,5 +26,4 @@ for my $func (qw(dualvar set_prototype weaken)) {
  	    qr/$func is only available with the XS/,
  	    "no pure perl $func: error raised",
 	);
-	diag $@;
 }
