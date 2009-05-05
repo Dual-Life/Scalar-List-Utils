@@ -164,6 +164,7 @@ Scalar::Util - A selection of general-utility scalar subroutines
 
     use Scalar::Util qw(blessed dualvar isweak readonly refaddr reftype tainted
                         weaken isvstring looks_like_number set_prototype);
+                        # and other useful utils appearing below
 
 =head1 DESCRIPTION
 
