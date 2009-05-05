@@ -17,7 +17,6 @@ lib/List/Util/XS.pm
 lib/Scalar/Util.pm
 Makefile.PL
 MANIFEST
-META.yml
 multicall.h
 mytypemap
 README

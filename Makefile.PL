@@ -1,5 +1,5 @@
 # -*- perl -*-
-
+BEGIN { require 5.006; } # allow CPAN testers to get the point
 use inc::Module::Install;
 
 my $do_xs = can_cc();
