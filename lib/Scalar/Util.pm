@@ -21,7 +21,7 @@ sub export_fail {
     my $pat = join("|", @EXPORT_FAIL);
     if (my ($err) = grep { /^($pat)$/ } @_ ) {
       require Carp;
-      Carp::croak("$err is only avaliable with the XS version of Scalar::Util");
+      Carp::croak("$err is only available with the XS version of Scalar::Util");
     }
   }
 
@@ -338,7 +338,7 @@ C<isweak> or C<weaken> you will need to use a newer release of perl.
 The version of perl that you are using does not implement Vstrings, to use
 C<isvstring> you will need to use a newer release of perl.
 
-=item C<NAME> is only avaliable with the XS version of Scalar::Util
+=item C<NAME> is only available with the XS version of Scalar::Util
 
 C<Scalar::Util> contains both perl and C implementations of many of its functions
 so that those without access to a C compiler may still use it. However some of the functions
