@@ -1,6 +1,10 @@
 # -*- perl -*-
-BEGIN { require 5.006; } # allow CPAN testers to get the point
-use inc::Module::Install;
+BEGIN { require 5.006_01; } # allow CPAN testers to get the point
+use strict;
+use warnings;
+use Config;
+use File::Spec;
+use ExtUtils::MakeMaker;
 
 my $do_xs = can_cc();
 
@@ -9,27 +13,47 @@ for (@ARGV) {
   /^-xs/ and $do_xs = 1;
 }
 
-perl_version    5.006001;
-name		('Scalar-List-Utils');
-module_name	('List::Util');
-abstract	('Common Scalar and List utility subroutines');
-author		('Graham Barr <gbarr@cpan.org>');
-version_from	('lib/List/Util.pm');
-license		('perl');
-repository      ('http://git.goingon.net/?p=Scalar-List-Utils.git;a=summary');
+WriteMakefile(
+    ABSTRACT     => q[Common Scalar and List utility subroutines],
+    AUTHOR       => q[Graham Barr <gbarr@cpan.org>],
+    DEFINE       => q[-DPERL_EXT],
+    DISTNAME     => q[Scalar-List-Utils],
+    INSTALLDIRS  => q[perl],
+    NAME         => q[List::Util],
+#    PL_FILES     => { 'xs_version.PL' => q[__FORCE__]},
+    PREREQ_PM    => {
+      'Test::More' => 0,
+    },
+    VERSION_FROM => 'lib/List/Util.pm',
+    (eval { ExtUtils::MakeMaker->VERSION(6.21) } ? (LICENSE => 'perl') : ()),
+    ($do_xs ? () : (XS => {}, C => [])),
+    (   eval { ExtUtils::MakeMaker->VERSION(6.46) } ? (
+            META_MERGE => {
+                resources => {    ##
+                    repository => 'http://github.com/gbarr/Scalar-List-Utils',
+                },
+            }
+          )
+        : ()
+    ),
+);
 
-makemaker_args	( XS => {}, C => []) unless $do_xs;
-makemaker_args	( DEFINE      => "-DPERL_EXT",);
-makemaker_args	( PL_FILES => { 'xs_version.PL' => '__FORCE__' });
 
-installdirs	('perl');
+sub can_cc {
 
-check_nmake();      # check and download nmake.exe for Win32
+    foreach my $cmd (split(/ /, $Config::Config{cc})) {
+        my $_cmd = $cmd;
+        return $_cmd if (-x $_cmd or $_cmd = MM->maybe_command($_cmd));
 
-include_deps('Test::More');
+        for my $dir ((split /$Config::Config{path_sep}/, $ENV{PATH}), '.') {
+            my $abs = File::Spec->catfile($dir, $_[1]);
+            return $abs if (-x $abs or $abs = MM->maybe_command($abs));
+        }
+    }
 
-&Makefile->write;
-&Meta->write;
+    return;
+}
+
 
 ## - - - - - - - -
 
