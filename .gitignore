@@ -4,3 +4,5 @@ pm_to_blib
 Util.o
 Util.bs
 Util.c
+*.bak
+Scalar-List-Utils*
