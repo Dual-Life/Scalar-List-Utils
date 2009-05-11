@@ -16,7 +16,7 @@ BEGIN {
 use Test::More tests => 3;
 use strict;
 
-$List::Util::TESTING_PERL_ONLY = 1;
+$List::Util::TESTING_PERL_ONLY = $List::Util::TESTING_PERL_ONLY = 1;
 require Scalar::Util;
 
 for my $func (qw(dualvar set_prototype weaken)) {
