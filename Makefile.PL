@@ -1,5 +1,5 @@
 # -*- perl -*-
-BEGIN { require 5.006_01; } # allow CPAN testers to get the point
+BEGIN { require 5.008; } # allow CPAN testers to get the point
 use strict;
 use warnings;
 use Config;
@@ -20,7 +20,6 @@ WriteMakefile(
     DISTNAME     => q[Scalar-List-Utils],
     INSTALLDIRS  => q[perl],
     NAME         => q[List::Util],
-#    PL_FILES     => { 'xs_version.PL' => q[__FORCE__]},
     PREREQ_PM    => {
       'Test::More' => 0,
     },
@@ -53,24 +52,3 @@ sub can_cc {
 
     return;
 }
-
-
-## - - - - - - - -
-
-sub MY::post_constants {
-  return '' if $] >= 5.006_01;
-
-  return <<'POST_CONST' if $^O eq 'MSWin32';
-
-XSUBPPARGS = $(XSUBPPARGS) -typemap mytypemap
-
-POST_CONST
-
-  return <<'POST_CONST';
-
-XSUBPPARGS +=  -typemap mytypemap
-
-POST_CONST
-
-}
-

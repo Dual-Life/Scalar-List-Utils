@@ -5,7 +5,6 @@ lib/Scalar/Util.pm
 Makefile.PL
 MANIFEST
 multicall.h
-mytypemap
 README
 t/00version.t
 t/blessed.t
