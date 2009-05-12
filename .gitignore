@@ -1,8 +1,10 @@
 Makefile
+Makefile.old
 blib
 pm_to_blib
-Util.o
+ListUtil.o
 Util.bs
-Util.c
+ListUtil.c
 *.bak
+.*.swp
 Scalar-List-Utils*

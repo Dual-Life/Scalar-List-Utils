@@ -42,5 +42,5 @@ t/shuffle.t
 t/sum.t
 t/tainted.t
 t/weak.t
-Util.xs
+ListUtil.xs
 xs_version.PL
