@@ -16,6 +16,13 @@ require List::Util; # List::Util loads the XS
 $VERSION    = "1.20";
 $VERSION   = eval $VERSION;
 
+unless (defined &dualvar) {
+  # Load Pure Perl version if XS not loaded
+  require Scalar::Util::PP;
+  Scalar::Util::PP->import;
+  push @EXPORT_FAIL, qw(weaken isweak dualvar isvstring set_prototype);
+}
+
 sub export_fail {
   if (grep { /dualvar/ } @EXPORT_FAIL) { # no XS loaded
     my $pat = join("|", @EXPORT_FAIL);
@@ -55,102 +62,6 @@ sub openhandle ($) {
   (tied(*$fh) or defined(fileno($fh)))
     ? $fh : undef;
 }
-
-eval <<'ESQ' unless defined &dualvar;
-
-use vars qw(@EXPORT_FAIL $recurse);
-push @EXPORT_FAIL, qw(weaken isweak dualvar isvstring set_prototype);
-
-# The code beyond here is only used if the XS is not installed
-
-sub blessed ($) {
-  local($@, $SIG{__DIE__}, $SIG{__WARN__});
-  return ref($_[0]) if $recurse;
-  local $recurse = 1; # protect against recursion if user has used UNIVERSAL::can from CPAN
-  length(ref($_[0]))
-    ? eval { $_[0]->UNIVERSAL::can('can') && ref($_[0]) }
-    : undef;
-}
-
-sub refaddr($) {
-  return undef unless length(ref($_[0]));
-
-  my $addr;
-  if(defined(my $pkg = blessed($_[0]))) {
-    $addr .= bless $_[0], 'Scalar::Util::Fake';
-    bless $_[0], $pkg;
-  }
-  else {
-    $addr .= $_[0]
-  }
-
-  $addr =~ /0x(\w+)/;
-  local $^W;
-  hex($1);
-}
-
-sub reftype ($) {
-  local($@, $SIG{__DIE__}, $SIG{__WARN__});
-  my $r = shift;
-  my $t;
-
-  length($t = ref($r)) or return undef;
-
-  # This eval will fail if the reference is not blessed
-  eval { $r->UNIVERSAL::can('can') }
-    ? do {
-      $t = eval {
-	  # we have a GLOB or an IO. Stringify a GLOB gives it's name
-	  my $q = *$r;
-	  (defined($q) && $q =~ /^\*/) ? "GLOB" : "IO";
-	}
-	or do {
-	  # OK, if we don't have a GLOB what parts of
-	  # a glob will it populate.
-	  # NOTE: A glob always has a SCALAR
-	  local *glob = $r;
-	  defined *glob{ARRAY} && "ARRAY"
-	  or defined *glob{HASH} && "HASH"
-	  or defined *glob{CODE} && "CODE"
-	  or length(ref(${$r})) ? "REF" : "SCALAR";
-	}
-    }
-    : $t
-}
-
-sub tainted {
-  local($@, $SIG{__DIE__}, $SIG{__WARN__});
-  local $^W = 0;
-  eval { kill 0 * $_[0] };
-  $@ =~ /^Insecure/;
-}
-
-sub readonly {
-  return 0 if tied($_[0]) || (ref(\($_[0])) ne "SCALAR");
-
-  local($@, $SIG{__DIE__}, $SIG{__WARN__});
-  my $tmp = $_[0];
-
-  !eval { $_[0] = $tmp; 1 };
-}
-
-sub looks_like_number {
-  local $_ = shift;
-
-  # checks from perlfaq4
-  return 0 if !defined($_);
-  if (ref($_)) {
-    require overload;
-    return overload::Overloaded($_) ? defined(0 + $_) : 0;
-  }
-  return 1 if (/^[+-]?\d+$/); # is a +/- integer
-  return 1 if (/^([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?$/); # a C float
-  return 1 if ($] >= 5.008 and /^(Inf(inity)?|NaN)$/i) or ($] >= 5.006001 and /^Inf$/i);
-
-  0;
-}
-
-ESQ
 
 1;
 

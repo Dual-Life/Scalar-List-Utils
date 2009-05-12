@@ -1,7 +1,10 @@
 Changes
 lib/List/Util.pm
+lib/List/Util/PP.pm
 lib/List/Util/XS.pm
 lib/Scalar/Util.pm
+lib/Scalar/Util/PP.pm
+ListUtil.xs
 Makefile.PL
 MANIFEST
 multicall.h
@@ -18,6 +21,7 @@ t/maxstr.t
 t/min.t
 t/minstr.t
 t/openhan.t
+t/p_00version.t
 t/p_blessed.t
 t/p_first.t
 t/p_lln.t
@@ -42,5 +46,4 @@ t/shuffle.t
 t/sum.t
 t/tainted.t
 t/weak.t
-ListUtil.xs
 xs_version.PL

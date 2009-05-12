@@ -1,8 +1,10 @@
 # List::Util.pm
 #
-# Copyright (c) 1997-2007 Graham Barr <gbarr@pobox.com>. All rights reserved.
+# Copyright (c) 1997-2009 Graham Barr <gbarr@pobox.com>. All rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
+#
+# This module is normally only loaded if the XS module is not available
 
 package List::Util;
 
@@ -32,78 +34,10 @@ eval {
 } unless $TESTING_PERL_ONLY;
 
 
-# This code is only compiled if the XS did not load
-# of for perl < 5.6.0
-
-if (!defined &reduce) {
-eval <<'ESQ' or die $@;
-
-sub reduce (&@) {
-  my $code = shift;
-  unless(ref($code)) {
-    require Carp;
-    Carp::croak("Not a subroutine reference");
-  }
-  no strict 'refs';
-
-  return shift unless @_ > 1;
-
-  use vars qw($a $b);
-
-  my $caller = caller;
-  local(*{$caller."::a"}) = \my $a;
-  local(*{$caller."::b"}) = \my $b;
-
-  $a = shift;
-  foreach (@_) {
-    $b = $_;
-    $a = &{$code}();
-  }
-
-  $a;
+if (!defined &sum) {
+  require List::Util::PP;
+  List::Util::PP->import;
 }
-
-sub first (&@) {
-  my $code = shift;
-
-  foreach (@_) {
-    return $_ if &{$code}();
-  }
-
-  undef;
-}
-
-1;
-
-ESQ
-}
-
-# This code is only compiled if the XS did not load
-eval <<'ESQ' if !defined &sum;
-
-use vars qw($a $b);
-
-sub sum (@) { reduce { $a + $b } @_ }
-
-sub min (@) { reduce { $a < $b ? $a : $b } @_ }
-
-sub max (@) { reduce { $a > $b ? $a : $b } @_ }
-
-sub minstr (@) { reduce { $a lt $b ? $a : $b } @_ }
-
-sub maxstr (@) { reduce { $a gt $b ? $a : $b } @_ }
-
-sub shuffle (@) {
-  my @a=\(@_);
-  my $n;
-  my $i=@_;
-  map {
-    $n = rand($i--);
-    (${$a[$n]}, $a[$n] = $a[$i])[0];
-  } @_;
-}
-
-ESQ
 
 1;
 
