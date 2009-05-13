@@ -71,7 +71,9 @@ ok(openhandle(*DATA{IO}), "works for *DATA{IO}");
     ok(!openhandle(IO::File->new), "unopened IO::File" );
 }
 
-{
+SKIP: {
+    skip( "Tied handles only on 5.8 or later", 1) if $]<5.008;
+
     use vars qw(*H);
 
     package My::Tie;

@@ -58,11 +58,12 @@ use overload
   }
 }
 
-use bignum;
+SKIP: {
+  eval { require bignum; } or skip("Need bignum for testing overloading",1);
 
-my $v1 = 2**65;
-my $v2 = $v1 - 1;
-my $v3 = $v2 - 1;
-$v = max($v1,$v2,$v1,$v3,$v1);
-is($v, $v1, 'bigint');
-
+  my $v1 = 2**65;
+  my $v2 = $v1 - 1;
+  my $v3 = $v2 - 1;
+  $v = max($v1,$v2,$v1,$v3,$v1);
+  is($v, $v1, 'bigint');
+}

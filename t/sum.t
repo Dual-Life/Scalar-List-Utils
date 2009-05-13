@@ -58,10 +58,12 @@ use overload
   }
 }
 
-use bignum;
+SKIP: {
+  eval { require bignum; } or skip("Need bignum for testing overloading",1);
 
-my $v1 = 2**65;
-my $v2 = 2**65;
-my $v3 = $v1 + $v2;
-$v = sum($v1,$v2);
-is($v, $v3, 'bignum');
+  my $v1 = 2**65;
+  my $v2 = 2**65;
+  my $v3 = $v1 + $v2;
+  $v = sum($v1,$v2);
+  is($v, $v3, 'bignum');
+}
