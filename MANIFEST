@@ -43,6 +43,7 @@ t/reduce.t
 t/refaddr.t
 t/reftype.t
 t/shuffle.t
+t/stack-corruption.t
 t/sum.t
 t/tainted.t
 t/weak.t
