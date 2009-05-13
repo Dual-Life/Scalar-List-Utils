@@ -37,7 +37,7 @@ WriteMakefile(
     : (
       INSTALLDIRS => q[perl],
       PREREQ_PM   => {'Test::More' => 0,},
-      (eval { ExtUtils::MakeMaker->VERSION(6.21) } ? (LICENSE => 'perl') : ()),
+      (eval { ExtUtils::MakeMaker->VERSION(6.31) } ? (LICENSE => 'perl') : ()),
       ($do_xs ? () : (XS => {}, C => [])),
       ( eval { ExtUtils::MakeMaker->VERSION(6.46) } ? (
           META_MERGE => {
