@@ -47,4 +47,4 @@ t/stack-corruption.t
 t/sum.t
 t/tainted.t
 t/weak.t
-xs_version.PL
+XS.pp

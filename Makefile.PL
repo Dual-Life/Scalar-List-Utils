@@ -38,7 +38,7 @@ WriteMakefile(
       INSTALLDIRS => q[perl],
       PREREQ_PM   => {'Test::More' => 0,},
       (eval { ExtUtils::MakeMaker->VERSION(6.31) } ? (LICENSE => 'perl') : ()),
-      ($do_xs ? () : (XS => {}, C => [])),
+      ($do_xs ? () : (XS => {}, C => [], OBJECT => '')),
       ( eval { ExtUtils::MakeMaker->VERSION(6.46) } ? (
           META_MERGE => {
             resources => {    ##
@@ -67,3 +67,20 @@ sub can_cc {
 
     return;
 }
+
+package MY;
+
+sub init_PM  {
+  my $self = shift;
+
+  $self->SUPER::init_PM(@_);
+
+  return if $do_xs;
+
+  my $pm = $self->{PM};
+  my $pm_file = File::Spec->catfile(qw(lib List Util XS.pm));
+
+  # When installing pure perl, install XS.pp as XS.pm
+  $self->{PM}{'XS.pp'} = delete $self->{PM}{$pm_file};
+}
+
