@@ -15,7 +15,7 @@ BEGIN {
 }
 
 use Scalar::Util ();
-use Test::More  (grep { /weaken/ } @Scalar::Util::EXPORT_FAIL)
+use Test::More  ((grep { /weaken/ } @Scalar::Util::EXPORT_FAIL) and !$ENV{PERL_CORE})
 			? (skip_all => 'weaken requires XS version')
 			: (tests => 22);
 
