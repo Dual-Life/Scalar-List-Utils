@@ -16,7 +16,7 @@ use B qw(svref_2object);
 
 @ISA     = qw(Exporter);
 @EXPORT  = qw(blessed reftype tainted readonly refaddr looks_like_number);
-$VERSION = "1.20";
+$VERSION = "1.21";
 $VERSION = eval $VERSION;
 
 sub blessed ($) {
