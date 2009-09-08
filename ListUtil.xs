@@ -194,7 +194,6 @@ CODE:
     SV *sv;
     SV *retsv = NULL;
     int index;
-    int magic;
     NV retval = 0;
     if(!items) {
 	XSRETURN_UNDEF;
