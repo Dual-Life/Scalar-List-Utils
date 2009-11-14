@@ -6,7 +6,7 @@ lib/Scalar/Util.pm
 lib/Scalar/Util/PP.pm
 ListUtil.xs
 Makefile.PL
-MANIFEST
+MANIFEST			This list of files
 multicall.h
 README
 t/00version.t
