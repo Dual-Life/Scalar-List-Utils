@@ -126,10 +126,6 @@ sv_tainted(pTHX_ SV *sv)
 #define dNOOP extern int Perl___notused PERL_UNUSED_DECL
 #endif
 
-#ifndef dVAR
-#define dVAR dNOOP
-#endif
-
 #ifndef GvSVn
 #  define GvSVn GvSV
 #endif
@@ -282,7 +278,7 @@ reduce(block,...)
 PROTOTYPE: &@
 CODE:
 {
-    dVAR; dMULTICALL;
+    dMULTICALL;
     SV *ret = sv_newmortal();
     int index;
     GV *agv,*bgv,*gv;
@@ -321,7 +317,7 @@ first(block,...)
 PROTOTYPE: &@
 CODE:
 {
-    dVAR; dMULTICALL;
+    dMULTICALL;
     int index;
     GV *gv;
     HV *stash;
@@ -359,7 +355,6 @@ shuffle(...)
 PROTOTYPE: @
 CODE:
 {
-    dVAR;
     int index;
 #if (PERL_VERSION < 9)
     struct op dmy_op;
