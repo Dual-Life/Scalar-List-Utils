@@ -438,7 +438,7 @@ CODE:
 {
     if (SvMAGICAL(sv))
 	mg_get(sv);
-    if(!sv_isobject(sv)) {
+    if(!(SvROK(sv) && SvOBJECT(SvRV(sv)))) {
 	XSRETURN_UNDEF;
     }
     RETVAL = (char*)sv_reftype(SvRV(sv),TRUE);
