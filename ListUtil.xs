@@ -2,7 +2,7 @@
  * This program is free software; you can redistribute it and/or
  * modify it under the same terms as Perl itself.
  */
-
+#define PERL_NO_GET_CONTEXT /* we want efficiency */
 #include <EXTERN.h>
 #include <perl.h>
 #include <XSUB.h>
@@ -66,7 +66,7 @@ my_cxinc(pTHX)
 #  ifndef SvTAINTED
 
 static bool
-sv_tainted(SV *sv)
+sv_tainted(pTHX_ SV *sv)
 {
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
 	MAGIC *mg = mg_find(sv, 't');
@@ -77,7 +77,7 @@ sv_tainted(SV *sv)
 }
 
 #    define SvTAINTED_on(sv) sv_magic((sv), Nullsv, 't', Nullch, 0)
-#    define SvTAINTED(sv) (SvMAGICAL(sv) && sv_tainted(sv))
+#    define SvTAINTED(sv) (SvMAGICAL(sv) && sv_tainted(aTHX_ sv))
 #  endif
 #  define PL_defgv defgv
 #  define PL_op op
