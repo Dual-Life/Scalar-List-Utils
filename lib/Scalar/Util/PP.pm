@@ -47,15 +47,13 @@ sub refaddr($) {
 
 {
   my %tmap = qw(
-    B::HV HASH
-    B::AV ARRAY
-    B::CV CODE
-    B::IO IO
-    B::NULL SCALAR
-    B::NV SCALAR
-    B::PV SCALAR
-    B::GV GLOB
-    B::RV REF
+    B::NULL   SCALAR
+
+    B::HV     HASH
+    B::AV     ARRAY
+    B::CV     CODE
+    B::IO     IO
+    B::GV     GLOB
     B::REGEXP REGEXP
   );
 
