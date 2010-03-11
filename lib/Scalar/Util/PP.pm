@@ -41,6 +41,7 @@ sub refaddr($) {
 
   $addr =~ /0x(\w+)/;
   local $^W;
+  no warnings 'portable';
   hex($1);
 }
 
