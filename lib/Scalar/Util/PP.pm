@@ -15,7 +15,7 @@ require Exporter;
 use B qw(svref_2object);
 
 @ISA     = qw(Exporter);
-@EXPORT  = qw(blessed reftype tainted readonly refaddr looks_like_number);
+@EXPORT  = qw(blessed reftype tainted readonly refaddr looks_like_number openhandle);
 $VERSION = "1.23";
 $VERSION = eval $VERSION;
 
@@ -102,6 +102,24 @@ sub looks_like_number {
   return 1 if ($] >= 5.008 and /^(Inf(inity)?|NaN)$/i) or ($] >= 5.006001 and /^Inf$/i);
 
   0;
+}
+
+sub openhandle ($) {
+  my $fh = shift;
+  my $rt = reftype($fh) || '';
+
+  return defined(fileno($fh)) ? $fh : undef
+    if $rt eq 'IO';
+
+  if (reftype(\$fh) eq 'GLOB') { # handle  openhandle(*DATA)
+    $fh = \(my $tmp=$fh);
+  }
+  elsif ($rt ne 'GLOB') {
+    return undef;
+  }
+
+  (tied(*$fh) or defined(fileno($fh)))
+    ? $fh : undef;
 }
 
 

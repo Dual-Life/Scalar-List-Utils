@@ -45,24 +45,6 @@ sub export_fail {
   @_;
 }
 
-sub openhandle ($) {
-  my $fh = shift;
-  my $rt = reftype($fh) || '';
-
-  return defined(fileno($fh)) ? $fh : undef
-    if $rt eq 'IO';
-
-  if (reftype(\$fh) eq 'GLOB') { # handle  openhandle(*DATA)
-    $fh = \(my $tmp=$fh);
-  }
-  elsif ($rt ne 'GLOB') {
-    return undef;
-  }
-
-  (tied(*$fh) or defined(fileno($fh)))
-    ? $fh : undef;
-}
-
 1;
 
 __END__

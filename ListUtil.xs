@@ -581,6 +581,35 @@ CODE:
     XSRETURN(1);
 }
 
+void
+openhandle(SV* sv)
+PROTOTYPE: $
+CODE:
+{
+    IO* io = NULL;
+    SvGETMAGIC(sv);
+    if(SvROK(sv)){
+        /* deref first */
+        sv = SvRV(sv);
+    }
+
+    /* must be GLOB or IO */
+    if(isGV(sv)){
+        io = GvIO((GV*)sv);
+    }
+    else if(SvTYPE(sv) == SVt_PVIO){
+        io = (IO*)sv;
+    }
+
+    if(io){
+        /* real or tied filehandle? */
+        if(IoIFP(io) || SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)){
+            XSRETURN(1);
+        }
+    }
+    XSRETURN_UNDEF;
+}
+
 BOOT:
 {
     HV *lu_stash = gv_stashpvn("List::Util", 10, TRUE);
