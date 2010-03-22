@@ -12,7 +12,7 @@ require Exporter;
 
 our @ISA     = qw(Exporter);
 our @EXPORT  = qw(first min max minstr maxstr reduce sum shuffle);
-our $VERSION = "1.23";
+our $VERSION = "1.23_01";
 $VERSION = eval $VERSION;
 
 sub reduce (&@) {

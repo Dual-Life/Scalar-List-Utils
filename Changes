@@ -1,3 +1,16 @@
+1.23_01 -- Mon Mar 22 08:24:11 CDT 2010
+
+  * Add failing tests; SVt_RV is not directly SvROK [gfx]
+  * Implement openhandle() in XS (with extra tests) [gfx]
+  * Modernize *.pm [gfx]
+  * Modernize ListUtil.xs [gfx]
+  * Add ppport.h [gfx]
+  * Fix an overloading issue on sum(), and add tests for overloading [gfx]
+  * Small tweaks for minstr()/maxstr() [gfx]
+  * Optimize dualvar() [gfx]
+  * Use sv_copypv() instead of SvPV() and sv_setpv() [gfx]
+  * avoid non-portable warnings
+
 1.23 -- Wed Mar 10 20:50:00 CST 2010
 
   * Add a test file to ensure 'GETMAGIC' called once [gfx]
