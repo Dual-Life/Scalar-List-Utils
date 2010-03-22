@@ -43,10 +43,10 @@ SKIP: {
 }
 
 SKIP: {
-    skip "in-memory files only on 5.8 or later", 1 if $]<5.008;
+    skip "in-memory files only on 5.8 or later", 2 if $]<5.008;
 
     open my $fh, "<", \"in-memory file";
-    skip "could not open in-memory file: $!", 1 unless $fh;
+    skip "could not open in-memory file: $!", 2 unless $fh;
     is(openhandle($fh), $fh, "works with in-memory files");
     close($fh);
     is(openhandle($fh), undef, "works with in-memory files");
@@ -59,7 +59,7 @@ ok(openhandle(*DATA{IO}), "works for *DATA{IO}");
 {
     require IO::Handle;
     my $fh = IO::Handle->new_from_fd(fileno(*STDERR), 'w');
-    skip "new_from_fd(fileno(*STDERR)) failed", 1 unless $fh;
+    skip "new_from_fd(fileno(*STDERR)) failed", 2 unless $fh;
     ok(openhandle($fh), "works for IO::Handle objects");
 
     ok(!openhandle(IO::Handle->new), "unopened IO::Handle");
@@ -69,7 +69,7 @@ ok(openhandle(*DATA{IO}), "works for *DATA{IO}");
     require IO::File;
     my $fh = IO::File->new;
     $fh->open("< $0")
-        or skip "could not open $0: $!", 1;
+        or skip "could not open $0: $!", 3;
     ok(openhandle($fh), "works for IO::File objects");
     close($fh);
     ok(!openhandle($fh), "works for IO::File objects");
@@ -78,7 +78,7 @@ ok(openhandle(*DATA{IO}), "works for *DATA{IO}");
 }
 
 SKIP: {
-    skip( "Tied handles only on 5.8 or later", 1) if $]<5.008;
+    skip( "Tied handles only on 5.8 or later", 2) if $]<5.008;
 
     use vars qw(*H);
 
