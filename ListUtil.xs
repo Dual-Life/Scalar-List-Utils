@@ -95,29 +95,40 @@ sum(...)
 PROTOTYPE: @
 CODE:
 {
+    dXSTARG;
     SV *sv;
     SV *retsv = NULL;
     int index;
     NV retval = 0;
+    int magic;
     if(!items) {
 	XSRETURN_UNDEF;
     }
-    sv = ST(0);
-    if (SvAMAGIC(sv)) {
-        retsv = sv_newmortal();
+    sv    = ST(0);
+    magic = SvAMAGIC(sv);
+    if (magic) {
+        retsv = TARG;
         sv_setsv(retsv, sv);
     }
     else {
         retval = slu_sv_value(sv);
     }
     for(index = 1 ; index < items ; index++) {
-	sv = ST(index);
-        if (retsv || SvAMAGIC(sv)) {
+        sv = ST(index);
+        if(!magic && SvAMAGIC(sv)){
+            magic = TRUE;
             if (!retsv) {
-                retsv = sv_newmortal();
+                retsv = TARG;
                 sv_setnv(retsv,retval);
             }
-            if (!amagic_call(retsv, sv, add_amg, AMGf_assign)) {
+        }
+        if (magic) {
+            SV* const tmpsv = amagic_call(retsv, sv, add_amg, SvAMAGIC(retsv) ? AMGf_assign : 0);
+            if(tmpsv){
+                retsv = tmpsv;
+            }
+            else {
+                /* fall back to default */
                 sv_setnv(retsv, SvNV(retsv) + SvNV(sv));
             }
         }
@@ -126,7 +137,7 @@ CODE:
         }
     }
     if (!retsv) {
-        retsv = sv_newmortal();
+        retsv = TARG;
         sv_setnv(retsv,retval);
     }
     ST(0) = retsv;
@@ -307,7 +318,7 @@ PROTOTYPE: $$
 CODE:
 {
     STRLEN len;
-    char *ptr = SvPV(str,len);
+    const char *ptr = SvPV_const(str,len);
     ST(0) = sv_newmortal();
     (void)SvUPGRADE(ST(0),SVt_PVNV);
     sv_setpvn(ST(0),ptr,len);
@@ -470,7 +481,7 @@ CODE:
 	if (SvPOK(proto)) {
 	    /* set the prototype */
 	    STRLEN len;
-	    char *ptr = SvPV(proto, len);
+	    const char *ptr = SvPV_const(proto, len);
 	    sv_setpvn(sv, ptr, len);
 	}
 	else {

@@ -13,7 +13,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 8;
+use Test::More tests => 10;
 
 use List::Util qw(sum);
 
@@ -58,12 +58,14 @@ use overload
   }
 }
 
-SKIP: {
-  eval { require bignum; } or skip("Need bignum for testing overloading",1);
+use Math::BigInt;
+my $v1 = Math::BigInt->new(2) ** Math::BigInt->new(65);
+my $v2 = $v1 - 1;
+$v = sum($v1,$v2);
+is($v, $v1 + $v2, 'bigint');
 
-  my $v1 = 2**65;
-  my $v2 = 2**65;
-  my $v3 = $v1 + $v2;
-  $v = sum($v1,$v2);
-  is($v, $v3, 'bignum');
-}
+$v = sum(42, $v1);
+is($v, $v1 + 42, 'bigint + builtin int');
+
+$v = sum(42, $v1, 2);
+is($v, $v1 + 42 + 2, 'bigint + builtin int');
