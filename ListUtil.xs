@@ -488,9 +488,7 @@ CODE:
 	}
 	if (SvPOK(proto)) {
 	    /* set the prototype */
-	    STRLEN len;
-	    const char *ptr = SvPV_const(proto, len);
-	    sv_setpvn(sv, ptr, len);
+	    sv_copypv(sv, proto);
 	}
 	else {
 	    /* delete the prototype */
