@@ -32,6 +32,21 @@ my_cxinc(pTHX)
 }
 #endif
 
+#ifndef sv_copypv
+#define sv_copypv(a, b) my_sv_copypv(aTHX_ a, b)
+static void
+my_sv_copypv(pTHX_ SV *const dsv, SV *const ssv)
+{
+    STRLEN len;
+    const char * const s = SvPV_const(ssv,len);
+    sv_setpvn(dsv,s,len);
+    if (SvUTF8(ssv))
+        SvUTF8_on(dsv);
+    else
+        SvUTF8_off(dsv);
+}
+#endif
+
 #ifdef SVf_IVisUV
 #  define slu_sv_value(sv) (SvIOK(sv)) ? (SvIOK_UV(sv)) ? (NV)(SvUVX(sv)) : (NV)(SvIVX(sv)) : (SvNV(sv))
 #else
@@ -313,30 +328,27 @@ dualvar(num,str)
 PROTOTYPE: $$
 CODE:
 {
-    STRLEN len;
-    const char *ptr = SvPV_const(str,len);
-    ST(0) = sv_newmortal();
-    (void)SvUPGRADE(ST(0),SVt_PVNV);
-    sv_setpvn(ST(0),ptr,len);
-    if (SvUTF8(str))
-        SvUTF8_on(ST(0));
+    dXSTARG;
+    (void)SvUPGRADE(TARG, SVt_PVNV);
+    sv_copypv(TARG,str);
     if(SvNOK(num) || SvPOK(num) || SvMAGICAL(num)) {
-	SvNV_set(ST(0), SvNV(num));
-	SvNOK_on(ST(0));
+	SvNV_set(TARG, SvNV(num));
+	SvNOK_on(TARG);
     }
 #ifdef SVf_IVisUV
     else if (SvUOK(num)) {
-	SvUV_set(ST(0), SvUV(num));
-	SvIOK_on(ST(0));
-	SvIsUV_on(ST(0));
+	SvUV_set(TARG, SvUV(num));
+	SvIOK_on(TARG);
+	SvIsUV_on(TARG);
     }
 #endif
     else {
-	SvIV_set(ST(0), SvIV(num));
-	SvIOK_on(ST(0));
+	SvIV_set(TARG, SvIV(num));
+	SvIOK_on(TARG);
     }
     if(PL_tainting && (SvTAINTED(num) || SvTAINTED(str)))
-	SvTAINTED_on(ST(0));
+	SvTAINTED_on(TARG);
+	ST(0) = TARG;
     XSRETURN(1);
 }
 
