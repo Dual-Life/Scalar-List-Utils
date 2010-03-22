@@ -7,31 +7,18 @@
 #include <perl.h>
 #include <XSUB.h>
 
-#ifndef PERL_VERSION
-#    include <patchlevel.h>
-#    if !(defined(PERL_VERSION) || (SUBVERSION > 0 && defined(PATCHLEVEL)))
-#        include <could_not_find_Perl_patchlevel.h>
-#    endif
-#    define PERL_REVISION	5
-#    define PERL_VERSION	PATCHLEVEL
-#    define PERL_SUBVERSION	SUBVERSION
-#endif
+#include "ppport.h"
 
-#if PERL_VERSION >= 6
+#if PERL_BCDVERSION >= 0x5006000
 #  include "multicall.h"
 #endif
 
-#ifndef aTHX
-#  define aTHX
-#  define pTHX
-#endif
 /* Some platforms have strict exports. And before 5.7.3 cxinc (or Perl_cxinc)
    was not exported. Therefore platforms like win32, VMS etc have problems
    so we redefine it here -- GMB
 */
-#if PERL_VERSION < 7
+#if PERL_BCDVERSION < 0x5007000
 /* Not in 5.6.1. */
-#  define SvUOK(sv)           SvIOK_UV(sv)
 #  ifdef cxinc
 #    undef cxinc
 #  endif
@@ -45,89 +32,10 @@ my_cxinc(pTHX)
 }
 #endif
 
-#if PERL_VERSION < 6
-#    define NV double
-#endif
-
 #ifdef SVf_IVisUV
 #  define slu_sv_value(sv) (SvIOK(sv)) ? (SvIOK_UV(sv)) ? (NV)(SvUVX(sv)) : (NV)(SvIVX(sv)) : (SvNV(sv))
 #else
 #  define slu_sv_value(sv) (SvIOK(sv)) ? (NV)(SvIVX(sv)) : (SvNV(sv))
-#endif
-
-#ifndef Drand01
-#    define Drand01()		((rand() & 0x7FFF) / (double) ((unsigned long)1 << 15))
-#endif
-
-#if PERL_VERSION < 5
-#  ifndef gv_stashpvn
-#    define gv_stashpvn(n,l,c) gv_stashpv(n,c)
-#  endif
-#  ifndef SvTAINTED
-
-static bool
-sv_tainted(pTHX_ SV *sv)
-{
-    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
-	MAGIC *mg = mg_find(sv, 't');
-	if (mg && ((mg->mg_len & 1) || (mg->mg_len & 2) && mg->mg_obj == sv))
-	    return TRUE;
-    }
-    return FALSE;
-}
-
-#    define SvTAINTED_on(sv) sv_magic((sv), Nullsv, 't', Nullch, 0)
-#    define SvTAINTED(sv) (SvMAGICAL(sv) && sv_tainted(aTHX_ sv))
-#  endif
-#  define PL_defgv defgv
-#  define PL_op op
-#  define PL_curpad curpad
-#  define CALLRUNOPS runops
-#  define PL_curpm curpm
-#  define PL_sv_undef sv_undef
-#  define PERL_CONTEXT struct context
-#endif
-#if (PERL_VERSION < 5) || (PERL_VERSION == 5 && PERL_SUBVERSION <50)
-#  ifndef PL_tainting
-#    define PL_tainting tainting
-#  endif
-#  ifndef PL_stack_base
-#    define PL_stack_base stack_base
-#  endif
-#  ifndef PL_stack_sp
-#    define PL_stack_sp stack_sp
-#  endif
-#  ifndef PL_ppaddr
-#    define PL_ppaddr ppaddr
-#  endif
-#endif
-
-#ifndef PTR2UV
-#  define PTR2UV(ptr) (UV)(ptr)
-#endif
-
-#ifndef SvUV_set
-#  define SvUV_set(sv, val) (((XPVUV*)SvANY(sv))->xuv_uv = (val))
-#endif
-
-#ifndef PERL_UNUSED_DECL
-#  ifdef HASATTRIBUTE
-#    if (defined(__GNUC__) && defined(__cplusplus)) || defined(__INTEL_COMPILER)
-#      define PERL_UNUSED_DECL
-#    else
-#      define PERL_UNUSED_DECL __attribute__((unused))
-#    endif
-#  else
-#    define PERL_UNUSED_DECL
-#  endif
-#endif
-
-#ifndef dNOOP
-#define dNOOP extern int Perl___notused PERL_UNUSED_DECL
-#endif
-
-#ifndef GvSVn
-#  define GvSVn GvSV
 #endif
 
 MODULE=List::Util	PACKAGE=List::Util
@@ -431,8 +339,7 @@ blessed(sv)
 PROTOTYPE: $
 CODE:
 {
-    if (SvMAGICAL(sv))
-	mg_get(sv);
+    SvGETMAGIC(sv);
     if(!(SvROK(sv) && SvOBJECT(SvRV(sv)))) {
 	XSRETURN_UNDEF;
     }
@@ -447,8 +354,7 @@ reftype(sv)
 PROTOTYPE: $
 CODE:
 {
-    if (SvMAGICAL(sv))
-	mg_get(sv);
+    SvGETMAGIC(sv);
     if(!SvROK(sv)) {
 	XSRETURN_UNDEF;
     }
@@ -463,8 +369,7 @@ refaddr(sv)
 PROTOTYPE: $
 CODE:
 {
-    if (SvMAGICAL(sv))
-	mg_get(sv);
+    SvGETMAGIC(sv);
     if(!SvROK(sv)) {
 	XSRETURN_UNDEF;
     }
@@ -535,10 +440,8 @@ CODE:
   if (SvAMAGIC(sv) && (tempsv = AMG_CALLun(sv, numer))) {
     sv = tempsv;
   }
-  else if (SvMAGICAL(sv)) {
-      SvGETMAGIC(sv);
-  }
-#if (PERL_VERSION < 8) || (PERL_VERSION == 8 && PERL_SUBVERSION <5)
+  SvGETMAGIC(sv);
+#if PERL_BCDVERSION < 0x5008005
   if (SvPOK(sv) || SvPOKp(sv)) {
     RETVAL = looks_like_number(sv);
   }
