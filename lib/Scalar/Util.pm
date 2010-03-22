@@ -28,7 +28,7 @@ unless (defined &dualvar) {
 sub export_fail {
   if (grep { /dualvar/ } @EXPORT_FAIL) { # no XS loaded
     my $pat = join("|", @EXPORT_FAIL);
-    if (my ($err) = grep { /^($pat)$/ } @_ ) {
+    if (my ($err) = grep { /^(?:$pat)$/ } @_ ) {
       require Carp;
       Carp::croak("$err is only available with the XS version of Scalar::Util");
     }
