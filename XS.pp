@@ -1,8 +1,7 @@
 package List::Util::XS;
 use strict;
-use vars qw($VERSION);
 
-$VERSION = undef;
+our $VERSION = undef;
 
 sub VERSION {
   require Carp;

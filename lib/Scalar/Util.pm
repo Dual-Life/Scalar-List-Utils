@@ -7,19 +7,21 @@
 package Scalar::Util;
 
 use strict;
-use vars qw(@ISA @EXPORT_OK $VERSION @EXPORT_FAIL);
 require Exporter;
 require List::Util; # List::Util loads the XS
 
-@ISA       = qw(Exporter);
-@EXPORT_OK = qw(blessed dualvar reftype weaken isweak tainted readonly openhandle refaddr isvstring looks_like_number set_prototype);
-$VERSION    = "1.23";
+our @ISA       = qw(Exporter);
+our @EXPORT_OK = qw(blessed dualvar reftype weaken isweak tainted readonly openhandle refaddr isvstring looks_like_number set_prototype);
+our $VERSION    = "1.23";
 $VERSION   = eval $VERSION;
+
+our @EXPORT_FAIL;
 
 unless (defined &dualvar) {
   # Load Pure Perl version if XS not loaded
   require Scalar::Util::PP;
   Scalar::Util::PP->import;
+
   push @EXPORT_FAIL, qw(weaken isweak dualvar isvstring set_prototype);
 }
 
@@ -32,12 +34,12 @@ sub export_fail {
     }
   }
 
-  if (grep { /^(weaken|isweak)$/ } @_ ) {
+  if (grep { /^(?:weaken|isweak)$/ } @_ ) {
     require Carp;
     Carp::croak("Weak references are not implemented in the version of perl");
   }
 
-  if (grep { /^(isvstring)$/ } @_ ) {
+  if (grep { /^isvstring$/ } @_ ) {
     require Carp;
     Carp::croak("Vstrings are not implemented in the version of perl");
   }

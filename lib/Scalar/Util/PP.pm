@@ -10,13 +10,12 @@ package Scalar::Util::PP;
 
 use strict;
 use warnings;
-use vars qw(@ISA @EXPORT $VERSION $recurse);
 require Exporter;
 use B qw(svref_2object);
 
-@ISA     = qw(Exporter);
-@EXPORT  = qw(blessed reftype tainted readonly refaddr looks_like_number openhandle);
-$VERSION = "1.23";
+our @ISA     = qw(Exporter);
+our @EXPORT  = qw(blessed reftype tainted readonly refaddr looks_like_number openhandle);
+our $VERSION = "1.23";
 $VERSION = eval $VERSION;
 
 sub blessed ($) {
@@ -98,8 +97,8 @@ sub looks_like_number {
     return overload::Overloaded($_) ? defined(0 + $_) : 0;
   }
   return 1 if (/^[+-]?[0-9]+$/); # is a +/- integer
-  return 1 if (/^([+-]?)(?=[0-9]|\.[0-9])[0-9]*(\.[0-9]*)?([Ee]([+-]?[0-9]+))?$/); # a C float
-  return 1 if ($] >= 5.008 and /^(Inf(inity)?|NaN)$/i) or ($] >= 5.006001 and /^Inf$/i);
+  return 1 if (/^[+-]?(?=[0-9]|\.[0-9])[0-9]*(?:\.[0-9]*)?(?:[Ee](?:[+-]?[0-9]+))?$/); # a C float
+  return 1 if ($] >= 5.008 and /^(?:Inf(?:inity)?|NaN)$/i) or ($] >= 5.006001 and /^Inf$/i);
 
   0;
 }

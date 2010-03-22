@@ -8,12 +8,11 @@ package List::Util::PP;
 
 use strict;
 use warnings;
-use vars qw(@ISA @EXPORT $VERSION $a $b);
 require Exporter;
 
-@ISA     = qw(Exporter);
-@EXPORT  = qw(first min max minstr maxstr reduce sum shuffle);
-$VERSION = "1.23";
+our @ISA     = qw(Exporter);
+our @EXPORT  = qw(first min max minstr maxstr reduce sum shuffle);
+our $VERSION = "1.23";
 $VERSION = eval $VERSION;
 
 sub reduce (&@) {
@@ -27,8 +26,6 @@ sub reduce (&@) {
   no strict 'refs';
 
   return shift unless @_ > 1;
-
-  use vars qw($a $b);
 
   my $caller = caller;
   local(*{$caller."::a"}) = \my $a;
@@ -59,6 +56,7 @@ sub first (&@) {
   undef;
 }
 
+our($a, $b);
 
 sub sum (@) { reduce { $a + $b } @_ }
 
