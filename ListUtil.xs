@@ -144,13 +144,15 @@ CODE:
     XSRETURN(1);
 }
 
+#define SLU_CMP_LARGER   1
+#define SLU_CMP_SMALLER -1
 
 void
 minstr(...)
 PROTOTYPE: @
 ALIAS:
-    minstr = 2
-    maxstr = 0
+    minstr = SLU_CMP_LARGER
+    maxstr = SLU_CMP_SMALLER
 CODE:
 {
     SV *left;
@@ -158,12 +160,6 @@ CODE:
     if(!items) {
 	XSRETURN_UNDEF;
     }
-    /*
-      sv_cmp & sv_cmp_locale return 1,0,-1 for gt,eq,lt
-      so we set ix to the value we are looking for
-      xsubpp does not allow -ve values, so we start with 0,2 and subtract 1
-    */
-    ix -= 1;
     left = ST(0);
 #ifdef OPpLOCALE
     if(MAXARG & OPpLOCALE) {
