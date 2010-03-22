@@ -8,12 +8,14 @@ ListUtil.xs
 Makefile.PL
 MANIFEST			This list of files
 multicall.h
+ppport.h
 README
 t/00version.t
 t/blessed.t
 t/dualvar.t
 t/expfail.t
 t/first.t
+t/getmagic-once.t
 t/isvstring.t
 t/lln.t
 t/max.t
