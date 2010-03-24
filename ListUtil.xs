@@ -458,6 +458,7 @@ readonly(sv)
 	SV *sv
 PROTOTYPE: $
 CODE:
+  SvGETMAGIC(sv);
   RETVAL = SvREADONLY(sv);
 OUTPUT:
   RETVAL
@@ -467,6 +468,7 @@ tainted(sv)
 	SV *sv
 PROTOTYPE: $
 CODE:
+  SvGETMAGIC(sv);
   RETVAL = SvTAINTED(sv);
 OUTPUT:
   RETVAL
@@ -477,6 +479,7 @@ isvstring(sv)
 PROTOTYPE: $
 CODE:
 #ifdef SvVOK
+  SvGETMAGIC(sv);
   ST(0) = boolSV(SvVOK(sv));
   XSRETURN(1);
 #else
@@ -489,10 +492,10 @@ looks_like_number(sv)
 PROTOTYPE: $
 CODE:
   SV *tempsv;
+  SvGETMAGIC(sv);
   if (SvAMAGIC(sv) && (tempsv = AMG_CALLun(sv, numer))) {
     sv = tempsv;
   }
-  SvGETMAGIC(sv);
 #if PERL_BCDVERSION < 0x5008005
   if (SvPOK(sv) || SvPOKp(sv)) {
     RETVAL = looks_like_number(sv);
