@@ -224,8 +224,8 @@ CODE:
 	XSRETURN_UNDEF;
     }
     PUSH_MULTICALL(cv);
-    agv = gv_fetchpv("a", TRUE, SVt_PV);
-    bgv = gv_fetchpv("b", TRUE, SVt_PV);
+    agv = gv_fetchpv("a", GV_ADD, SVt_PV);
+    bgv = gv_fetchpv("b", GV_ADD, SVt_PV);
     SAVESPTR(GvSV(agv));
     SAVESPTR(GvSV(bgv));
     GvSV(agv) = ret;
