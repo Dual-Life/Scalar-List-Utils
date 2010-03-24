@@ -15,7 +15,7 @@ BEGIN {
 
 use List::Util qw(first);
 use Test::More;
-plan tests => 19 + ($::PERL_ONLY ? 0 : 2);
+plan tests => 20 + ($::PERL_ONLY ? 0 : 2);
 my $v;
 
 ok(defined &first,	'defined');
@@ -114,6 +114,8 @@ if (!$::PERL_ONLY) { SKIP: {
 
 } }
 
+eval { &first(1) };
+ok($@ =~ /^Not a subroutine reference/, 'check for code reference');
 eval { &first(1,2) };
 ok($@ =~ /^Not a subroutine reference/, 'check for code reference');
 eval { &first(qw(a b)) };
