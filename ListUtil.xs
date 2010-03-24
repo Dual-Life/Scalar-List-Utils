@@ -208,14 +208,13 @@ reduce(block,...)
 PROTOTYPE: &@
 CODE:
 {
-    dMULTICALL;
     SV *ret = sv_newmortal();
     int index;
     GV *agv,*bgv,*gv;
     HV *stash;
-    I32 gimme = G_SCALAR;
     SV **args = &PL_stack_base[ax];
     CV* cv    = sv_2cv(block, &stash, &gv, 0);
+
     if (cv == Nullcv) {
        croak("Not a subroutine reference");
     }
@@ -223,19 +222,38 @@ CODE:
     if(items <= 1) {
 	XSRETURN_UNDEF;
     }
-    PUSH_MULTICALL(cv);
+
     agv = gv_fetchpv("a", GV_ADD, SVt_PV);
     bgv = gv_fetchpv("b", GV_ADD, SVt_PV);
     SAVESPTR(GvSV(agv));
     SAVESPTR(GvSV(bgv));
     GvSV(agv) = ret;
     SvSetSV(ret, args[1]);
-    for(index = 2 ; index < items ; index++) {
-	GvSV(bgv) = args[index];
-	MULTICALL;
-	SvSetSV(ret, *PL_stack_sp);
+
+    if(!CvISXSUB(cv)) {
+        dMULTICALL;
+        I32 gimme = G_SCALAR;
+
+        PUSH_MULTICALL(cv);
+        for(index = 2 ; index < items ; index++) {
+            GvSV(bgv) = args[index];
+            MULTICALL;
+            SvSetSV(ret, *PL_stack_sp);
+        }
+        POP_MULTICALL;
     }
-    POP_MULTICALL;
+    else {
+        for(index = 2 ; index < items ; index++) {
+            dSP;
+            GvSV(bgv) = args[index];
+
+            PUSHMARK(SP);
+            call_sv((SV*)cv, G_SCALAR);
+
+            SvSetSV(ret, *PL_stack_sp);
+        }
+    }
+
     ST(0) = ret;
     XSRETURN(1);
 }
