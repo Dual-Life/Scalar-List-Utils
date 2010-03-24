@@ -264,11 +264,9 @@ first(block,...)
 PROTOTYPE: &@
 CODE:
 {
-    dMULTICALL;
     int index;
     GV *gv;
     HV *stash;
-    I32 gimme = G_SCALAR;
     SV **args = &PL_stack_base[ax];
     CV *cv    = sv_2cv(block, &stash, &gv, 0);
     if (cv == Nullcv) {
@@ -278,19 +276,38 @@ CODE:
     if(items <= 1) {
 	XSRETURN_UNDEF;
     }
-    PUSH_MULTICALL(cv);
+
     SAVESPTR(GvSV(PL_defgv));
 
-    for(index = 1 ; index < items ; index++) {
-	GvSV(PL_defgv) = args[index];
-	MULTICALL;
-	if (SvTRUE(*PL_stack_sp)) {
-	  POP_MULTICALL;
-	  ST(0) = ST(index);
-	  XSRETURN(1);
-	}
+    if(!CvISXSUB(cv)) {
+        dMULTICALL;
+        I32 gimme = G_SCALAR;
+        PUSH_MULTICALL(cv);
+
+        for(index = 1 ; index < items ; index++) {
+            GvSV(PL_defgv) = args[index];
+            MULTICALL;
+            if (SvTRUEx(*PL_stack_sp)) {
+                POP_MULTICALL;
+                ST(0) = ST(index);
+                XSRETURN(1);
+            }
+        }
+        POP_MULTICALL;
     }
-    POP_MULTICALL;
+    else {
+        for(index = 1 ; index < items ; index++) {
+            dSP;
+            GvSV(PL_defgv) = args[index];
+
+            PUSHMARK(SP);
+            call_sv((SV*)cv, G_SCALAR);
+            if (SvTRUEx(*PL_stack_sp)) {
+                ST(0) = ST(index);
+                XSRETURN(1);
+            }
+        }
+    }
     XSRETURN_UNDEF;
 }
 
