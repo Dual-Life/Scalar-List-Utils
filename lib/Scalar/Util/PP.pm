@@ -15,7 +15,7 @@ use B qw(svref_2object);
 
 our @ISA     = qw(Exporter);
 our @EXPORT  = qw(blessed reftype tainted readonly refaddr looks_like_number openhandle);
-our $VERSION = "1.23_01";
+our $VERSION = "1.23_02";
 $VERSION = eval $VERSION;
 
 sub blessed ($) {

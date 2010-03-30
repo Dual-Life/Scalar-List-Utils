@@ -1,3 +1,11 @@
+1.23_02 -- Tue Mar 30 11:09:15 CDT 2010
+
+  * Fix first() and reduce() to check the callback first; &first(1) is now illigal. [gfx]
+  * Fix reduce() to allow XSUB callbacks [gfx]
+  * Fix first() to allow XSUB callbacks [gfx]
+  * Resolve RT #55763: tainted() doesn't do SvGETMAGIC(sv) [gfx]
+  * define CvISXSUB so older perl versions will still compile
+
 1.23_01 -- Mon Mar 22 08:24:11 CDT 2010
 
   * Add failing tests; SVt_RV is not directly SvROK [gfx]
