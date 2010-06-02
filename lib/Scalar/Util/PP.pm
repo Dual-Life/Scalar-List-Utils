@@ -15,7 +15,7 @@ use B qw(svref_2object);
 
 our @ISA     = qw(Exporter);
 our @EXPORT  = qw(blessed reftype tainted readonly refaddr looks_like_number openhandle);
-our $VERSION = "1.23_02";
+our $VERSION = "1.23_03";
 $VERSION = eval $VERSION;
 
 sub blessed ($) {
@@ -26,22 +26,34 @@ sub blessed ($) {
   return $s->isa('B::HV') ? $s->NAME : undef;
 }
 
-sub refaddr($) {
-  return undef unless length(ref($_[0]));
+BEGIN {
+    local $SIG{__WARN__};
+    local $SIG{__DIE__};
+    eval <<'ESQ' if $] > 5.010000;
+        sub refaddr($) {
+          no overloading;
+          return length(ref($_[0])) ? 0+$_[0] : undef;
+        }
+ESQ
+    eval <<'ESQ' unless defined &refaddr;
+        sub refaddr($) {
+          return undef unless length(ref($_[0]));
 
-  my $addr;
-  if(defined(my $pkg = blessed($_[0]))) {
-    $addr .= bless $_[0], 'Scalar::Util::Fake';
-    bless $_[0], $pkg;
-  }
-  else {
-    $addr .= $_[0]
-  }
+          my $addr;
+          if(defined(my $pkg = blessed($_[0]))) {
+            $addr .= bless $_[0], 'Scalar::Util::Fake';
+            bless $_[0], $pkg;
+          }
+          else {
+            $addr .= $_[0]
+          }
 
-  $addr =~ /0x(\w+)/;
-  local $^W;
-  no warnings 'portable';
-  hex($1);
+          $addr =~ /0x(\w+)/;
+          local $^W;
+          no warnings 'portable';
+          hex($1);
+        }
+ESQ
 }
 
 {
