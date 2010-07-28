@@ -31,7 +31,7 @@ static I32
 my_cxinc(pTHX)
 {
     cxstack_max = cxstack_max * 3 / 2;
-    Renew(cxstack, cxstack_max + 1, struct context);      /* XXX should fix CXINC macro */
+    Renew(cxstack, cxstack_max + 1, struct context); /* fencepost bug in older CXINC macros requires +1 here */
     return cxstack_ix + 1;
 }
 #endif
