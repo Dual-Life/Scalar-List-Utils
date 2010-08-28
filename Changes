@@ -1,3 +1,7 @@
+1.23_03
+
+  * Dropped the pure-Perl implementation of both Scalar::- and List::Util.
+
 1.23_02 -- Tue Mar 30 11:09:15 CDT 2010
 
   * Fix first() and reduce() to check the callback first; &first(1) is now illigal. [gfx]
