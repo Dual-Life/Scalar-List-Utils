@@ -31,6 +31,10 @@ installed using a C compiler and that the XS version is installed.
 During installation C<$List::Util::XS::VERSION> will be set to
 C<undef> if the XS was not compiled.
 
+Starting with release 1.23_03, Scalar-List-Util is B<always> using
+the XS implementation, but for backwards compatibility, we still
+ship the C<List::Util::XS> module which just loads C<List::Util>.
+
 =head1 SEE ALSO
 
 L<Scalar::Util>, L<List::Util>, L<List::MoreUtils>
