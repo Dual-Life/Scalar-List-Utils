@@ -2,15 +2,8 @@ package List::Util::XS;
 use strict;
 use List::Util;
 
-our $VERSION = "1.23_02";       # FIXUP
+our $VERSION = "1.23_03";       # FIXUP
 $VERSION = eval $VERSION;    # FIXUP
-
-sub _VERSION { # FIXUP
-  require Carp;
-  Carp::croak("You need to install Scalar-List-Utils with a C compiler to ensure the XS is compiled")
-    if defined $_[1];
-  $VERSION;
-}
 
 1;
 __END__
