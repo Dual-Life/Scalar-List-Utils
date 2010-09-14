@@ -1,5 +1,5 @@
 # -*- perl -*-
-BEGIN { require 5.006; } # allow CPAN testers to get the point
+BEGIN { require 5.008; } # allow CPAN testers to get the point
 use strict;
 use warnings;
 use Config;
