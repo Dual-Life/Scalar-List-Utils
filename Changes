@@ -1,6 +1,7 @@
 1.23_03
 
   * Dropped the pure-Perl implementation of both Scalar::- and List::Util.
+  * RT#61118 Fix assumption in sum() that once magic, always magic
 
 1.23_02 -- Tue Mar 30 11:09:15 CDT 2010
 
