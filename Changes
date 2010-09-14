@@ -1,4 +1,4 @@
-1.23_03
+1.23_03 -- Tue Sep 14 10:09:59 CDT 2010
 
   * Min perl version supported for build is not 5.008
   * Dropped the pure-Perl implementation of both Scalar::- and List::Util.
