@@ -12,6 +12,7 @@ require List::Util; # List::Util loads the XS
 
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(blessed dualvar reftype weaken isweak tainted readonly openhandle refaddr isvstring looks_like_number set_prototype);
+my %exportable = map { $_ => 1 } @EXPORT_OK;
 our $VERSION    = "1.23_03";
 $VERSION   = eval $VERSION;
 
@@ -19,13 +20,18 @@ our @EXPORT_FAIL;
 
 unless (defined &weaken) {
   push @EXPORT_FAIL, qw(weaken);
+  delete $exportable{weaken};
 }
 unless (defined &isweak) {
   push @EXPORT_FAIL, qw(isweak isvstring);
+  delete $exportable{isweak};
+  delete $exportable{isvstring};
 }
 unless (defined &isvstring) {
   push @EXPORT_FAIL, qw(isvstring);
+  delete $exportable{isvstring};
 }
+our %EXPORT_TAGS = (all => [keys %exportable]);
 
 sub export_fail {
   if (grep { /^(?:weaken|isweak)$/ } @_ ) {
