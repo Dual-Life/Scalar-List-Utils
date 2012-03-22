@@ -8,3 +8,5 @@ ListUtil.c
 *.bak
 .*.swp
 Scalar-List-Utils*
+MYMETA.json
+MYMETA.yml
