@@ -34,7 +34,7 @@ WriteMakefile(
       ( eval { ExtUtils::MakeMaker->VERSION(6.46) } ? (
           META_MERGE => {
             resources => {    ##
-              repository => 'http://github.com/gbarr/Scalar-List-Utils',
+              repository => 'https://github.com/Scalar-List-Utils/Scalar-List-Utils',
             },
           }
           )
