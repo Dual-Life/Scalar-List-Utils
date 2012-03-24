@@ -7,6 +7,7 @@
 #include <perl.h>
 #include <XSUB.h>
 
+#define NEED_sv_2pv_flags 1
 #include "ppport.h"
 
 #if PERL_BCDVERSION >= 0x5006000
