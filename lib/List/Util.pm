@@ -57,7 +57,7 @@ C<undef> is returned.
 
 This function could be implemented using C<reduce> like this
 
-    $foo = reduce { defined($a) ? $a : wanted($b) ? $b : undef } undef, @list
+    $foo = reduce { wanted($a) ? $a : wanted($b) ? $b : undef } undef, @list
 
 for example wanted() could be defined() which would return the first
 defined value in @list
