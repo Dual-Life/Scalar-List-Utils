@@ -6,6 +6,7 @@ ListUtil.xs
 Makefile.PL
 MANIFEST			This list of files
 multicall.h
+MYMETA.json
 MYMETA.yml
 ppport.h
 README
@@ -20,6 +21,7 @@ t/max.t
 t/maxstr.t
 t/min.t
 t/minstr.t
+t/multicall-refcount.t
 t/openhan.t
 t/proto.t
 t/readonly.t
@@ -29,5 +31,6 @@ t/reftype.t
 t/shuffle.t
 t/stack-corruption.t
 t/sum.t
+t/sum0.t
 t/tainted.t
 t/weak.t
