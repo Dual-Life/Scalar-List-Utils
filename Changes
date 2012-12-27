@@ -1,6 +1,6 @@
 1.26_001 -- Sun Dec 23 15:58
 
-  * First attempt at fixing multicall refcount bug
+  * Fix multicall refcount bug RT#80646
 
 1.26 -- Sun Dec 16 19:39
 
