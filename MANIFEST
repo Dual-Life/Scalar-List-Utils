@@ -23,6 +23,7 @@ t/min.t
 t/minstr.t
 t/multicall-refcount.t
 t/openhan.t
+t/pair.t
 t/proto.t
 t/readonly.t
 t/reduce.t
