@@ -466,6 +466,31 @@ PPCODE:
 #endif
 
 void
+pairs(...)
+PROTOTYPE: @
+PPCODE:
+{
+    SV **args = &PL_stack_base[ax];
+    SV **end_of_args = args + items;
+
+    int retcount = 0;
+    SV **ret = &PL_stack_base[ax];
+
+    {
+	for(; args < end_of_args; args += 2) {
+	    AV *av = newAV();
+	    av_push(av, newSVsv(*args));
+	    av_push(av, newSVsv(*(args+1)));
+
+	    *(ret++) = sv_2mortal(newRV_noinc(av));
+	    retcount++;
+	}
+    }
+
+    XSRETURN(retcount);
+}
+
+void
 shuffle(...)
 PROTOTYPE: @
 CODE:

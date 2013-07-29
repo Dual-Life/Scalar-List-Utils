@@ -12,7 +12,7 @@ use strict;
 require Exporter;
 
 our @ISA        = qw(Exporter);
-our @EXPORT_OK  = qw(first min max minstr maxstr reduce sum sum0 shuffle pairmap pairgrep);
+our @EXPORT_OK  = qw(first min max minstr maxstr reduce sum sum0 shuffle pairmap pairgrep pairs);
 our $VERSION    = "1.27";
 our $XS_VERSION = $VERSION;
 $VERSION    = eval $VERSION;
@@ -148,6 +148,21 @@ context, or the count of the number of items that would have been returned
 in scalar context.
 
     @result = pairmap { "The key $a has value $b" } @kvlist
+
+=item pairs KVLIST
+
+A convenient shortcut to operating on even-sized lists of pairs, this
+function returns a list of ARRAY references, each containing two items from
+the given list. It is a more efficient version of
+
+    pairmap { [ $a, $b ] } KVLIST
+
+It is most convenient to use in a C<foreach> loop, for example:
+
+    foreach ( pairs @KVLIST ) {
+       my ( $key, $value ) = @$_;
+       ...
+    }
 
 =item reduce BLOCK LIST
 

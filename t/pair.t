@@ -1,8 +1,8 @@
 #!./perl
 
 use strict;
-use Test::More tests => 4;
-use List::Util qw(pairgrep pairmap);
+use Test::More tests => 5;
+use List::Util qw(pairgrep pairmap pairs);
 
 is_deeply( [ pairgrep { $b % 2 } one => 1, two => 2, three => 3 ],
            [ one => 1, three => 3 ],
@@ -19,3 +19,7 @@ is_deeply( [ pairmap { uc $a => $b } one => 1, two => 2, three => 3 ],
 is_deeply( [ pairmap { $a => @$b } one => [1,1,1], two => [2,2,2], three => [3,3,3] ],
            [ one => 1, 1, 1, two => 2, 2, 2, three => 3, 3, 3 ],
            'pairmap list returning >2 items' );
+
+is_deeply( [ pairs one => 1, two => 2, three => 3 ],
+           [ [ one => 1 ], [ two => 2 ], [ three => 3 ] ],
+           'pairs' );
