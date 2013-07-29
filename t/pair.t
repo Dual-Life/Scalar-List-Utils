@@ -1,8 +1,8 @@
 #!./perl
 
 use strict;
-use Test::More tests => 8;
-use List::Util qw(pairgrep pairmap pairs);
+use Test::More tests => 10;
+use List::Util qw(pairgrep pairmap pairs pairkeys pairvalues);
 
 is_deeply( [ pairgrep { $b % 2 } one => 1, two => 2, three => 3 ],
            [ one => 1, three => 3 ],
@@ -35,3 +35,11 @@ is_deeply( [ pairs one => 1, two => 2, three => 3 ],
 is_deeply( [ pairs one => 1, two => ],
            [ [ one => 1 ], [ two => undef ] ],
            'pairs pads with undef' );
+
+is_deeply( [ pairkeys one => 1, two => 2 ],
+           [qw( one two )],
+           'pairkeys' );
+
+is_deeply( [ pairvalues one => 1, two => 2 ],
+           [ 1, 2 ],
+           'pairvalues' );

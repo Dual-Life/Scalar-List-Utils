@@ -494,6 +494,52 @@ PPCODE:
 }
 
 void
+pairkeys(...)
+PROTOTYPE: @
+PPCODE:
+{
+    SV **args = &PL_stack_base[ax];
+    SV **end_of_args = args + items;
+
+    int retcount = 0;
+    SV **ret = &PL_stack_base[ax];
+
+    {
+	for(; args < end_of_args; args += 2) {
+	    SV *a = *args;
+
+	    *(ret++) = sv_2mortal(newSVsv(a));
+	    retcount++;
+	}
+    }
+
+    XSRETURN(retcount);
+}
+
+void
+pairvalues(...)
+PROTOTYPE: @
+PPCODE:
+{
+    SV **args = &PL_stack_base[ax];
+    SV **end_of_args = args + items;
+
+    int retcount = 0;
+    SV **ret = &PL_stack_base[ax];
+
+    {
+	for(; args < end_of_args; args += 2) {
+	    SV *b = args < end_of_args-1 ? *(args+1) : &PL_sv_undef;
+
+	    *(ret++) = sv_2mortal(newSVsv(b));
+	    retcount++;
+	}
+    }
+
+    XSRETURN(retcount);
+}
+
+void
 shuffle(...)
 PROTOTYPE: @
 CODE:

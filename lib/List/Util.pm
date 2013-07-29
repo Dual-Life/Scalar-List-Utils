@@ -12,7 +12,7 @@ use strict;
 require Exporter;
 
 our @ISA        = qw(Exporter);
-our @EXPORT_OK  = qw(first min max minstr maxstr reduce sum sum0 shuffle pairmap pairgrep pairs);
+our @EXPORT_OK  = qw(first min max minstr maxstr reduce sum sum0 shuffle pairmap pairgrep pairs pairkeys pairvalues);
 our $VERSION    = "1.27_001";
 our $XS_VERSION = $VERSION;
 $VERSION    = eval $VERSION;
@@ -163,6 +163,22 @@ It is most convenient to use in a C<foreach> loop, for example:
        my ( $key, $value ) = @$_;
        ...
     }
+
+=item pairkeys KVLIST
+
+A convenient shortcut to operating on even-sized lists of pairs, this
+function returns a list of the the first values of each of the pairs in
+the given list. It is a more efficient version of
+
+    pairmap { $a } KVLIST
+
+=item pairvalues KVLIST
+
+A convenient shortcut to operating on even-sized lists of pairs, this
+function returns a list of the the second values of each of the pairs in
+the given list. It is a more efficient version of
+
+    pairmap { $b } KVLIST
 
 =item reduce BLOCK LIST
 
