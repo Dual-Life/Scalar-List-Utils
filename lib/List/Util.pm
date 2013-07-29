@@ -12,7 +12,7 @@ use strict;
 require Exporter;
 
 our @ISA        = qw(Exporter);
-our @EXPORT_OK  = qw(first min max minstr maxstr reduce sum sum0 shuffle pairgrep);
+our @EXPORT_OK  = qw(first min max minstr maxstr reduce sum sum0 shuffle pairmap pairgrep);
 our $VERSION    = "1.27";
 our $XS_VERSION = $VERSION;
 $VERSION    = eval $VERSION;
@@ -135,6 +135,19 @@ in list context, or the count of the B<number of pairs> in scalar context.
 of the count of items it would have returned in list context).
 
     @subset = pairgrep { $a =~ m/^[[:upper:]]+$/ } @kvlist
+
+=item pairmap BLOCK KVLIST
+
+Similar to perl's C<map> keyword, but interprets the given list as an
+even-sized list of pairs. It invokes the BLOCK multiple times, in list
+context, with C<$a> and C<$b> set to successive pairs of values from the
+KVLIST.
+
+Returns the concatenation of all the values returned by the BLOCK in list
+context, or the count of the number of items that would have been returned
+in scalar context.
+
+    @result = pairmap { "The key $a has value $b" } @kvlist
 
 =item reduce BLOCK LIST
 

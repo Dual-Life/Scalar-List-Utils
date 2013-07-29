@@ -396,6 +396,73 @@ PPCODE:
     }
 }
 
+void
+pairmap(block,...)
+    SV * block
+PROTOTYPE: &@
+PPCODE:
+{
+    GV *agv,*bgv,*gv;
+    HV *stash;
+    SV **args = &PL_stack_base[ax];
+    SV **end_of_args = args + items;
+    CV *cv    = sv_2cv(block, &stash, &gv, 0);
+    int args_saved = 0;
+
+    int retcount = 0;
+    SV **ret = &PL_stack_base[ax];
+
+    // "shift" the block
+    args++;
+
+    agv = gv_fetchpv("a", GV_ADD, SVt_PV);
+    bgv = gv_fetchpv("b", GV_ADD, SVt_PV);
+    SAVESPTR(GvSV(agv));
+    SAVESPTR(GvSV(bgv));
+
+    {
+	for(; args < end_of_args; args += 2) {
+	    dSP;
+	    GvSV(agv) = *args;
+	    GvSV(bgv) = *(args+1);
+
+	    PUSHMARK(SP);
+	    int count = call_sv((SV*)cv, G_ARRAY);
+
+	    SPAGAIN;
+
+	    if(count > 2 && !args_saved) {
+		/* We can't return more than 2 results for a given input pair
+		 * without trashing the remaining argmuents on the stack still
+		 * to be processed. So, we'll copy them out to a temporary
+		 * buffer and work from there instead.
+		 * We didn't do this initially because in the common case, most
+		 * code blocks will return only 1 or 2 items so it won't be
+		 * necessary
+		 */
+		int n_args = end_of_args - args;
+		SV **args_copy;
+		Newx(args_copy, n_args, SV *);
+		Copy(args, args_copy, n_args, SV *);
+		SAVEFREEPV(args_copy);
+
+		args = args_copy;
+		end_of_args = args + n_args;
+		args_saved = 1;
+	    }
+
+	    int i;
+	    for(i = 0; i < count; i++)
+		*(ret++) = sv_mortalcopy(SP[i - count + 1]);
+	    retcount += count;
+
+	    PUTBACK;
+	}
+    }
+
+    XSRETURN(retcount);
+}
+
 #endif
 
 void
