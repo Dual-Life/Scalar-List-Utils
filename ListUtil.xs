@@ -368,8 +368,8 @@ PPCODE:
     {
 	for(; args < end_of_args; args += 2) {
 	    dSP;
-	    GvSV(agv) = *args;
-	    GvSV(bgv) = *(args+1);
+	    SV *a = GvSV(agv) = *args;
+	    SV *b = GvSV(bgv) = args < end_of_args-1 ? *(args+1) : &PL_sv_undef;
 
 	    PUSHMARK(SP);
 	    call_sv((SV*)cv, G_SCALAR);
@@ -378,8 +378,8 @@ PPCODE:
 
             if (SvTRUEx(*PL_stack_sp)) {
 		if(GIMME_V == G_ARRAY) {
-		    *(ret++) = sv_mortalcopy(*args);
-		    *(ret++) = sv_mortalcopy(*(args+1));
+		    *(ret++) = sv_mortalcopy(a);
+		    *(ret++) = sv_mortalcopy(b);
 		    retcount += 2;
 		}
 		else if(GIMME_V == G_SCALAR)
@@ -424,7 +424,7 @@ PPCODE:
 	for(; args < end_of_args; args += 2) {
 	    dSP;
 	    GvSV(agv) = *args;
-	    GvSV(bgv) = *(args+1);
+	    GvSV(bgv) = args < end_of_args-1 ? *(args+1) : &PL_sv_undef;
 
 	    PUSHMARK(SP);
 	    int count = call_sv((SV*)cv, G_ARRAY);
@@ -478,11 +478,14 @@ PPCODE:
 
     {
 	for(; args < end_of_args; args += 2) {
-	    AV *av = newAV();
-	    av_push(av, newSVsv(*args));
-	    av_push(av, newSVsv(*(args+1)));
+	    SV *a = *args;
+	    SV *b = args < end_of_args-1 ? *(args+1) : &PL_sv_undef;
 
-	    *(ret++) = sv_2mortal(newRV_noinc(av));
+	    AV *av = newAV();
+	    av_push(av, newSVsv(a));
+	    av_push(av, newSVsv(b));
+
+	    *(ret++) = sv_2mortal(newRV_noinc((SV *)av));
 	    retcount++;
 	}
     }
