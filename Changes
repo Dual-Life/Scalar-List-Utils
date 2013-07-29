@@ -1,3 +1,7 @@
+1.27_001 -- Mon Jul 29 20:05 UTC 2013
+
+  * Added pairgrep, pairmap, pairs (inspired by List::Pairwise)
+
 1.26_001 -- Sun Dec 23 15:58
 
   * Fix multicall refcount bug RT#80646
