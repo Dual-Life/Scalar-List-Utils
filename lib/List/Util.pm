@@ -12,7 +12,7 @@ use strict;
 require Exporter;
 
 our @ISA        = qw(Exporter);
-our @EXPORT_OK  = qw(first min max minstr maxstr reduce sum sum0 shuffle);
+our @EXPORT_OK  = qw(first min max minstr maxstr reduce sum sum0 shuffle pairgrep);
 our $VERSION    = "1.27";
 our $XS_VERSION = $VERSION;
 $VERSION    = eval $VERSION;
@@ -121,6 +121,20 @@ If the list is empty then C<undef> is returned.
 This function could be implemented using C<reduce> like this
 
     $foo = reduce { $a lt $b ? $a : $b } 'A'..'Z'
+
+=item pairgrep BLOCK KVLIST
+
+Similar to perl's C<grep> keyword, but interprets the given list as an
+even-sized list of pairs. It invokes the BLOCK multiple times, in scalar
+context, with C<$a> and C<$b> set to successive pairs of values from the
+KVLIST.
+
+Returns an even-sized list of those pairs for which the BLOCK returned true
+in list context, or the count of the B<number of pairs> in scalar context.
+(Note, therefore, in scalar context that it returns a number half the size
+of the count of items it would have returned in list context).
+
+    @subset = pairgrep { $a =~ m/^[[:upper:]]+$/ } @kvlist
 
 =item reduce BLOCK LIST
 

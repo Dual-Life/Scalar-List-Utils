@@ -339,6 +339,63 @@ CODE:
     XSRETURN_UNDEF;
 }
 
+void
+pairgrep(block,...)
+    SV * block
+PROTOTYPE: &@
+PPCODE:
+{
+    GV *agv,*bgv,*gv;
+    HV *stash;
+    SV **args = &PL_stack_base[ax];
+    SV **end_of_args = args + items;
+    CV *cv    = sv_2cv(block, &stash, &gv, 0);
+
+    /* This function never returns more than it consumed in arguments. So we
+     * can build the results "live", behind the arguments
+     */
+    int retcount = 0;
+    SV **ret = args;
+
+    // "shift" the block
+    args++;
+
+    agv = gv_fetchpv("a", GV_ADD, SVt_PV);
+    bgv = gv_fetchpv("b", GV_ADD, SVt_PV);
+    SAVESPTR(GvSV(agv));
+    SAVESPTR(GvSV(bgv));
+
+    {
+	for(; args < end_of_args; args += 2) {
+	    dSP;
+	    GvSV(agv) = *args;
+	    GvSV(bgv) = *(args+1);
+
+	    PUSHMARK(SP);
+	    call_sv((SV*)cv, G_SCALAR);
+
+	    SPAGAIN;
+
+            if (SvTRUEx(*PL_stack_sp)) {
+		if(GIMME_V == G_ARRAY) {
+		    *(ret++) = sv_mortalcopy(*args);
+		    *(ret++) = sv_mortalcopy(*(args+1));
+		    retcount += 2;
+		}
+		else if(GIMME_V == G_SCALAR)
+		    retcount++;
+	    }
+	}
+    }
+
+    if(GIMME_V == G_ARRAY)
+	XSRETURN(retcount);
+    else if(GIMME_V == G_SCALAR) {
+	ST(0) = newSViv(retcount);
+	XSRETURN(1);
+    }
+}
+
 #endif
 
 void
