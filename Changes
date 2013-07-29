@@ -1,3 +1,7 @@
+1.27_002 -- Mon Jul 29 23:01 UTC 2013
+
+  * Added pairkeys and pairvalues
+
 1.27_001 -- Mon Jul 29 20:05 UTC 2013
 
   * Added pairgrep, pairmap, pairs (inspired by List::Pairwise)
