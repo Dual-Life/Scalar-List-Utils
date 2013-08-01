@@ -26,7 +26,7 @@ our @EXPORT_OK = qw(
   tainted
   weaken
 );
-our $VERSION    = "1.28";
+our $VERSION    = "1.29";
 $VERSION   = eval $VERSION;
 
 our @EXPORT_FAIL;
