@@ -136,6 +136,10 @@ of the count of items it would have returned in list context).
 
     @subset = pairgrep { $a =~ m/^[[:upper:]]+$/ } @kvlist
 
+Similar to C<grep>, C<pairgrep> aliases C<$a> and C<$b> to elements of the
+given list. Any modifications of it by the code block will be visible to
+the caller.
+
 =item pairmap BLOCK KVLIST
 
 Similar to perl's C<map> keyword, but interprets the given list as an
@@ -148,6 +152,10 @@ context, or the count of the number of items that would have been returned
 in scalar context.
 
     @result = pairmap { "The key $a has value $b" } @kvlist
+
+Similar to C<map>, C<pairmap> aliases C<$a> and C<$b> to elements of the
+given list. Any modifications of it by the code block will be visible to
+the caller.
 
 =item pairs KVLIST
 
