@@ -354,8 +354,7 @@ PPCODE:
     /* This function never returns more than it consumed in arguments. So we
      * can build the results "live", behind the arguments
      */
-    int retcount = 0;
-    SV **ret = args;
+    int reti = 0;
 
     // "shift" the block
     args++;
@@ -378,20 +377,19 @@ PPCODE:
 
             if (SvTRUEx(*PL_stack_sp)) {
 		if(GIMME_V == G_ARRAY) {
-		    *(ret++) = sv_mortalcopy(a);
-		    *(ret++) = sv_mortalcopy(b);
-		    retcount += 2;
+		    *(PL_stack_base + ax + reti++) = sv_mortalcopy(a);
+		    *(PL_stack_base + ax + reti++) = sv_mortalcopy(b);
 		}
 		else if(GIMME_V == G_SCALAR)
-		    retcount++;
+		    reti++;
 	    }
 	}
     }
 
     if(GIMME_V == G_ARRAY)
-	XSRETURN(retcount);
+	XSRETURN(reti);
     else if(GIMME_V == G_SCALAR) {
-	ST(0) = newSViv(retcount);
+	ST(0) = newSViv(reti);
 	XSRETURN(1);
     }
 }
@@ -409,8 +407,7 @@ PPCODE:
     CV *cv    = sv_2cv(block, &stash, &gv, 0);
     int args_saved = 0;
 
-    int retcount = 0;
-    SV **ret = &PL_stack_base[ax];
+    int reti = 0;
 
     // "shift" the block
     args++;
@@ -453,14 +450,13 @@ PPCODE:
 
 	    int i;
 	    for(i = 0; i < count; i++)
-		*(ret++) = sv_mortalcopy(SP[i - count + 1]);
-	    retcount += count;
+		*(PL_stack_base + ax + reti++) = sv_mortalcopy(SP[i - count + 1]);
 
 	    PUTBACK;
 	}
     }
 
-    XSRETURN(retcount);
+    XSRETURN(reti);
 }
 
 #endif
@@ -473,8 +469,7 @@ PPCODE:
     SV **args = &PL_stack_base[ax];
     SV **end_of_args = args + items;
 
-    int retcount = 0;
-    SV **ret = &PL_stack_base[ax];
+    int reti = 0;
 
     {
 	for(; args < end_of_args; args += 2) {
@@ -485,12 +480,11 @@ PPCODE:
 	    av_push(av, newSVsv(a));
 	    av_push(av, newSVsv(b));
 
-	    *(ret++) = sv_2mortal(newRV_noinc((SV *)av));
-	    retcount++;
+	    *(PL_stack_base + ax + reti++) = sv_2mortal(newRV_noinc((SV *)av));
 	}
     }
 
-    XSRETURN(retcount);
+    XSRETURN(reti);
 }
 
 void
@@ -501,19 +495,17 @@ PPCODE:
     SV **args = &PL_stack_base[ax];
     SV **end_of_args = args + items;
 
-    int retcount = 0;
-    SV **ret = &PL_stack_base[ax];
+    int reti = 0;
 
     {
 	for(; args < end_of_args; args += 2) {
 	    SV *a = *args;
 
-	    *(ret++) = sv_2mortal(newSVsv(a));
-	    retcount++;
+	    *(PL_stack_base + ax + reti++) = sv_2mortal(newSVsv(a));
 	}
     }
 
-    XSRETURN(retcount);
+    XSRETURN(reti);
 }
 
 void
@@ -524,19 +516,17 @@ PPCODE:
     SV **args = &PL_stack_base[ax];
     SV **end_of_args = args + items;
 
-    int retcount = 0;
-    SV **ret = &PL_stack_base[ax];
+    int reti = 0;
 
     {
 	for(; args < end_of_args; args += 2) {
 	    SV *b = args < end_of_args-1 ? *(args+1) : &PL_sv_undef;
 
-	    *(ret++) = sv_2mortal(newSVsv(b));
-	    retcount++;
+	    *(PL_stack_base + ax + reti++) = sv_2mortal(newSVsv(b));
 	}
     }
 
-    XSRETURN(retcount);
+    XSRETURN(reti);
 }
 
 void

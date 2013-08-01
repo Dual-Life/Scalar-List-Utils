@@ -1,7 +1,7 @@
 #!./perl
 
 use strict;
-use Test::More tests => 12;
+use Test::More tests => 13;
 use List::Util qw(pairgrep pairmap pairs pairkeys pairvalues);
 
 is_deeply( [ pairgrep { $b % 2 } one => 1, two => 2, three => 3 ],
@@ -39,6 +39,12 @@ is_deeply( [ pairmap { $b } one => 1, two => 2, three => ],
   pairmap { $b++ } @kvlist;
   is_deeply( \@kvlist, [ one => 2, two => 3 ], 'pairmap aliases elements' );
 }
+
+# Calculating a 1000-element list should hopefully cause the stack to move
+# underneath pairmap
+is_deeply( [ pairmap { my @l = (1) x 1000; "$a=$b" } one => 1, two => 2, three => 3 ],
+           [ "one=1", "two=2", "three=3" ],
+           'pairmap copes with stack movement' );
 
 is_deeply( [ pairs one => 1, two => 2, three => 3 ],
            [ [ one => 1 ], [ two => 2 ], [ three => 3 ] ],
