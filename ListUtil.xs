@@ -373,8 +373,8 @@ PPCODE:
 
             if (SvTRUEx(*PL_stack_sp)) {
 		if(GIMME_V == G_ARRAY) {
-		    *(PL_stack_base + ax + reti++) = sv_mortalcopy(a);
-		    *(PL_stack_base + ax + reti++) = sv_mortalcopy(b);
+		    ST(reti++) = sv_mortalcopy(a);
+		    ST(reti++) = sv_mortalcopy(b);
 		}
 		else if(GIMME_V == G_SCALAR)
 		    reti++;
@@ -443,7 +443,7 @@ PPCODE:
 
 	    int i;
 	    for(i = 0; i < count; i++)
-		*(PL_stack_base + ax + reti++) = sv_mortalcopy(SP[i - count + 1]);
+		ST(reti++) = sv_mortalcopy(SP[i - count + 1]);
 
 	    PUTBACK;
 	}
@@ -471,7 +471,7 @@ PPCODE:
 	    av_push(av, newSVsv(a));
 	    av_push(av, newSVsv(b));
 
-	    *(PL_stack_base + ax + reti++) = sv_2mortal(newRV_noinc((SV *)av));
+	    ST(reti++) = sv_2mortal(newRV_noinc((SV *)av));
 	}
     }
 
@@ -490,7 +490,7 @@ PPCODE:
 	for(; argi < items; argi += 2) {
 	    SV *a = ST(argi);
 
-	    *(PL_stack_base + ax + reti++) = sv_2mortal(newSVsv(a));
+	    ST(reti++) = sv_2mortal(newSVsv(a));
 	}
     }
 
@@ -509,7 +509,7 @@ PPCODE:
 	for(; argi < items; argi += 2) {
 	    SV *b = argi < items-1 ? ST(argi+1) : &PL_sv_undef;
 
-	    *(PL_stack_base + ax + reti++) = sv_2mortal(newSVsv(b));
+	    ST(reti++) = sv_2mortal(newSVsv(b));
 	}
     }
 
