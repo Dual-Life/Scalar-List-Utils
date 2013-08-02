@@ -416,9 +416,11 @@ PPCODE:
 	    SV *b = GvSV(bgv) = argi < items-1 ? 
 		(args_copy ? args_copy[argi+1] : ST(argi+1)) :
 		&PL_sv_undef;
+	    int count;
+	    int i;
 
 	    PUSHMARK(SP);
-	    int count = call_sv((SV*)cv, G_ARRAY);
+	    count = call_sv((SV*)cv, G_ARRAY);
 
 	    SPAGAIN;
 
@@ -441,7 +443,6 @@ PPCODE:
 		items = n_args;
 	    }
 
-	    int i;
 	    for(i = 0; i < count; i++)
 		ST(reti++) = sv_mortalcopy(SP[i - count + 1]);
 
