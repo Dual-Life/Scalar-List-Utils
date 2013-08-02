@@ -339,6 +339,8 @@ CODE:
     XSRETURN_UNDEF;
 }
 
+#endif
+
 void
 pairgrep(block,...)
     SV * block
@@ -452,8 +454,6 @@ PPCODE:
 
     XSRETURN(reti);
 }
-
-#endif
 
 void
 pairs(...)
