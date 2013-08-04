@@ -12,7 +12,7 @@ use strict;
 require Exporter;
 
 our @ISA        = qw(Exporter);
-our @EXPORT_OK  = qw(first min max minstr maxstr reduce sum sum0 shuffle pairmap pairgrep pairs pairkeys pairvalues);
+our @EXPORT_OK  = qw(first min max minstr maxstr reduce sum sum0 shuffle pairmap pairgrep pairfirst pairs pairkeys pairvalues);
 our $VERSION    = "1.29";
 our $XS_VERSION = $VERSION;
 $VERSION    = eval $VERSION;
@@ -121,6 +121,24 @@ If the list is empty then C<undef> is returned.
 This function could be implemented using C<reduce> like this
 
     $foo = reduce { $a lt $b ? $a : $b } 'A'..'Z'
+
+=item pairfirst BLOCK KVLIST
+
+Similar to the C<first> function, but interprets the given list as an
+even-sized list of pairs. It invokes the BLOCK multiple times, in scalar
+context, with C<$a> and C<$b> set to successive pairs of values from the
+KVLIST.
+
+Returns the first pair of values from the list for which the BLOCK returned
+true in list context, or an empty list of no such pair was found. In scalar
+context it returns a simple boolean value, rather than either the key or the
+value found.
+
+    ( $key, $value ) = pairfirst { $a =~ m/^[[:upper:]]+$/ } @kvlist
+
+Similar to C<grep>, C<pairfirst> aliases C<$a> and C<$b> to elements of the
+given list. Any modifications of it by the code block will be visible to
+the caller.
 
 =item pairgrep BLOCK KVLIST
 

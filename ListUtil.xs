@@ -342,6 +342,50 @@ CODE:
 #endif
 
 void
+pairfirst(block,...)
+    SV * block
+PROTOTYPE: &@
+PPCODE:
+{
+    GV *agv,*bgv,*gv;
+    HV *stash;
+    CV *cv    = sv_2cv(block, &stash, &gv, 0);
+    I32 ret_gimme = GIMME_V;
+    int argi = 1; // "shift" the block
+
+    agv = gv_fetchpv("a", GV_ADD, SVt_PV);
+    bgv = gv_fetchpv("b", GV_ADD, SVt_PV);
+    SAVESPTR(GvSV(agv));
+    SAVESPTR(GvSV(bgv));
+
+    {
+	for(; argi < items; argi += 2) {
+	    dSP;
+	    SV *a = GvSV(agv) = ST(argi);
+	    SV *b = GvSV(bgv) = argi < items-1 ? ST(argi+1) : &PL_sv_undef;
+
+	    PUSHMARK(SP);
+	    call_sv((SV*)cv, G_SCALAR);
+
+	    SPAGAIN;
+
+            if(!SvTRUEx(*PL_stack_sp))
+		continue;
+
+	    if(ret_gimme == G_ARRAY) {
+		ST(0) = sv_mortalcopy(a);
+		ST(1) = sv_mortalcopy(b);
+		XSRETURN(2);
+	    }
+	    else
+		XSRETURN_YES;
+	}
+    }
+
+    XSRETURN(0);
+}
+
+void
 pairgrep(block,...)
     SV * block
 PROTOTYPE: &@
@@ -350,6 +394,7 @@ PPCODE:
     GV *agv,*bgv,*gv;
     HV *stash;
     CV *cv    = sv_2cv(block, &stash, &gv, 0);
+    I32 ret_gimme = GIMME_V;
 
     /* This function never returns more than it consumed in arguments. So we
      * can build the results "live", behind the arguments
@@ -365,7 +410,6 @@ PPCODE:
     if(!CvISXSUB(cv)) {
 	// Since MULTICALL is about to move it
 	SV **stack = PL_stack_base + ax;
-	I32 ret_gimme = GIMME_V;
 	int i;
 
 	dMULTICALL;
@@ -407,20 +451,20 @@ PPCODE:
 
 	    SPAGAIN;
 
-            if (SvTRUEx(*PL_stack_sp)) {
-		if(GIMME_V == G_ARRAY) {
+            if(SvTRUEx(*PL_stack_sp)) {
+		if(ret_gimme == G_ARRAY) {
 		    ST(reti++) = sv_mortalcopy(a);
 		    ST(reti++) = sv_mortalcopy(b);
 		}
-		else if(GIMME_V == G_SCALAR)
+		else if(ret_gimme == G_SCALAR)
 		    reti++;
 	    }
 	}
     }
 
-    if(GIMME_V == G_ARRAY)
+    if(ret_gimme == G_ARRAY)
 	XSRETURN(reti);
-    else if(GIMME_V == G_SCALAR) {
+    else if(ret_gimme == G_SCALAR) {
 	ST(0) = newSViv(reti);
 	XSRETURN(1);
     }
@@ -436,6 +480,7 @@ PPCODE:
     HV *stash;
     CV *cv    = sv_2cv(block, &stash, &gv, 0);
     SV **args_copy = NULL;
+    I32 ret_gimme = GIMME_V;
 
     int argi = 1; // "shift" the block
     int reti = 0;
