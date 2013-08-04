@@ -13,7 +13,7 @@ require Exporter;
 
 our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw(first min max minstr maxstr reduce sum sum0 shuffle pairmap pairgrep pairfirst pairs pairkeys pairvalues);
-our $VERSION    = "1.29";
+our $VERSION    = "1.29_001";
 our $XS_VERSION = $VERSION;
 $VERSION    = eval $VERSION;
 
