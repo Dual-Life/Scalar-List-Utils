@@ -361,7 +361,41 @@ PPCODE:
     bgv = gv_fetchpv("b", GV_ADD, SVt_PV);
     SAVESPTR(GvSV(agv));
     SAVESPTR(GvSV(bgv));
+#ifdef dMULTICALL
+    if(!CvISXSUB(cv)) {
+	// Since MULTICALL is about to move it
+	SV **stack = PL_stack_base + ax;
+	I32 ret_gimme = GIMME_V;
+	int i;
 
+	dMULTICALL;
+	I32 gimme = G_SCALAR;
+
+	PUSH_MULTICALL(cv);
+	for(; argi < items; argi += 2) {
+	    SV *a = GvSV(agv) = stack[argi];
+	    SV *b = GvSV(bgv) = argi < items-1 ? stack[argi+1] : &PL_sv_undef;
+
+	    MULTICALL;
+
+            if(SvTRUEx(*PL_stack_sp)) {
+		if(ret_gimme == G_ARRAY) {
+		    // We can't mortalise yet or they'd be mortal too early
+		    stack[reti++] = newSVsv(a);
+		    stack[reti++] = newSVsv(b);
+		}
+		else if(ret_gimme == G_SCALAR)
+		    reti++;
+	    }
+	}
+	POP_MULTICALL;
+
+	if(ret_gimme == G_ARRAY)
+	    for(i = 0; i < reti; i++)
+		sv_2mortal(stack[i]);
+    }
+    else
+#endif
     {
 	for(; argi < items; argi += 2) {
 	    dSP;
@@ -410,7 +444,56 @@ PPCODE:
     bgv = gv_fetchpv("b", GV_ADD, SVt_PV);
     SAVESPTR(GvSV(agv));
     SAVESPTR(GvSV(bgv));
+#ifdef dMULTICALL
+    if(!CvISXSUB(cv)) {
+	// Since MULTICALL is about to move it
+	SV **stack = PL_stack_base + ax;
+	I32 ret_gimme = GIMME_V;
+	int i;
 
+	dMULTICALL;
+	I32 gimme = G_ARRAY;
+
+	PUSH_MULTICALL(cv);
+	for(; argi < items; argi += 2) {
+	    SV *a = GvSV(agv) = args_copy ? args_copy[argi] : stack[argi];
+	    SV *b = GvSV(bgv) = argi < items-1 ? 
+		(args_copy ? args_copy[argi+1] : stack[argi+1]) :
+		&PL_sv_undef;
+
+	    MULTICALL;
+	    int count = PL_stack_sp - PL_stack_base;
+
+	    if(count > 2 && !args_copy) {
+		/* We can't return more than 2 results for a given input pair
+		 * without trashing the remaining argmuents on the stack still
+		 * to be processed. So, we'll copy them out to a temporary
+		 * buffer and work from there instead.
+		 * We didn't do this initially because in the common case, most
+		 * code blocks will return only 1 or 2 items so it won't be
+		 * necessary
+		 */
+		int n_args = items - argi;
+		Newx(args_copy, n_args, SV *);
+		SAVEFREEPV(args_copy);
+
+		Copy(stack + argi, args_copy, n_args, SV *);
+
+		argi = 0;
+		items = n_args;
+	    }
+
+	    for(i = 0; i < count; i++)
+		stack[reti++] = newSVsv(PL_stack_sp[i - count + 1]);
+	}
+	POP_MULTICALL;
+
+	if(ret_gimme == G_ARRAY)
+	    for(i = 0; i < reti; i++)
+		sv_2mortal(stack[i]);
+    }
+    else
+#endif
     {
 	for(; argi < items; argi += 2) {
 	    dSP;
@@ -427,14 +510,6 @@ PPCODE:
 	    SPAGAIN;
 
 	    if(count > 2 && !args_copy) {
-		/* We can't return more than 2 results for a given input pair
-		 * without trashing the remaining argmuents on the stack still
-		 * to be processed. So, we'll copy them out to a temporary
-		 * buffer and work from there instead.
-		 * We didn't do this initially because in the common case, most
-		 * code blocks will return only 1 or 2 items so it won't be
-		 * necessary
-		 */
 		int n_args = items - argi;
 		Newx(args_copy, n_args, SV *);
 		SAVEFREEPV(args_copy);
