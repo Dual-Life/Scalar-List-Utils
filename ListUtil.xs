@@ -357,7 +357,38 @@ PPCODE:
     bgv = gv_fetchpv("b", GV_ADD, SVt_PV);
     SAVESPTR(GvSV(agv));
     SAVESPTR(GvSV(bgv));
+#ifdef dMULTICALL
+    if(!CvISXSUB(cv)) {
+	// Since MULTICALL is about to move it
+	SV **stack = PL_stack_base + ax;
 
+	dMULTICALL;
+	I32 gimme = G_SCALAR;
+
+	PUSH_MULTICALL(cv);
+	for(; argi < items; argi += 2) {
+	    SV *a = GvSV(agv) = stack[argi];
+	    SV *b = GvSV(bgv) = argi < items-1 ? stack[argi+1] : &PL_sv_undef;
+
+	    MULTICALL;
+
+            if(!SvTRUEx(*PL_stack_sp))
+		continue;
+
+	    POP_MULTICALL;
+	    if(ret_gimme == G_ARRAY) {
+		ST(0) = sv_mortalcopy(a);
+		ST(1) = sv_mortalcopy(b);
+		XSRETURN(2);
+	    }
+	    else
+		XSRETURN_YES;
+	}
+	POP_MULTICALL;
+	XSRETURN(0);
+    }
+    else
+#endif
     {
 	for(; argi < items; argi += 2) {
 	    dSP;
