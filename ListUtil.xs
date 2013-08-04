@@ -536,9 +536,10 @@ PPCODE:
 	    SV *b = GvSV(bgv) = argi < items-1 ? 
 		(args_copy ? args_copy[argi+1] : stack[argi+1]) :
 		&PL_sv_undef;
+	    int count;
 
 	    MULTICALL;
-	    int count = PL_stack_sp - PL_stack_base;
+	    count = PL_stack_sp - PL_stack_base;
 
 	    if(count > 2 && !args_copy) {
 		/* We can't return more than 2 results for a given input pair
