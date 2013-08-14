@@ -353,6 +353,9 @@ PPCODE:
     I32 ret_gimme = GIMME_V;
     int argi = 1; // "shift" the block
 
+    if(!(items % 2) && ckWARN(WARN_MISC))
+	warn("Odd number of elements in pairfirst");
+
     agv = gv_fetchpv("a", GV_ADD, SVt_PV);
     bgv = gv_fetchpv("b", GV_ADD, SVt_PV);
     SAVESPTR(GvSV(agv));
@@ -432,6 +435,9 @@ PPCODE:
      */
     int argi = 1; // "shift" the block
     int reti = 0;
+
+    if(!(items % 2) && ckWARN(WARN_MISC))
+	warn("Odd number of elements in pairgrep");
 
     agv = gv_fetchpv("a", GV_ADD, SVt_PV);
     bgv = gv_fetchpv("b", GV_ADD, SVt_PV);
@@ -515,6 +521,9 @@ PPCODE:
 
     int argi = 1; // "shift" the block
     int reti = 0;
+
+    if(!(items % 2) && ckWARN(WARN_MISC))
+	warn("Odd number of elements in pairmap");
 
     agv = gv_fetchpv("a", GV_ADD, SVt_PV);
     bgv = gv_fetchpv("b", GV_ADD, SVt_PV);
@@ -622,6 +631,9 @@ PPCODE:
     int argi = 0;
     int reti = 0;
 
+    if(items % 2 && ckWARN(WARN_MISC))
+	warn("Odd number of elements in pairs");
+
     {
 	for(; argi < items; argi += 2) {
 	    SV *a = ST(argi);
@@ -646,6 +658,9 @@ PPCODE:
     int argi = 0;
     int reti = 0;
 
+    if(items % 2 && ckWARN(WARN_MISC))
+	warn("Odd number of elements in pairkeys");
+
     {
 	for(; argi < items; argi += 2) {
 	    SV *a = ST(argi);
@@ -664,6 +679,9 @@ PPCODE:
 {
     int argi = 0;
     int reti = 0;
+
+    if(items % 2 && ckWARN(WARN_MISC))
+	warn("Odd number of elements in pairvalues");
 
     {
 	for(; argi < items; argi += 2) {

@@ -1,8 +1,10 @@
 #!./perl
 
 use strict;
-use Test::More tests => 18;
+use Test::More tests => 20;
 use List::Util qw(pairgrep pairfirst pairmap pairs pairkeys pairvalues);
+
+no warnings 'misc'; # avoid "Odd number of elements" warnings most of the time
 
 is_deeply( [ pairgrep { $b % 2 } one => 1, two => 2, three => 3 ],
            [ one => 1, three => 3 ],
@@ -15,6 +17,19 @@ is( scalar( pairgrep { $b & 2 } one => 1, two => 2, three => 3 ),
 is_deeply( [ pairgrep { $a } 0 => "zero", 1 => "one", 2 ],
            [ 1 => "one", 2 => undef ],
            'pairgrep pads with undef' );
+
+{
+  use warnings 'misc';
+  my $warnings = "";
+  local $SIG{__WARN__} = sub { $warnings .= $_[0] };
+
+  pairgrep { } one => 1, two => 2;
+  is( $warnings, "", 'even-sized list yields no warnings from pairgrep' );
+
+  pairgrep { } one => 1, two =>;
+  like( $warnings, qr/^Odd number of elements in pairgrep at /,
+        'odd-sized list yields warning from pairgrep' );
+}
 
 {
   my @kvlist = ( one => 1, two => 2 );
