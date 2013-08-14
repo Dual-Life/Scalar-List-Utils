@@ -1,7 +1,7 @@
 #!./perl
 
 use strict;
-use Test::More tests => 17;
+use Test::More tests => 18;
 use List::Util qw(pairgrep pairfirst pairmap pairs pairkeys pairvalues);
 
 is_deeply( [ pairgrep { $b % 2 } one => 1, two => 2, three => 3 ],
@@ -40,6 +40,10 @@ ok( !scalar( pairfirst { length $a == 4 } one => 1, two => 2, three => 3 ),
 is_deeply( [ pairmap { uc $a => $b } one => 1, two => 2, three => 3 ],
            [ ONE => 1, TWO => 2, THREE => 3 ],
            'pairmap list' );
+
+is( scalar( pairmap { qw( a b c ) } one => 1, two => 2 ),
+    6,
+    'pairmap scalar' );
 
 is_deeply( [ pairmap { $a => @$b } one => [1,1,1], two => [2,2,2], three => [3,3,3] ],
            [ one => 1, 1, 1, two => 2, 2, 2, three => 3, 3, 3 ],

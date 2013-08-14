@@ -586,7 +586,7 @@ PPCODE:
 
 	    SPAGAIN;
 
-	    if(count > 2 && !args_copy) {
+	    if(count > 2 && !args_copy && ret_gimme == G_ARRAY) {
 		int n_args = items - argi;
 		Newx(args_copy, n_args, SV *);
 		SAVEFREEPV(args_copy);
@@ -597,14 +597,21 @@ PPCODE:
 		items = n_args;
 	    }
 
-	    for(i = 0; i < count; i++)
-		ST(reti++) = sv_mortalcopy(SP[i - count + 1]);
+	    if(ret_gimme == G_ARRAY)
+		for(i = 0; i < count; i++)
+		    ST(reti++) = sv_mortalcopy(SP[i - count + 1]);
+	    else
+		reti += count;
 
 	    PUTBACK;
 	}
     }
 
-    XSRETURN(reti);
+    if(ret_gimme == G_ARRAY)
+	XSRETURN(reti);
+
+    ST(0) = sv_2mortal(newSViv(reti));
+    XSRETURN(1);
 }
 
 void
