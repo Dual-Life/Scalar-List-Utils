@@ -529,7 +529,7 @@ PPCODE:
     bgv = gv_fetchpv("b", GV_ADD, SVt_PV);
     SAVESPTR(GvSV(agv));
     SAVESPTR(GvSV(bgv));
-#ifdef dMULTICALL
+#if defined(dMULTICALL) && PERL_BCDVERSION != 589 && PERL_BCDVERSION != 510
     if(!CvISXSUB(cv)) {
 	// Since MULTICALL is about to move it
 	SV **stack = PL_stack_base + ax;
