@@ -80,9 +80,7 @@ so small such that being individual extensions would be wasteful.
 By default C<Scalar::Util> does not export any subroutines. The
 subroutines defined are
 
-=over 4
-
-=item blessed EXPR
+=head2 blessed EXPR
 
 If EXPR evaluates to a blessed reference the name of the package
 that it is blessed into is returned. Otherwise C<undef> is returned.
@@ -96,7 +94,7 @@ that it is blessed into is returned. Otherwise C<undef> is returned.
    $obj    = bless [], "Foo";
    $class  = blessed $obj;              # "Foo"
 
-=item dualvar NUM, STRING
+=head2 dualvar NUM, STRING
 
 Returns a scalar that has the value NUM in a numeric context and the
 value STRING in a string context.
@@ -105,7 +103,7 @@ value STRING in a string context.
     $num = $foo + 2;                    # 12
     $str = $foo . " world";             # Hello world
 
-=item isdual EXPR
+=head2 isdual EXPR
 
 If EXPR is a scalar that is a dualvar, the result is true.
 
@@ -132,7 +130,7 @@ You can capture its numeric and string content using:
     $err = dualvar $!, $!;
     $dual = isdual($err);               # true
 
-=item isvstring EXPR
+=head2 isvstring EXPR
 
 If EXPR is a scalar which was coded as a vstring the result is true.
 
@@ -140,12 +138,12 @@ If EXPR is a scalar which was coded as a vstring the result is true.
     $fmt  = isvstring($vs) ? "%vd" : "%s"; #true
     printf($fmt,$vs);
 
-=item looks_like_number EXPR
+=head2 looks_like_number EXPR
 
 Returns true if perl thinks EXPR is a number. See
 L<perlapi/looks_like_number>.
 
-=item openhandle FH
+=head2 openhandle FH
 
 Returns FH if FH may be used as a filehandle and is open, or FH is a tied
 handle. Otherwise C<undef> is returned.
@@ -155,7 +153,7 @@ handle. Otherwise C<undef> is returned.
     $fh = openhandle(*NOTOPEN);         # undef
     $fh = openhandle("scalar");         # undef
 
-=item readonly SCALAR
+=head2 readonly SCALAR
 
 Returns true if SCALAR is readonly.
 
@@ -164,7 +162,7 @@ Returns true if SCALAR is readonly.
     $readonly = foo($bar);              # false
     $readonly = foo(0);                 # true
 
-=item refaddr EXPR
+=head2 refaddr EXPR
 
 If EXPR evaluates to a reference the internal memory address of
 the referenced value is returned. Otherwise C<undef> is returned.
@@ -176,7 +174,7 @@ the referenced value is returned. Otherwise C<undef> is returned.
     $obj  = bless {}, "Foo";
     $addr = refaddr $obj;               # eg 88123488
 
-=item reftype EXPR
+=head2 reftype EXPR
 
 If EXPR evaluates to a reference the type of the variable referenced
 is returned. Otherwise C<undef> is returned.
@@ -188,21 +186,21 @@ is returned. Otherwise C<undef> is returned.
     $obj  = bless {}, "Foo";
     $type = reftype $obj;               # HASH
 
-=item set_prototype CODEREF, PROTOTYPE
+=head2 set_prototype CODEREF, PROTOTYPE
 
 Sets the prototype of the given function, or deletes it if PROTOTYPE is
 undef. Returns the CODEREF.
 
     set_prototype \&foo, '$$';
 
-=item tainted EXPR
+=head2 tainted EXPR
 
 Return true if the result of EXPR is tainted
 
     $taint = tainted("constant");       # false
     $taint = tainted($ENV{PWD});        # true if running under -T
 
-=item weaken REF
+=head2 weaken REF
 
 REF will be turned into a weak reference. This means that it will not
 hold a reference count on the object it references. Also when the reference
@@ -237,7 +235,7 @@ references to objects will be strong, causing the remaining objects to never
 be destroyed because there is now always a strong reference to them in the
 @object array.
 
-=item isweak EXPR
+=head2 isweak EXPR
 
 If EXPR is a scalar which is a weak reference the result is true.
 
@@ -250,8 +248,6 @@ B<NOTE>: Copying a weak reference creates a normal, strong, reference.
 
     $copy = $ref;
     $weak = isweak($copy);              # false
-
-=back
 
 =head1 DIAGNOSTICS
 
