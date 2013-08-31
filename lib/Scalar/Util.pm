@@ -94,6 +94,10 @@ that it is blessed into is returned. Otherwise C<undef> is returned.
    $obj    = bless [], "Foo";
    $class  = blessed $obj;              # "Foo"
 
+Take care when using this function simply as a truth test (such as in
+C<if(blessed $ref)...>) because the package name C<"0"> is defined yet
+false.
+
 =head2 dualvar NUM, STRING
 
 Returns a scalar that has the value NUM in a numeric context and the
