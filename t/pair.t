@@ -2,7 +2,8 @@
 
 use strict;
 use Test::More tests => 20;
-use List::Util qw(pairgrep pairfirst pairmap pairs pairkeys pairvalues);
+use List::Util qw(pairgrep pairfirst pairs pairkeys pairvalues);
+List::Util->import('pairmap') if $] < 5.008009 or $] > 5.010000;
 
 no warnings 'misc'; # avoid "Odd number of elements" warnings most of the time
 
@@ -52,33 +53,38 @@ is( scalar( pairfirst { length $a == 5 } one => 1, two => 2, three => 3 ),
 ok( !scalar( pairfirst { length $a == 4 } one => 1, two => 2, three => 3 ),
     'pairfirst scalar false' );
 
-is_deeply( [ pairmap { uc $a => $b } one => 1, two => 2, three => 3 ],
+SKIP: {
+  skip "pairmap broken on 5.8.9 and 5.10.0", 6 if $] > 5.008008 and $] < 5.010001;
+
+  is_deeply( [ pairmap { uc $a => $b } one => 1, two => 2, three => 3 ],
            [ ONE => 1, TWO => 2, THREE => 3 ],
            'pairmap list' );
 
-is( scalar( pairmap { qw( a b c ) } one => 1, two => 2 ),
+  is( scalar( pairmap { qw( a b c ) } one => 1, two => 2 ),
     6,
     'pairmap scalar' );
 
-is_deeply( [ pairmap { $a => @$b } one => [1,1,1], two => [2,2,2], three => [3,3,3] ],
+  is_deeply( [ pairmap { $a => @$b } one => [1,1,1], two => [2,2,2], three => [3,3,3] ],
            [ one => 1, 1, 1, two => 2, 2, 2, three => 3, 3, 3 ],
            'pairmap list returning >2 items' );
 
-is_deeply( [ pairmap { $b } one => 1, two => 2, three => ],
+  is_deeply( [ pairmap { $b } one => 1, two => 2, three => ],
            [ 1, 2, undef ],
            'pairmap pads with undef' );
 
-{
-  my @kvlist = ( one => 1, two => 2 );
-  pairmap { $b++ } @kvlist;
-  is_deeply( \@kvlist, [ one => 2, two => 3 ], 'pairmap aliases elements' );
-}
+  {
+    my @kvlist = ( one => 1, two => 2 );
+    pairmap { $b++ } @kvlist;
+    is_deeply( \@kvlist, [ one => 2, two => 3 ], 'pairmap aliases elements' );
+  }
 
-# Calculating a 1000-element list should hopefully cause the stack to move
-# underneath pairmap
-is_deeply( [ pairmap { my @l = (1) x 1000; "$a=$b" } one => 1, two => 2, three => 3 ],
+  # Calculating a 1000-element list should hopefully cause the stack to move
+  # underneath pairmap
+  is_deeply( [ pairmap { my @l = (1) x 1000; "$a=$b" } one => 1, two => 2, three => 3 ],
            [ "one=1", "two=2", "three=3" ],
            'pairmap copes with stack movement' );
+
+}
 
 is_deeply( [ pairs one => 1, two => 2, three => 3 ],
            [ [ one => 1 ], [ two => 2 ], [ three => 3 ] ],

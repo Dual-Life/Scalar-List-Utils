@@ -12,8 +12,9 @@ use strict;
 require Exporter;
 
 our @ISA        = qw(Exporter);
-our @EXPORT_OK  = qw(first min max minstr maxstr reduce sum sum0 shuffle pairmap pairgrep pairfirst pairs pairkeys pairvalues);
-our $VERSION    = "1.31";
+our @EXPORT_OK  = qw(first min max minstr maxstr reduce sum sum0 shuffle pairgrep pairfirst pairs pairkeys pairvalues);
+push @EXPORT_OK, 'pairmap' if $] < 5.008009 or $] > 5.010000;
+our $VERSION    = "1.32";
 our $XS_VERSION = $VERSION;
 $VERSION    = eval $VERSION;
 
@@ -220,7 +221,7 @@ Similar to C<grep>, C<pairfirst> aliases C<$a> and C<$b> to elements of the
 given list. Any modifications of it by the code block will be visible to
 the caller.
 
-=head2 pairmap BLOCK KVLIST
+=head2 pairmap BLOCK KVLIST (disabled in 5.8.9 and 5.10.0)
 
 Similar to perl's C<map> keyword, but interprets the given list as an
 even-sized list of pairs. It invokes the BLOCK multiple times, in list
@@ -236,6 +237,8 @@ in scalar context.
 Similar to C<map>, C<pairmap> aliases C<$a> and C<$b> to elements of the
 given list. Any modifications of it by the code block will be visible to
 the caller.
+
+C<pairmap> is not exported and does not work in perl 5.8.9 and 5.10.0.
 
 =head2 pairs KVLIST
 
@@ -284,9 +287,11 @@ Returns the elements of LIST in a random order
 
 =head1 KNOWN BUGS
 
-With perl versions prior to 5.005 there are some cases where reduce
+With perl versions prior to 5.005 there are some cases where C<reduce>
 will return an incorrect result. This will show up as test 7 of
-reduce.t failing.
+F<t/reduce.t> failing.
+
+With perl versions 5.8.9 and 5.10.0 C<pairmap> is broken and not exported.
 
 =head1 SUGGESTED ADDITIONS
 

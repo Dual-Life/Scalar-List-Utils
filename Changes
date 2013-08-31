@@ -1,3 +1,7 @@
+1.32 -- 
+
+  * Disable pairmap on 5.8.9 and 5.10.0, added with 1.28
+
 1.31 -- Wed Aug 14 20:38 UTC 2013
 
   * Bugfix pairmap to return list length in scalar context
