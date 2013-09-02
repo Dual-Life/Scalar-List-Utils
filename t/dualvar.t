@@ -16,7 +16,7 @@ BEGIN {
 use Scalar::Util ();
 use Test::More  (grep { /dualvar/ } @Scalar::Util::EXPORT_FAIL)
 			? (skip_all => 'dualvar requires XS version')
-			: (tests => 41);
+			: (tests => 42);
 use Config;
 
 Scalar::Util->import('dualvar');
@@ -49,7 +49,7 @@ ok( isdual($var),	'Is a dualvar');
 ok( $var == $numstr,	'NV');
 
 SKIP: {
-  skip("dualvar with UV value known to fail with $]",2) if $] < 5.006_001;
+  skip("dualvar with UV value known to fail with $]",3) if $] < 5.006_001;
   my $bits = ($Config{'use64bitint'}) ? 63 : 31;
   $var = dualvar(1<<$bits, "");
   ok( isdual($var),		'Is a dualvar');
