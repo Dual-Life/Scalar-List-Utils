@@ -11,6 +11,7 @@ MYMETA.yml
 ppport.h
 README
 t/00version.t
+t/any-all.t
 t/blessed.t
 t/dualvar.t
 t/first.t
