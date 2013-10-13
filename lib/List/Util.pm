@@ -88,6 +88,12 @@ element is returned and BLOCK is not executed.
     $foo = reduce { $a + $b } 1 .. 10               # sum
     $foo = reduce { $a . $b } @bar                  # concat
 
+    $foo = reduce { $a || $code->(local $_ = $b) } 0, @bar   # any
+    $foo = reduce { $a && $code->(local $_ = $b) } 1, @bar   # all
+    $foo = reduce { $a && !$code->(local $_ = $b) } 1, @bar  # none
+    $foo = reduce { $a || !$code->(local $_ = $b) } 0, @bar  # notall
+       # Note that these implementations do not fully short-circuit
+
 If your algorithm requires that C<reduce> produce an identity value, then
 make sure that you always pass that identity value as the first argument to prevent
 C<undef> being returned
