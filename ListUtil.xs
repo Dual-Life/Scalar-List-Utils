@@ -353,7 +353,6 @@ PPCODE:
 {
     int ret    = (ix == 0 || ix == 3);
     int invert = (ix == 1 || ix == 3);
-    int index;
     GV *gv;
     HV *stash;
     SV **args = &PL_stack_base[ax];
@@ -363,16 +362,39 @@ PPCODE:
     }
 
     SAVESPTR(GvSV(PL_defgv));
+#ifdef dMULTICALL
+    if(!CvISXSUB(cv)) {
+	dMULTICALL;
+	I32 gimme = G_SCALAR;
+	int index;
 
-    for(index = 1; index < items; index++) {
-	dSP;
-	GvSV(PL_defgv) = args[index];
+	PUSH_MULTICALL(cv);
+	for(index = 1; index < items; index++) {
+	    GvSV(PL_defgv) = args[index];
 
-	PUSHMARK(SP);
-	call_sv((SV*)cv, G_SCALAR);
-	if (SvTRUEx(*PL_stack_sp) ^ invert) {
-	    ST(0) = newSViv(ret);
-	    XSRETURN(1);
+	    MULTICALL;
+	    if (SvTRUEx(*PL_stack_sp) ^ invert) {
+		POP_MULTICALL;
+		ST(0) = newSViv(ret);
+		XSRETURN(1);
+	    }
+	}
+	POP_MULTICALL;
+    }
+    else
+#endif
+    {
+	int index;
+	for(index = 1; index < items; index++) {
+	    dSP;
+	    GvSV(PL_defgv) = args[index];
+
+	    PUSHMARK(SP);
+	    call_sv((SV*)cv, G_SCALAR);
+	    if (SvTRUEx(*PL_stack_sp) ^ invert) {
+		ST(0) = newSViv(ret);
+		XSRETURN(1);
+	    }
 	}
     }
 
