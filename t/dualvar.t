@@ -49,7 +49,7 @@ ok( isdual($var),	'Is a dualvar');
 ok( $var == $numstr,	'NV');
 
 SKIP: {
-  skip("dualvar with UV value known to fail with $]",2) if $] < 5.006_001;
+  skip("dualvar with UV value known to fail with $]",3) if $] < 5.006_001;
   my $bits = ($Config{'use64bitint'}) ? 63 : 31;
   $var = dualvar(1<<$bits, "");
   ok( isdual($var),		'Is a dualvar');
@@ -78,7 +78,7 @@ ok($var eq 'ok',	'Tied str');
 
 
 SKIP: {
-  skip("need utf8::is_utf8",3) unless defined &utf8::is_utf8;
+  skip("need utf8::is_utf8",2) unless defined &utf8::is_utf8;
   ok(!!utf8::is_utf8(dualvar(1,chr(400))), 'utf8');
   ok( !utf8::is_utf8(dualvar(1,"abc")),    'not utf8');
 }
