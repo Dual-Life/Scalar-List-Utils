@@ -16,7 +16,7 @@ BEGIN {
 use Scalar::Util ();
 use Test::More  (grep { /dualvar/ } @Scalar::Util::EXPORT_FAIL)
 			? (skip_all => 'dualvar requires XS version')
-			: (tests => 41);
+			: (tests => 42);
 use Config;
 
 Scalar::Util->import('dualvar');
@@ -90,10 +90,18 @@ SKIP: {
   require threads::shared; import threads::shared;
   skip("Requires threads::shared v1.42 or later",20) unless ($threads::shared::VERSION >= 1.42);
 
-  my $siv :shared = dualvar(42, 'Fourty-Two');
-  my $snv :shared = dualvar(3.14, 'PI');
+  my $siv;
+  share($siv);
+  $siv = dualvar(42, 'Fourty-Two');
+
+  my $snv;
+  share($snv);
+  $snv = dualvar(3.14, 'PI');
+
+  my $suv;
+  share($suv);
   my $bits = ($Config{'use64bitint'}) ? 63 : 31;
-  my $suv :shared = dualvar(1<<$bits, 'Large unsigned int');
+  $suv = dualvar(1<<$bits, 'Large unsigned int');
 
   ok($siv == 42, 'Shared IV number preserved');
   ok($siv eq 'Fourty-Two', 'Shared string preserved');
@@ -106,7 +114,8 @@ SKIP: {
   ok($suv eq 'Large unsigned int', 'Shared string preserved');
   ok(isdual($suv), 'Is a dualvar');
 
-  my @ary :shared;
+  my @ary;
+  share(@ary);
   $ary[0] = $siv;
   $ary[1] = $snv;
   $ary[2] = $suv;
