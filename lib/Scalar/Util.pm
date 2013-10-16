@@ -3,6 +3,8 @@
 # Copyright (c) 1997-2007 Graham Barr <gbarr@pobox.com>. All rights reserved.
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
+#
+# Maintained since 2013 by Paul Evans <leonerd@leonerd.org.uk>
 
 package Scalar::Util;
 
