@@ -16,7 +16,7 @@ BEGIN {
 use Scalar::Util ();
 use Test::More  (grep { /dualvar/ } @Scalar::Util::EXPORT_FAIL)
 			? (skip_all => 'dualvar requires XS version')
-			: (tests => 42);
+			: (tests => 41);
 use Config;
 
 Scalar::Util->import('dualvar');
@@ -83,11 +83,19 @@ SKIP: {
   ok( !utf8::is_utf8(dualvar(1,"abc")),    'not utf8');
 }
 
+BEGIN {
+  if($Config{'useithreads'}) {
+    require threads; import threads;
+    require threads::shared; import threads::shared;
+    require constant; import constant HAVE_THREADS => 1;
+  }
+  else {
+    require constant; import constant HAVE_THREADS => 0;
+  }
+}
 
 SKIP: {
-  skip("Perl not compiled with 'useithreads'",20) unless ($Config{'useithreads'});
-  require threads; import threads;
-  require threads::shared; import threads::shared;
+  skip("Perl not compiled with 'useithreads'",20) unless HAVE_THREADS;
   skip("Requires threads::shared v1.42 or later",20) unless ($threads::shared::VERSION >= 1.42);
 
   my $siv;
