@@ -232,7 +232,7 @@ CODE:
     CV* cv    = sv_2cv(block, &stash, &gv, 0);
 
     if (cv == Nullcv) {
-       croak("Not a subroutine reference");
+	croak("Not a subroutine reference");
     }
 
     if(items <= 1) {
@@ -290,7 +290,7 @@ CODE:
     SV **args = &PL_stack_base[ax];
     CV *cv    = sv_2cv(block, &stash, &gv, 0);
     if (cv == Nullcv) {
-       croak("Not a subroutine reference");
+	croak("Not a subroutine reference");
     }
 
     if(items <= 1) {
@@ -358,7 +358,7 @@ PPCODE:
     SV **args = &PL_stack_base[ax];
     CV *cv    = sv_2cv(block, &stash, &gv, 0);
     if (cv == Nullcv) {
-       croak("Not a subroutine reference");
+	croak("Not a subroutine reference");
     }
 
     SAVESPTR(GvSV(PL_defgv));
@@ -824,9 +824,11 @@ CODE:
 	SvIV_set(TARG, SvIV(num));
 	SvIOK_on(TARG);
     }
+
     if(PL_tainting && (SvTAINTED(num) || SvTAINTED(str)))
 	SvTAINTED_on(TARG);
-	ST(0) = TARG;
+
+    ST(0) = TARG;
     XSRETURN(1);
 }
 
@@ -836,7 +838,8 @@ isdual(sv)
 PROTOTYPE: $
 CODE:
     if (SvMAGICAL(sv))
-    mg_get(sv);
+	mg_get(sv);
+
     ST(0) = boolSV((SvPOK(sv) || SvPOKp(sv)) && (SvNIOK(sv) || SvNIOKp(sv)));
     XSRETURN(1);
 
@@ -887,82 +890,82 @@ OUTPUT:
 
 void
 weaken(sv)
-	SV *sv
+    SV *sv
 PROTOTYPE: $
 CODE:
 #ifdef SvWEAKREF
-	sv_rvweaken(sv);
+    sv_rvweaken(sv);
 #else
-	croak("weak references are not implemented in this release of perl");
+    croak("weak references are not implemented in this release of perl");
 #endif
 
 void
 isweak(sv)
-	SV *sv
+    SV *sv
 PROTOTYPE: $
 CODE:
 #ifdef SvWEAKREF
-	ST(0) = boolSV(SvROK(sv) && SvWEAKREF(sv));
-	XSRETURN(1);
+    ST(0) = boolSV(SvROK(sv) && SvWEAKREF(sv));
+    XSRETURN(1);
 #else
-	croak("weak references are not implemented in this release of perl");
+    croak("weak references are not implemented in this release of perl");
 #endif
 
 int
 readonly(sv)
-	SV *sv
+    SV *sv
 PROTOTYPE: $
 CODE:
-  SvGETMAGIC(sv);
-  RETVAL = SvREADONLY(sv);
+    SvGETMAGIC(sv);
+    RETVAL = SvREADONLY(sv);
 OUTPUT:
-  RETVAL
+    RETVAL
 
 int
 tainted(sv)
-	SV *sv
+    SV *sv
 PROTOTYPE: $
 CODE:
-  SvGETMAGIC(sv);
-  RETVAL = SvTAINTED(sv);
+    SvGETMAGIC(sv);
+    RETVAL = SvTAINTED(sv);
 OUTPUT:
-  RETVAL
+    RETVAL
 
 void
 isvstring(sv)
-       SV *sv
+    SV *sv
 PROTOTYPE: $
 CODE:
 #ifdef SvVOK
-  SvGETMAGIC(sv);
-  ST(0) = boolSV(SvVOK(sv));
-  XSRETURN(1);
+    SvGETMAGIC(sv);
+    ST(0) = boolSV(SvVOK(sv));
+    XSRETURN(1);
 #else
-	croak("vstrings are not implemented in this release of perl");
+    croak("vstrings are not implemented in this release of perl");
 #endif
 
 int
 looks_like_number(sv)
-	SV *sv
+    SV *sv
 PROTOTYPE: $
 CODE:
-  SV *tempsv;
-  SvGETMAGIC(sv);
-  if (SvAMAGIC(sv) && (tempsv = AMG_CALLun(sv, numer))) {
-    sv = tempsv;
-  }
+    SV *tempsv;
+    SvGETMAGIC(sv);
+    if (SvAMAGIC(sv) && (tempsv = AMG_CALLun(sv, numer))) {
+	sv = tempsv;
+    }
 #if PERL_BCDVERSION < 0x5008005
-  if (SvPOK(sv) || SvPOKp(sv)) {
-    RETVAL = looks_like_number(sv);
-  }
-  else {
-    RETVAL = SvFLAGS(sv) & (SVf_NOK|SVp_NOK|SVf_IOK|SVp_IOK);
-  }
+    if (SvPOK(sv) || SvPOKp(sv)) {
+	RETVAL = looks_like_number(sv);
+    }
+    else {
+	RETVAL = SvFLAGS(sv) & (SVf_NOK|SVp_NOK|SVf_IOK|SVp_IOK);
+    }
 #else
-  RETVAL = looks_like_number(sv);
+    RETVAL = looks_like_number(sv);
 #endif
 OUTPUT:
-  RETVAL
+    RETVAL
 
 void
 set_prototype(subref, proto)
