@@ -348,14 +348,15 @@ void
 any(block,...)
     SV *block
 ALIAS:
-    all = 1
-    none = 2
+    none   = 0
+    all    = 1
+    any    = 2
     notall = 3
 PROTOTYPE: &@
 PPCODE:
 {
-    int ret    = (ix == 0 || ix == 3);
-    int invert = (ix == 1 || ix == 3);
+    int ret_true = !(ix & 2); /* return true at end of loop for none/all; false for any/notall */
+    int invert   =  (ix & 1); /* invert block test for all/notall */
     GV *gv;
     HV *stash;
     SV **args = &PL_stack_base[ax];
@@ -378,7 +379,7 @@ PPCODE:
             MULTICALL;
             if(SvTRUEx(*PL_stack_sp) ^ invert) {
                 POP_MULTICALL;
-                ST(0) = newSViv(ret);
+                ST(0) = ret_true ? &PL_sv_no : &PL_sv_yes;
                 XSRETURN(1);
             }
         }
@@ -395,13 +396,13 @@ PPCODE:
             PUSHMARK(SP);
             call_sv((SV*)cv, G_SCALAR);
             if(SvTRUEx(*PL_stack_sp) ^ invert) {
-                ST(0) = newSViv(ret);
+                ST(0) = ret_true ? &PL_sv_no : &PL_sv_yes;
                 XSRETURN(1);
             }
         }
     }
 
-    ST(0) = newSViv(!ret);
+    ST(0) = ret_true ? &PL_sv_yes : &PL_sv_no;
     XSRETURN(1);
 }
 
