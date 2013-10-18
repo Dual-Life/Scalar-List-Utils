@@ -117,6 +117,9 @@ CODE:
 void
 sum(...)
 PROTOTYPE: @
+ALIAS:
+    sum  = 0
+    sum0 = 1
 CODE:
 {
     dXSTARG;
@@ -127,7 +130,10 @@ CODE:
     int magic;
 
     if(!items)
-        XSRETURN_UNDEF;
+        switch(ix) {
+            case 0: XSRETURN_UNDEF;
+            case 1: ST(0) = newSViv(0); XSRETURN(1);
+        }
 
     sv    = ST(0);
     magic = SvAMAGIC(sv);

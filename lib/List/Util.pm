@@ -36,12 +36,6 @@ sub import
   goto &Exporter::import;
 }
 
-sub sum0
-{
-   return 0 unless @_;
-   goto &sum;
-}
-
 1;
 
 __END__
