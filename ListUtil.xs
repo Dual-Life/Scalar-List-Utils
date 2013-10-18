@@ -220,7 +220,6 @@ CODE:
 
 
 
-#ifdef dMULTICALL
 
 void
 reduce(block,...)
@@ -247,7 +246,7 @@ CODE:
     SAVESPTR(GvSV(bgv));
     GvSV(agv) = ret;
     SvSetSV(ret, args[1]);
-
+#ifdef dMULTICALL
     if(!CvISXSUB(cv)) {
         dMULTICALL;
         I32 gimme = G_SCALAR;
@@ -258,13 +257,15 @@ CODE:
             MULTICALL;
             SvSetSV(ret, *PL_stack_sp);
         }
-#ifdef PERL_HAS_BAD_MULTICALL_REFCOUNT
+#  ifdef PERL_HAS_BAD_MULTICALL_REFCOUNT
         if(CvDEPTH(multicall_cv) > 1)
             SvREFCNT_inc_simple_void_NN(multicall_cv);
-#endif
+#  endif
         POP_MULTICALL;
     }
-    else {
+    else
+#endif
+    {
         for(index = 2 ; index < items ; index++) {
             dSP;
             GvSV(bgv) = args[index];
@@ -299,7 +300,7 @@ CODE:
         XSRETURN_UNDEF;
 
     SAVESPTR(GvSV(PL_defgv));
-
+#ifdef dMULTICALL
     if(!CvISXSUB(cv)) {
         dMULTICALL;
         I32 gimme = G_SCALAR;
@@ -309,22 +310,24 @@ CODE:
             GvSV(PL_defgv) = args[index];
             MULTICALL;
             if(SvTRUEx(*PL_stack_sp)) {
-#ifdef PERL_HAS_BAD_MULTICALL_REFCOUNT
+#  ifdef PERL_HAS_BAD_MULTICALL_REFCOUNT
                 if(CvDEPTH(multicall_cv) > 1)
                     SvREFCNT_inc_simple_void_NN(multicall_cv);
-#endif
+#  endif
                 POP_MULTICALL;
                 ST(0) = ST(index);
                 XSRETURN(1);
             }
         }
-#ifdef PERL_HAS_BAD_MULTICALL_REFCOUNT
+#  ifdef PERL_HAS_BAD_MULTICALL_REFCOUNT
         if(CvDEPTH(multicall_cv) > 1)
             SvREFCNT_inc_simple_void_NN(multicall_cv);
-#endif
+#  endif
         POP_MULTICALL;
     }
-    else {
+    else
+#endif
+    {
         for(index = 1 ; index < items ; index++) {
             dSP;
             GvSV(PL_defgv) = args[index];
@@ -340,7 +343,6 @@ CODE:
     XSRETURN_UNDEF;
 }
 
-#endif
 
 void
 any(block,...)
