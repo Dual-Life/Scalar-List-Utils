@@ -13,7 +13,7 @@ require Exporter;
 
 our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw(
-  all any first min max minstr maxstr none notall reduce sum sum0 shuffle
+  all any first min max minstr maxstr none notall product reduce sum sum0 shuffle
   pairmap pairgrep pairfirst pairs pairkeys pairvalues
 );
 our $VERSION    = "1.33";
@@ -184,6 +184,14 @@ If the list is empty then C<undef> is returned.
     $foo = minstr 'A'..'Z'          # 'A'
     $foo = minstr "hello","world"   # "hello"
     $foo = minstr @bar, @baz        # whatever
+
+=head2 product LIST
+
+Returns the product of all the elements in LIST. If LIST is empty then C<1> is
+returned.
+
+    $foo = product 1..10            # 3628800
+    $foo = product 3,9,12           # 324
 
 =head2 sum LIST
 

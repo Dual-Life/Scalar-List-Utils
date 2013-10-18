@@ -118,8 +118,9 @@ void
 sum(...)
 PROTOTYPE: @
 ALIAS:
-    sum  = 0
-    sum0 = 1
+    sum     = 0
+    sum0    = 1
+    product = 2
 CODE:
 {
     dXSTARG;
@@ -128,11 +129,13 @@ CODE:
     int index;
     NV retval = 0;
     int magic;
+    int is_product = (ix == 2);
 
     if(!items)
         switch(ix) {
             case 0: XSRETURN_UNDEF;
             case 1: ST(0) = newSViv(0); XSRETURN(1);
+            case 2: ST(0) = newSViv(1); XSRETURN(1);
         }
 
     sv    = ST(0);
@@ -154,7 +157,9 @@ CODE:
             sv_setnv(retsv,retval);
         }
         if(magic) {
-            SV *const tmpsv = amagic_call(retsv, sv, add_amg, SvAMAGIC(retsv) ? AMGf_assign : 0);
+            SV *const tmpsv = amagic_call(retsv, sv, 
+                is_product ? mult_amg : add_amg,
+                SvAMAGIC(retsv) ? AMGf_assign : 0);
             if(tmpsv) {
                 magic = SvAMAGIC(tmpsv);
                 if(!magic) {
@@ -167,11 +172,13 @@ CODE:
             else {
                 /* fall back to default */
                 magic = FALSE;
-                retval = SvNV(retsv) + SvNV(sv);
+                is_product ? (retval = SvNV(retsv) * SvNV(sv))
+                           : (retval = SvNV(retsv) + SvNV(sv));
             }
         }
         else {
-            retval += slu_sv_value(sv);
+            is_product ? (retval *= slu_sv_value(sv))
+                       : (retval += slu_sv_value(sv));
         }
     }
     if(!magic) {
