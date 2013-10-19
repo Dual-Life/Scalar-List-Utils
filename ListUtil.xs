@@ -62,6 +62,49 @@ my_sv_copypv(pTHX_ SV *const dsv, SV *const ssv)
 #  define PERL_HAS_BAD_MULTICALL_REFCOUNT
 #endif
 
+static XOP xop_blessed;
+static OP *pp_blessed(pTHX)
+{
+    dSP;
+    SV *sv = POPs;
+
+    SvGETMAGIC(sv);
+
+    if(SvROK(sv) && SvOBJECT(SvRV(sv))) {
+        PUSHs(sv_newmortal());
+        sv_setpv(TOPs, sv_reftype(SvRV(sv), TRUE));
+    }
+    else
+        PUSHs(&PL_sv_undef);
+
+    return PL_op->op_next;
+}
+
+static OP *ck_blessed(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
+{
+    OP *pushop, *argop, *blessedop;
+    entersubop = ck_entersub_args_proto(entersubop, namegv, protosv);
+    pushop = cUNOPx(entersubop)->op_first;
+    // First two children of pushop should be PUSHMARK and the argument
+    if(!pushop || cLISTOPx(pushop)->op_first->op_type != OP_PUSHMARK)
+        return entersubop;
+
+    // splice the arg op out of the list
+    argop = cLISTOPx(pushop)->op_first->op_sibling;
+    cLISTOPx(pushop)->op_first->op_sibling = argop->op_sibling;
+
+    argop->op_sibling = NULL;
+
+    // free the old optree entirely
+    op_free(entersubop);
+
+    // make a brand new one
+    blessedop = newUNOP(OP_CUSTOM, 0, argop);
+    blessedop->op_ppaddr = &pp_blessed;
+
+    return blessedop;
+}
+
 MODULE=List::Util       PACKAGE=List::Util
 
 void
@@ -1049,10 +1092,11 @@ CODE:
 BOOT:
 {
     HV *lu_stash = gv_stashpvn("List::Util", 10, TRUE);
+    HV *su_stash = gv_stashpvn("Scalar::Util", 12, TRUE);
+
     GV *rmcgv = *(GV**)hv_fetch(lu_stash, "REAL_MULTICALL", 14, TRUE);
     SV *rmcsv;
 #if !defined(SvWEAKREF) || !defined(SvVOK)
-    HV *su_stash = gv_stashpvn("Scalar::Util", 12, TRUE);
     GV *vargv = *(GV**)hv_fetch(su_stash, "EXPORT_FAIL", 11, TRUE);
     AV *varav;
     if(SvTYPE(vargv) != SVt_PVGV)
@@ -1074,4 +1118,14 @@ BOOT:
 #else
     sv_setsv(rmcsv, &PL_sv_no);
 #endif
+
+    {
+        CV *blessedcv = get_cv("Scalar::Util::blessed", 0);
+        cv_set_call_checker(blessedcv, &ck_blessed, (SV *)blessedcv);
+
+        XopENTRY_set(&xop_blessed, xop_name, "blessed");
+        XopENTRY_set(&xop_blessed, xop_desc, "blessed()");
+        XopENTRY_set(&xop_blessed, xop_class, OA_UNOP);
+        Perl_custom_op_register(aTHX_ &pp_blessed, &xop_blessed);
+    }
 }
