@@ -234,9 +234,9 @@ of the count of items it would have returned in list context).
 
     @subset = pairgrep { $a =~ m/^[[:upper:]]+$/ } @kvlist
 
-Similar to C<grep>, C<pairgrep> aliases C<$a> and C<$b> to elements of the
-given list. Any modifications of it by the code block will be visible to
-the caller.
+As with C<grep> aliasing C<$_> to list elements, C<pairgrep> aliases C<$a>
+and C<$b> to elements of the given list. Any modifications of it by the
+code block will be visible to the caller.
 
 =head2 pairfirst BLOCK KVLIST
 
@@ -252,9 +252,9 @@ value found.
 
     ( $key, $value ) = pairfirst { $a =~ m/^[[:upper:]]+$/ } @kvlist
 
-Similar to C<grep>, C<pairfirst> aliases C<$a> and C<$b> to elements of the
-given list. Any modifications of it by the code block will be visible to
-the caller.
+As with C<grep> aliasing C<$_> to list elements, C<pairfirst> aliases C<$a>
+and C<$b> to elements of the given list. Any modifications of it by the
+code block will be visible to the caller.
 
 =head2 pairmap BLOCK KVLIST
 
@@ -269,9 +269,9 @@ in scalar context.
 
     @result = pairmap { "The key $a has value $b" } @kvlist
 
-Similar to C<map>, C<pairmap> aliases C<$a> and C<$b> to elements of the
-given list. Any modifications of it by the code block will be visible to
-the caller.
+As with C<map> aliasing C<$_> to list elements, C<pairmap> aliases C<$a>
+and C<$b> to elements of the given list. Any modifications of it by the
+code block will be visible to the caller.
 
 =head2 pairs KVLIST
 
