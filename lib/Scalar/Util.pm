@@ -74,18 +74,18 @@ Scalar::Util - A selection of general-utility scalar subroutines
 
 =head1 DESCRIPTION
 
-C<Scalar::Util> contains a selection of subroutines that people have
-expressed would be nice to have in the perl core, but the usage would
-not really be high enough to warrant the use of a keyword, and the size
-so small such that being individual extensions would be wasteful.
+C<Scalar::Util> contains a selection of subroutines that people have expressed
+would be nice to have in the perl core, but the usage would not really be high
+enough to warrant the use of a keyword, and the size so small such that being
+individual extensions would be wasteful.
 
-By default C<Scalar::Util> does not export any subroutines. The
-subroutines defined are
+By default C<Scalar::Util> does not export any subroutines. The subroutines
+defined are
 
 =head2 blessed EXPR
 
-If EXPR evaluates to a blessed reference the name of the package
-that it is blessed into is returned. Otherwise C<undef> is returned.
+If EXPR evaluates to a blessed reference the name of the package that it is
+blessed into is returned. Otherwise C<undef> is returned.
 
    $scalar = "foo";
    $class  = blessed $scalar;           # undef
@@ -97,13 +97,12 @@ that it is blessed into is returned. Otherwise C<undef> is returned.
    $class  = blessed $obj;              # "Foo"
 
 Take care when using this function simply as a truth test (such as in
-C<if(blessed $ref)...>) because the package name C<"0"> is defined yet
-false.
+C<if(blessed $ref)...>) because the package name C<"0"> is defined yet false.
 
 =head2 dualvar NUM, STRING
 
-Returns a scalar that has the value NUM in a numeric context and the
-value STRING in a string context.
+Returns a scalar that has the value NUM in a numeric context and the value
+STRING in a string context.
 
     $foo = dualvar 10, "Hello";
     $num = $foo + 2;                    # 12
@@ -116,16 +115,16 @@ If EXPR is a scalar that is a dualvar, the result is true.
     $foo = dualvar 86, "Nix";
     $dual = isdual($foo);               # true
 
-Note that a scalar can be made to have both string and numeric content
-through numeric operations:
+Note that a scalar can be made to have both string and numeric content through
+numeric operations:
 
     $foo = "10";
     $dual = isdual($foo);               # false
     $bar = $foo + 0;
     $dual = isdual($foo);               # true
 
-Note that although C<$!> appears to be dual-valued variable, it is
-actually implemented using a tied scalar:
+Note that although C<$!> appears to be dual-valued variable, it is actually
+implemented using a tied scalar:
 
     $! = 1;
     print("$!\n");                      # "Operation not permitted"
@@ -146,8 +145,7 @@ If EXPR is a scalar which was coded as a vstring the result is true.
 
 =head2 looks_like_number EXPR
 
-Returns true if perl thinks EXPR is a number. See
-L<perlapi/looks_like_number>.
+Returns true if perl thinks EXPR is a number. See L<perlapi/looks_like_number>.
 
 =head2 openhandle FH
 
@@ -170,8 +168,8 @@ Returns true if SCALAR is readonly.
 
 =head2 refaddr EXPR
 
-If EXPR evaluates to a reference the internal memory address of
-the referenced value is returned. Otherwise C<undef> is returned.
+If EXPR evaluates to a reference the internal memory address of the referenced
+value is returned. Otherwise C<undef> is returned.
 
     $addr = refaddr "string";           # undef
     $addr = refaddr \$var;              # eg 12345678
@@ -182,8 +180,8 @@ the referenced value is returned. Otherwise C<undef> is returned.
 
 =head2 reftype EXPR
 
-If EXPR evaluates to a reference the type of the variable referenced
-is returned. Otherwise C<undef> is returned.
+If EXPR evaluates to a reference the type of the variable referenced is
+returned. Otherwise C<undef> is returned.
 
     $type = reftype "string";           # undef
     $type = reftype \$var;              # SCALAR
@@ -194,8 +192,8 @@ is returned. Otherwise C<undef> is returned.
 
 =head2 set_prototype CODEREF, PROTOTYPE
 
-Sets the prototype of the given function, or deletes it if PROTOTYPE is
-undef. Returns the CODEREF.
+Sets the prototype of the given function, or deletes it if PROTOTYPE is undef.
+Returns the CODEREF.
 
     set_prototype \&foo, '$$';
 
@@ -208,12 +206,12 @@ Return true if the result of EXPR is tainted
 
 =head2 weaken REF
 
-REF will be turned into a weak reference. This means that it will not
-hold a reference count on the object it references. Also when the reference
-count on that object reaches zero, REF will be set to undef.
+REF will be turned into a weak reference. This means that it will not hold a
+reference count on the object it references. Also when the reference count on
+that object reaches zero, REF will be set to undef.
 
-This is useful for keeping copies of references , but you don't want to
-prevent the object being DESTROY-ed at its usual time.
+This is useful for keeping copies of references, but you don't want to prevent
+the object being DESTROY-ed at its usual time.
 
     {
       my $var;
@@ -222,8 +220,8 @@ prevent the object being DESTROY-ed at its usual time.
     }
     # $ref is now undef
 
-Note that if you take a copy of a scalar with a weakened reference,
-the copy will be a strong reference.
+Note that if you take a copy of a scalar with a weakened reference, the copy
+will be a strong reference.
 
     my $var;
     my $foo = \$var;
@@ -237,9 +235,9 @@ been destroyed already:
     @object = grep { defined } @object;
 
 This will indeed remove all references to destroyed objects, but the remaining
-references to objects will be strong, causing the remaining objects to never
-be destroyed because there is now always a strong reference to them in the
-@object array.
+references to objects will be strong, causing the remaining objects to never be
+destroyed because there is now always a strong reference to them in the @object
+array.
 
 =head2 isweak EXPR
 
@@ -263,8 +261,8 @@ Module use may give one of the following errors during import.
 
 =item Weak references are not implemented in the version of perl
 
-The version of perl that you are using does not implement weak references, to use
-C<isweak> or C<weaken> you will need to use a newer release of perl.
+The version of perl that you are using does not implement weak references, to
+use C<isweak> or C<weaken> you will need to use a newer release of perl.
 
 =item Vstrings are not implemented in the version of perl
 
@@ -273,9 +271,10 @@ C<isvstring> you will need to use a newer release of perl.
 
 =item C<NAME> is only available with the XS version of Scalar::Util
 
-C<Scalar::Util> contains both perl and C implementations of many of its functions
-so that those without access to a C compiler may still use it. However some of the functions
-are only available when a C compiler was available to compile the XS version of the extension.
+C<Scalar::Util> contains both perl and C implementations of many of its
+functions so that those without access to a C compiler may still use it.
+However some of the functions are only available when a C compiler was
+available to compile the XS version of the extension.
 
 At present that list is: weaken, isweak, dualvar, isvstring, set_prototype
 
