@@ -125,7 +125,7 @@ instead, as it can short-circuit after the first true result.
 =head2 all BLOCK LIST
 
 Similar to C<any>, except that it requires all elements of the LIST to make
-the BLOCK return true. If any element returns false, then it returns true. If
+the BLOCK return true. If any element returns false, then it returns false. If
 the BLOCK never returns false or the LIST was empty then it returns true.
 
 =head2 none BLOCK LIST
@@ -133,8 +133,8 @@ the BLOCK never returns false or the LIST was empty then it returns true.
 =head2 notall BLOCK LIST
 
 Similar to C<any> and C<all>, but with the return sense inverted. C<none>
-returns true if no value in the LIST causes the BLOCK to return true, and
-C<notall> returns true if not all of the values do.
+returns true only if no value in the LIST causes the BLOCK to return true, and
+C<notall> returns true only if not all of the values do.
 
 =head2 first BLOCK LIST
 
