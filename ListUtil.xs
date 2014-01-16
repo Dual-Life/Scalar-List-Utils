@@ -945,9 +945,18 @@ CODE:
     else if (SvREADONLY(sv)) croak_no_modify();
 
     tsv = SvRV(sv);
+#if PERL_VERSION >= 14
     SvWEAKREF_off(sv); SvROK_on(sv);
     SvREFCNT_inc_NN(tsv);
     Perl_sv_del_backref(aTHX_ tsv, sv);
+#else
+    /* Lacking sv_del_backref() the best we can do is clear the old (weak) ref
+     * then set a new strong one
+     */
+    sv_clear(sv);
+    SvRV_set(sv, SvREFCNT_inc_NN(tsv));
+    SvROK_on(sv);
+#endif
 #else
     croak("weak references are not implemented in this release of perl");
 #endif
