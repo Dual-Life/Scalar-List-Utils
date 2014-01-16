@@ -62,6 +62,10 @@ my_sv_copypv(pTHX_ SV *const dsv, SV *const ssv)
 #  define PERL_HAS_BAD_MULTICALL_REFCOUNT
 #endif
 
+#if PERL_VERSION < 14
+#  define croak_no_modify() croak("%s", PL_no_modify)
+#endif
+
 MODULE=List::Util       PACKAGE=List::Util
 
 void
