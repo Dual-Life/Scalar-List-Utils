@@ -17,9 +17,9 @@ BEGIN {
 use Scalar::Util ();
 use Test::More  ((grep { /weaken/ } @Scalar::Util::EXPORT_FAIL) and !$ENV{PERL_CORE})
 			? (skip_all => 'weaken requires XS version')
-			: (tests => 22);
+			: (tests => 27);
 
-Scalar::Util->import(qw(weaken isweak));
+Scalar::Util->import(qw(weaken unweaken isweak));
 
 # two references, one is weakened, the other is then undef'ed.
 {
@@ -125,6 +125,29 @@ my $flag;
   weaken($x->{Y} = \$a);
   ok(isweak($x->{Y}));
   ok(!isweak($x->{Z}));
+}
+
+# unweaken
+{
+  my ($y,$z);
+  {
+    my $x = "foo";
+    $y = \$x;
+    $z = \$x;
+  }
+
+  weaken($y);
+
+  ok(isweak($y), '$y is weak after weaken()');
+  is($$y, "foo", '$y points at \"foo" after weaken()');
+
+  unweaken($y);
+
+  ok(!isweak($y), '$y is not weak after unweaken()');
+  is($$y, "foo", '$y points at \"foo" after unweaken()');
+
+  undef $z;
+  ok(defined $y, '$y still defined after undef $z');
 }
 
 # test weaken on a read only ref

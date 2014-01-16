@@ -12,7 +12,7 @@ require List::Util; # List::Util loads the XS
 
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(
-  blessed refaddr reftype weaken isweak
+  blessed refaddr reftype weaken unweaken isweak
 
   dualvar isdual isvstring looks_like_number openhandle readonly set_prototype tainted
 );
@@ -153,6 +153,23 @@ This will indeed remove all references to destroyed objects, but the remaining
 references to objects will be strong, causing the remaining objects to never be
 destroyed because there is now always a strong reference to them in the @object
 array.
+
+=head2 unweaken( REF )
+
+The lvalue C<REF> will be turned from a weak reference back into a normal
+(strong) reference again. This function mutates the lvalue passed as its
+argument and returns no value. This undoes the action performed by
+C<weaken()>.
+
+This function is slightly neater and more convenient than the
+otherwise-equivalent code
+
+    my $tmp = $REF;
+    undef $REF;
+    $REF = $tmp;
+
+(because in particular, simply assigning a weak reference back to itself does
+not work to unweaken it; C<$REF = $REF> does not work).
 
 =head2 $weak = isweak( $ref )
 

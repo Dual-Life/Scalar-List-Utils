@@ -922,6 +922,33 @@ CODE:
 #endif
 
 void
+unweaken(sv)
+    SV *sv
+PROTOTYPE: $
+INIT:
+    SV *tsv;
+CODE:
+#ifdef SvWEAKREF
+    /* This code stolen from core's sv_rvweaken() and modified */
+    if (!SvOK(sv))
+        return;
+    if (!SvROK(sv))
+        croak("Can't unweaken a nonreference");
+    else if (!SvWEAKREF(sv)) {
+        Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Reference is not weak");
+        return;
+    }
+    else if (SvREADONLY(sv)) croak_no_modify();
+
+    tsv = SvRV(sv);
+    SvWEAKREF_off(sv); SvROK_on(sv);
+    SvREFCNT_inc_NN(tsv);
+    Perl_sv_del_backref(aTHX_ tsv, sv);
+#else
+    croak("weak references are not implemented in this release of perl");
+#endif
+
+void
 isweak(sv)
     SV *sv
 PROTOTYPE: $
