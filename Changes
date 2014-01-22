@@ -1,3 +1,8 @@
+1.38 -- 2014/01/22 15:33:24
+        [BUGFIXES]
+	 * Avoid Perl_ckwarn() in unweaken() because it's missing on older
+	   perls; ckWARN() like the rest of the code (RT92363)
+
 1.37 -- 2014/01/21 14:44:34
         [BUGFIXES]
 	 * Fix unweaken() for perls < 5.14; need to use sv_setsv() to undef
