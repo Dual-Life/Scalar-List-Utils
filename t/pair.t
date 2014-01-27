@@ -1,7 +1,7 @@
 #!./perl
 
 use strict;
-use Test::More tests => 20;
+use Test::More tests => 21;
 use List::Util qw(pairgrep pairfirst pairmap pairs pairkeys pairvalues);
 
 no warnings 'misc'; # avoid "Odd number of elements" warnings most of the time
@@ -95,3 +95,15 @@ is_deeply( [ pairkeys one => 1, two => 2 ],
 is_deeply( [ pairvalues one => 1, two => 2 ],
            [ 1, 2 ],
            'pairvalues' );
+
+# pairmap within pairmap
+{
+  my @kvlist = (
+    o1 => [ iA => 'A', iB => 'B' ],
+    o2 => [ iC => 'C', iD => 'D' ],
+  );
+
+  is_deeply( [ pairmap { pairmap { $b } @$b } @kvlist ],
+             [ 'A', 'B', 'C', 'D', ],
+             'pairmap within pairmap' );
+}
