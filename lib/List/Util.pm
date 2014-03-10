@@ -280,14 +280,14 @@ will be visible to the caller.
 =head2 @pairs = pairs @kvlist
 
 A convenient shortcut to operating on even-sized lists of pairs, this function
-returns a list of ARRAY references, each containing two items from the given
+returns a list of C<ARRAY> references, each containing two items from the given
 list. It is a more efficient version of
 
     @pairs = pairmap { [ $a, $b ] } @kvlist
 
 It is most convenient to use in a C<foreach> loop, for example:
 
-    foreach ( pairs @KVLIST ) {
+    foreach ( pairs @kvlist ) {
        my ( $key, $value ) = @$_;
        ...
     }
