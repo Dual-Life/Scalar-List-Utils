@@ -715,6 +715,7 @@ PPCODE:
 {
     int argi = 0;
     int reti = 0;
+    HV *pairstash = get_hv("List::Util::_Pair::", GV_ADD);
 
     if(items % 2 && ckWARN(WARN_MISC))
         warn("Odd number of elements in pairs");
@@ -728,7 +729,9 @@ PPCODE:
             av_push(av, newSVsv(a));
             av_push(av, newSVsv(b));
 
-            ST(reti++) = sv_2mortal(newRV_noinc((SV *)av));
+            ST(reti) = sv_2mortal(newRV_noinc((SV *)av));
+            sv_bless(ST(reti), pairstash);
+            reti++;
         }
     }
 

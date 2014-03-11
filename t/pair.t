@@ -1,7 +1,7 @@
 #!./perl
 
 use strict;
-use Test::More tests => 21;
+use Test::More tests => 23;
 use List::Util qw(pairgrep pairfirst pairmap pairs pairkeys pairvalues);
 
 no warnings 'misc'; # avoid "Odd number of elements" warnings most of the time
@@ -87,6 +87,12 @@ is_deeply( [ pairs one => 1, two => 2, three => 3 ],
 is_deeply( [ pairs one => 1, two => ],
            [ [ one => 1 ], [ two => undef ] ],
            'pairs pads with undef' );
+
+{
+  my @p = pairs one => 1, two => 2;
+  is( $p[0]->key,   "one", 'pairs ->key' );
+  is( $p[0]->value, 1,     'pairs ->value' );
+}
 
 is_deeply( [ pairkeys one => 1, two => 2 ],
            [qw( one two )],

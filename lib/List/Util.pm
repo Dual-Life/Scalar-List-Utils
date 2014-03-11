@@ -34,6 +34,10 @@ sub import
   goto &Exporter::import;
 }
 
+# For objects returned by pairs()
+sub List::Util::_Pair::key   { shift->[0] }
+sub List::Util::_Pair::value { shift->[1] }
+
 1;
 
 __END__
@@ -287,8 +291,17 @@ list. It is a more efficient version of
 
 It is most convenient to use in a C<foreach> loop, for example:
 
-    foreach ( pairs @KVLIST ) {
-       my ( $key, $value ) = @$_;
+    foreach my $pair ( pairs @KVLIST ) {
+       my ( $key, $value ) = @$pair;
+       ...
+    }
+
+Since version C<1.39> these ARRAY references are blessed objects, recognising
+the two methods C<key> and C<value>. The following code is equivalent:
+
+    foreach my $pair ( pairs @KVLIST ) {
+       my $key   = $pair->key;
+       my $value = $pair->value;
        ...
     }
 
