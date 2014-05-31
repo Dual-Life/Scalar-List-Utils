@@ -129,10 +129,11 @@ CODE:
 {
     dXSTARG;
     SV *sv;
+    IV retiv = 0;
     NV retnv = 0.0;
     SV *retsv = NULL;
     int index;
-    enum { ACC_NV, ACC_SV } accum;
+    enum { ACC_IV, ACC_NV, ACC_SV } accum;
     int is_product = (ix == 2);
     SV *tmpsv;
 
@@ -149,9 +150,13 @@ CODE:
         retsv = TARG;
         sv_setsv(retsv, sv);
     }
+    else if(!SvNOK(sv) && SvIOK(sv) && !SvUOK(sv)) {
+        accum = ACC_IV;
+        retiv = SvIV(sv);
+    }
     else {
         accum = ACC_NV;
-        retnv = slu_sv_value(sv);
+        retnv = SvNV(sv);
     }
 
     for(index = 1 ; index < items ; index++) {
@@ -159,7 +164,7 @@ CODE:
         if(accum < ACC_SV && SvAMAGIC(sv)){
             if(!retsv)
                 retsv = TARG;
-            sv_setnv(retsv,retnv);
+            sv_setnv(retsv, accum == ACC_NV ? retnv : retiv);
             accum = ACC_SV;
         }
         switch(accum) {
@@ -171,6 +176,10 @@ CODE:
                 if(SvAMAGIC(tmpsv)) {
                     accum = ACC_SV;
                     retsv = tmpsv;
+                }
+                else if(!SvNOK(tmpsv) && SvIOK(tmpsv) && !SvUOK(tmpsv)) {
+                    accum = ACC_IV;
+                    retiv = SvIV(tmpsv);
                 }
                 else {
                     accum = ACC_NV;
@@ -184,6 +193,25 @@ CODE:
                            : (retnv = SvNV(retsv) + SvNV(sv));
             }
             break;
+        case ACC_IV:
+            if(is_product) {
+                if(!SvNOK(sv) && SvIOK(sv) && (SvIV(sv) < IV_MAX / retiv)) {
+                    retiv *= SvIV(sv);
+                    break;
+                }
+                /* else fallthrough */
+            }
+            else {
+                if(!SvNOK(sv) && SvIOK(sv) && (SvIV(sv) < IV_MAX - retiv)) {
+                    retiv += SvIV(sv);
+                    break;
+                }
+                /* else fallthrough */
+            }
+
+            /* fallthrough to NV now */
+            retnv = retiv;
+            accum = ACC_NV;
         case ACC_NV:
             is_product ? (retnv *= slu_sv_value(sv))
                        : (retnv += slu_sv_value(sv));
@@ -195,6 +223,9 @@ CODE:
         retsv = TARG;
 
     switch(accum) {
+    case ACC_IV:
+        sv_setiv(retsv, retiv);
+        break;
     case ACC_NV:
         sv_setnv(retsv, retnv);
         break;

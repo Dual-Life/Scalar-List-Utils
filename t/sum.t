@@ -3,8 +3,9 @@
 use strict;
 use warnings;
 
-use Test::More tests => 13;
+use Test::More tests => 15;
 
+use Config;
 use List::Util qw(sum);
 
 my $v = sum;
@@ -26,6 +27,9 @@ is( $v, 0, 'variable arg');
 
 $v = sum(-3.5,3);
 is( $v, -0.5, 'real numbers');
+
+$v = sum(3,-3.5);
+is( $v, -0.5, 'initial integer, then real');
 
 my $one = Foo->new(1);
 my $two = Foo->new(2);
@@ -84,4 +88,12 @@ is($v, $v1 + 42 + 2, 'bigint + builtin int');
   is($t, 23, 'overload returning non-overload');
   $t = sum(9, 9, $e1);
   is($t, 25, 'overload returning non-overload');
+}
+
+SKIP: {
+  skip "IV is not at least 64bit", 1 unless $Config{ivsize} >= 8;
+
+  # Sum using NV will only preserve 53 bits of integer precision
+  my $t = sum(1<<60, 1);
+  cmp_ok($t, '>', 1<<60, 'sum uses IV where it can');
 }
