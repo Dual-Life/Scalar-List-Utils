@@ -129,11 +129,12 @@ CODE:
 {
     dXSTARG;
     SV *sv;
+    NV retnv = 0.0;
     SV *retsv = NULL;
     int index;
-    NV retval = 0;
-    int magic;
+    enum { ACC_NV, ACC_SV } accum;
     int is_product = (ix == 2);
+    SV *tmpsv;
 
     if(!items)
         switch(ix) {
@@ -143,52 +144,60 @@ CODE:
         }
 
     sv    = ST(0);
-    magic = SvAMAGIC(sv);
-    if(magic) {
+    if(SvAMAGIC(sv)) {
+        accum = ACC_SV;
         retsv = TARG;
         sv_setsv(retsv, sv);
     }
     else {
-        retval = slu_sv_value(sv);
+        accum = ACC_NV;
+        retnv = slu_sv_value(sv);
     }
 
     for(index = 1 ; index < items ; index++) {
         sv = ST(index);
-        if(!magic && SvAMAGIC(sv)){
-            magic = TRUE;
+        if(accum < ACC_SV && SvAMAGIC(sv)){
             if(!retsv)
                 retsv = TARG;
-            sv_setnv(retsv,retval);
+            sv_setnv(retsv,retnv);
+            accum = ACC_SV;
         }
-        if(magic) {
-            SV *const tmpsv = amagic_call(retsv, sv, 
+        switch(accum) {
+        case ACC_SV:
+            tmpsv = amagic_call(retsv, sv,
                 is_product ? mult_amg : add_amg,
                 SvAMAGIC(retsv) ? AMGf_assign : 0);
             if(tmpsv) {
-                magic = SvAMAGIC(tmpsv);
-                if(!magic) {
-                    retval = slu_sv_value(tmpsv);
+                if(SvAMAGIC(tmpsv)) {
+                    accum = ACC_SV;
+                    retsv = tmpsv;
                 }
                 else {
-                    retsv = tmpsv;
+                    accum = ACC_NV;
+                    retnv = slu_sv_value(tmpsv);
                 }
             }
             else {
                 /* fall back to default */
-                magic = FALSE;
-                is_product ? (retval = SvNV(retsv) * SvNV(sv))
-                           : (retval = SvNV(retsv) + SvNV(sv));
+                accum = ACC_NV;
+                is_product ? (retnv = SvNV(retsv) * SvNV(sv))
+                           : (retnv = SvNV(retsv) + SvNV(sv));
             }
-        }
-        else {
-            is_product ? (retval *= slu_sv_value(sv))
-                       : (retval += slu_sv_value(sv));
+            break;
+        case ACC_NV:
+            is_product ? (retnv *= slu_sv_value(sv))
+                       : (retnv += slu_sv_value(sv));
+            break;
         }
     }
-    if(!magic) {
-        if(!retsv)
-            retsv = TARG;
-        sv_setnv(retsv,retval);
+
+    if(!retsv)
+        retsv = TARG;
+
+    switch(accum) {
+    case ACC_NV:
+        sv_setnv(retsv, retnv);
+        break;
     }
 
     ST(0) = retsv;
