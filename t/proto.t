@@ -13,6 +13,9 @@ BEGIN {
     }
 }
 
+use strict;
+use warnings;
+
 use Scalar::Util ();
 use Test::More  (grep { /set_prototype/ } @Scalar::Util::EXPORT_FAIL)
 			? (skip_all => 'set_prototype requires XS version')
@@ -23,7 +26,7 @@ Scalar::Util->import('set_prototype');
 sub f { }
 is( prototype('f'),	undef,	'no prototype');
 
-$r = set_prototype(\&f,'$');
+my $r = set_prototype(\&f,'$');
 is( prototype('f'),	'$',	'set prototype');
 is( $r,			\&f,	'return value');
 

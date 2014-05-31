@@ -13,6 +13,9 @@ BEGIN {
     }
 }
 
+use strict;
+use warnings;
+
 use Test::More tests => 13;
 
 use List::Util qw(product);
@@ -88,7 +91,7 @@ is($v, $v1 * 42 * 2, 'bigint + builtin int');
 
 {
   my $e1 = example->new(7, "test");
-  $t = product($e1, 7, 7);
+  my $t = product($e1, 7, 7);
   is($t, 343, 'overload returning non-overload');
   $t = product(8, $e1, 8);
   is($t, 448, 'overload returning non-overload');

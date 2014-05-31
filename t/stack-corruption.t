@@ -17,6 +17,9 @@ BEGIN {
     }
 }
 
+use strict;
+use warnings;
+
 use List::Util qw(reduce);
 use Test::More tests => 1;
 

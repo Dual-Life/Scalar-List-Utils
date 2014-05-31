@@ -13,22 +13,25 @@ BEGIN {
     }
 }
 
+use strict;
+use warnings;
 
 use Test::More tests => 32;
 
 use Scalar::Util qw(refaddr);
-use vars qw($t $y $x *F $v $r);
+use vars qw(*F);
 use Symbol qw(gensym);
 
 # Ensure we do not trigger and tied methods
 tie *F, 'MyTie';
 
 my $i = 1;
-foreach $v (undef, 10, 'string') {
+foreach my $v (undef, 10, 'string') {
   is(refaddr($v), undef, "not " . (defined($v) ? "'$v'" : "undef"));
 }
 
-foreach $r ({}, \$t, [], \*F, sub {}) {
+my $t;
+foreach my $r ({}, \$t, [], \*F, sub {}) {
   my $n = "$r";
   $n =~ /0x(\w+)/;
   my $addr = do { local $^W; hex $1 };
@@ -61,7 +64,10 @@ foreach $r ({}, \$t, [], \*F, sub {}) {
 {
   my $z = bless {}, '0';
   ok(refaddr($z));
-  @{"0::ISA"} = qw(FooBar);
+  {
+    no strict 'refs';
+    @{"0::ISA"} = qw(FooBar);
+  }
   my $a = {};
   my $r = refaddr($a);
   $z = bless $a, '0';
@@ -81,6 +87,7 @@ sub TIEHANDLE { bless {} }
 sub DESTROY {}
 
 sub AUTOLOAD {
+  our $AUTOLOAD;
   warn "$AUTOLOAD called";
   exit 1; # May be in an eval
 }

@@ -12,7 +12,10 @@ BEGIN {
 	}
     }
 }
+
 use strict;
+use warnings;
+
 use Scalar::Util qw(blessed reftype refaddr);
 use Test::More tests => 6;
 

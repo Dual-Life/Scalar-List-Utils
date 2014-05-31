@@ -14,6 +14,7 @@ BEGIN {
 }
 
 use strict;
+use warnings;
 
 use Test::More tests => 21;
 use Scalar::Util qw(openhandle);

@@ -13,6 +13,9 @@ BEGIN {
     }
 }
 
+use strict;
+use warnings;
+
 use Scalar::Util qw(readonly);
 use Test::More tests => 11;
 

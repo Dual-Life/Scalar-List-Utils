@@ -14,6 +14,8 @@ BEGIN {
 }
 
 use strict;
+use warnings;
+
 use Test::More tests => 19;
 use Scalar::Util qw(looks_like_number);
 

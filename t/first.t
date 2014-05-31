@@ -13,6 +13,9 @@ BEGIN {
     }
 }
 
+use strict;
+use warnings;
+
 use List::Util qw(first);
 use Test::More;
 plan tests => 22 + ($::PERL_ONLY ? 0 : 2);
@@ -68,7 +71,11 @@ like($@, qr/^Can't undef active subroutine/, "undef active sub");
 # redefinition takes effect immediately depends on whether we're
 # running the Perl or XS implementation.
 
-sub self_updating { local $^W; *self_updating = sub{1} ;1}
+sub self_updating {
+  no warnings 'redefine';
+  *self_updating = sub{1};
+  1
+}
 eval { $v = first \&self_updating, 1,2; };
 is($@, '', 'redefine self');
 

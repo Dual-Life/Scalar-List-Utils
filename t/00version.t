@@ -13,6 +13,9 @@ BEGIN {
     }
 }
 
+use strict;
+use warnings;
+
 use Scalar::Util ();
 use List::Util ();
 use List::Util::XS ();

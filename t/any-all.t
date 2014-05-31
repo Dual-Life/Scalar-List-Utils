@@ -13,6 +13,9 @@ BEGIN {
     }
 }
 
+use strict;
+use warnings;
+
 use List::Util qw(any all notall none);
 use Test::More tests => 12;
 

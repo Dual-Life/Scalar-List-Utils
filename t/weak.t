@@ -1,6 +1,8 @@
 #!./perl
 
 use strict;
+use warnings;
+
 use Config;
 BEGIN {
     unless (-d 'blib') {

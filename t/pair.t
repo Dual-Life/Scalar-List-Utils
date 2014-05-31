@@ -1,6 +1,8 @@
 #!./perl
 
 use strict;
+use warnings;
+
 use Test::More tests => 23;
 use List::Util qw(pairgrep pairfirst pairmap pairs pairkeys pairvalues);
 

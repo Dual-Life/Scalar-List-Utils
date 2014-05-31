@@ -16,6 +16,9 @@ BEGIN {
     }
 }
 
+use strict;
+use warnings;
+
 use Test::More tests => 5;
 
 use Scalar::Util qw(tainted);

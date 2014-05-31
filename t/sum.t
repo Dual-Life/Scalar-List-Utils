@@ -13,6 +13,9 @@ BEGIN {
     }
 }
 
+use strict;
+use warnings;
+
 use Test::More tests => 13;
 
 use List::Util qw(sum);
@@ -88,7 +91,7 @@ is($v, $v1 + 42 + 2, 'bigint + builtin int');
 
 {
   my $e1 = example->new(7, "test");
-  $t = sum($e1, 7, 7);
+  my $t = sum($e1, 7, 7);
   is($t, 21, 'overload returning non-overload');
   $t = sum(8, $e1, 8);
   is($t, 23, 'overload returning non-overload');

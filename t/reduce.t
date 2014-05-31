@@ -13,6 +13,8 @@ BEGIN {
     }
 }
 
+use strict;
+use warnings;
 
 use List::Util qw(reduce min);
 use Test::More;
@@ -28,7 +30,7 @@ is( $v,	9,	'4-arg divide');
 $v = reduce { $a / $b } 6;
 is( $v,	6,	'one arg');
 
-@a = map { rand } 0 .. 20;
+my @a = map { rand } 0 .. 20;
 $v = reduce { $a < $b ? $a : $b } @a;
 is( $v,	min(@a),	'min');
 
@@ -95,7 +97,11 @@ like($@, qr/^Can't undef active subroutine/, "undef active sub");
 # redefinition takes effect immediately depends on whether we're
 # running the Perl or XS implementation.
 
-sub self_updating { local $^W; *self_updating = sub{1} ;1 }
+sub self_updating {
+  no warnings 'redefine';
+  *self_updating = sub{1};
+  1
+}
 eval { $v = reduce \&self_updating, 1,2; };
 is($@, '', 'redefine self');
 
