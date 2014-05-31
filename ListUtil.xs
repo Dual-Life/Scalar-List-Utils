@@ -66,6 +66,22 @@ my_sv_copypv(pTHX_ SV *const dsv, SV *const ssv)
 #  define croak_no_modify() croak("%s", PL_no_modify)
 #endif
 
+enum slu_accum {
+    ACC_IV,
+    ACC_NV,
+    ACC_SV,
+};
+
+static enum slu_accum accum_type(SV *sv) {
+    if(SvAMAGIC(sv))
+        return ACC_SV;
+
+    if(SvIOK(sv) && !SvNOK(sv) && !SvUOK(sv))
+        return ACC_IV;
+
+    return ACC_NV;
+}
+
 MODULE=List::Util       PACKAGE=List::Util
 
 void
@@ -133,7 +149,7 @@ CODE:
     NV retnv = 0.0;
     SV *retsv = NULL;
     int index;
-    enum { ACC_IV, ACC_NV, ACC_SV } accum;
+    enum slu_accum accum;
     int is_product = (ix == 2);
     SV *tmpsv;
 
@@ -145,18 +161,17 @@ CODE:
         }
 
     sv    = ST(0);
-    if(SvAMAGIC(sv)) {
-        accum = ACC_SV;
+    switch((accum = accum_type(sv))) {
+    case ACC_SV:
         retsv = TARG;
         sv_setsv(retsv, sv);
-    }
-    else if(!SvNOK(sv) && SvIOK(sv) && !SvUOK(sv)) {
-        accum = ACC_IV;
+        break;
+    case ACC_IV:
         retiv = SvIV(sv);
-    }
-    else {
-        accum = ACC_NV;
-        retnv = SvNV(sv);
+        break;
+    case ACC_NV:
+        retnv = slu_sv_value(sv);
+        break;
     }
 
     for(index = 1 ; index < items ; index++) {
@@ -173,17 +188,16 @@ CODE:
                 is_product ? mult_amg : add_amg,
                 SvAMAGIC(retsv) ? AMGf_assign : 0);
             if(tmpsv) {
-                if(SvAMAGIC(tmpsv)) {
-                    accum = ACC_SV;
+                switch((accum = accum_type(tmpsv))) {
+                case ACC_SV:
                     retsv = tmpsv;
-                }
-                else if(!SvNOK(tmpsv) && SvIOK(tmpsv) && !SvUOK(tmpsv)) {
-                    accum = ACC_IV;
+                    break;
+                case ACC_IV:
                     retiv = SvIV(tmpsv);
-                }
-                else {
-                    accum = ACC_NV;
+                    break;
+                case ACC_NV:
                     retnv = slu_sv_value(tmpsv);
+                    break;
                 }
             }
             else {
