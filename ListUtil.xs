@@ -1094,6 +1094,7 @@ set_prototype(subref, proto)
 PROTOTYPE: &$
 CODE:
 {
+    SvGETMAGIC(subref);
     if(SvROK(subref)) {
         SV *sv = SvRV(subref);
         if(SvTYPE(sv) != SVt_PVCV) {

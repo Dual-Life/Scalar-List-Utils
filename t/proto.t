@@ -6,7 +6,7 @@ use warnings;
 use Scalar::Util ();
 use Test::More  (grep { /set_prototype/ } @Scalar::Util::EXPORT_FAIL)
 			? (skip_all => 'set_prototype requires XS version')
-			: (tests => 13);
+			: (tests => 14);
 
 Scalar::Util->import('set_prototype');
 
@@ -47,3 +47,24 @@ ok($@ =~ /^set_prototype: not a reference/,	'not a reference');
 
 eval { &set_prototype( \'f', '' ); };
 ok($@ =~ /^set_prototype: not a subroutine reference/,	'not a sub reference');
+
+# RT 72080
+
+{
+  package TiedCV;
+  sub TIESCALAR {
+    my $class = shift;
+    return bless {@_}, $class;
+  }
+  sub FETCH {
+    return \&my_subr;
+  }
+  sub my_subr {
+  }
+}
+
+my $cv;
+tie $cv, 'TiedCV';
+
+&Scalar::Util::set_prototype($cv, '$$');
+is( prototype($cv), '$$', 'set_prototype() on tied CV ref' );
