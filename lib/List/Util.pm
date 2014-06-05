@@ -112,6 +112,8 @@ idea.
 
 =head2 $b = any { BLOCK } @list
 
+I<Since version 1.33.>
+
 Similar to C<grep> in that it evaluates C<BLOCK> setting C<$_> to each element
 of C<@list> in turn. C<any> returns true if any element makes the C<BLOCK>
 return a true value. If C<BLOCK> never returns true or C<@list> was empty then
@@ -126,6 +128,8 @@ instead, as it can short-circuit after the first true result.
 
 =head2 $b = all { BLOCK } @list
 
+I<Since version 1.33.>
+
 Similar to C<any>, except that it requires all elements of the C<@list> to make
 the C<BLOCK> return true. If any element returns false, then it returns false.
 If the C<BLOCK> never returns false or the C<@list> was empty then it returns
@@ -134,6 +138,8 @@ true.
 =head2 $b = none { BLOCK } @list
 
 =head2 $b = notall { BLOCK } @list
+
+I<Since version 1.33.>
 
 Similar to C<any> and C<all>, but with the return sense inverted. C<none>
 returns true only if no value in the LIST causes the BLOCK to return true, and
@@ -190,6 +196,8 @@ empty then C<undef> is returned.
 
 =head2 $num = product @list
 
+I<Since version 1.35.>
+
 Returns the numerical product of all the elements in C<@list>. If C<@list> is
 empty then C<1> is returned.
 
@@ -206,6 +214,8 @@ compatibility, if C<@list> is empty then C<undef> is returned.
     $foo = sum @bar, @baz           # whatever
 
 =head2 $num = sum0 @list
+
+I<Since version 1.26.>
 
 Similar to C<sum>, except this returns 0 when given an empty list, rather than
 C<undef>.
@@ -225,6 +235,8 @@ value - nor even do they require that the first of each pair be a plain string.
 =head2 @kvlist = pairgrep { BLOCK } @kvlist
 
 =head2 $count = pairgrep { BLOCK } @kvlist
+
+I<Since version 1.29.>
 
 Similar to perl's C<grep> keyword, but interprets the given list as an
 even-sized list of pairs. It invokes the C<BLOCK> multiple times, in scalar
@@ -246,6 +258,8 @@ will be visible to the caller.
 
 =head2 $found = pairfirst { BLOCK } @kvlist
 
+I<Since version 1.30.>
+
 Similar to the C<first> function, but interprets the given list as an
 even-sized list of pairs. It invokes the C<BLOCK> multiple times, in scalar
 context, with C<$a> and C<$b> set to successive pairs of values from the
@@ -266,6 +280,8 @@ will be visible to the caller.
 
 =head2 $count = pairmap { BLOCK } @kvlist
 
+I<Since version 1.29.>
+
 Similar to perl's C<map> keyword, but interprets the given list as an
 even-sized list of pairs. It invokes the C<BLOCK> multiple times, in list
 context, with C<$a> and C<$b> set to successive pairs of values from the
@@ -284,6 +300,8 @@ will be visible to the caller.
 See L</KNOWN BUGS> for a known-bug with C<pairmap>, and a workaround.
 
 =head2 @pairs = pairs @kvlist
+
+I<Since version 1.29.>
 
 A convenient shortcut to operating on even-sized lists of pairs, this function
 returns a list of ARRAY references, each containing two items from the given
@@ -309,6 +327,8 @@ the two methods C<key> and C<value>. The following code is equivalent:
 
 =head2 @keys = pairkeys @kvlist
 
+I<Since version 1.29.>
+
 A convenient shortcut to operating on even-sized lists of pairs, this function
 returns a list of the the first values of each of the pairs in the given list.
 It is a more efficient version of
@@ -316,6 +336,8 @@ It is a more efficient version of
     @keys = pairmap { $a } @kvlist
 
 =head2 @values = pairvalues @kvlist
+
+I<Since version 1.29.>
 
 A convenient shortcut to operating on even-sized lists of pairs, this function
 returns a list of the the second values of each of the pairs in the given list.
