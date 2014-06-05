@@ -1076,13 +1076,13 @@ CODE:
     }
 #if PERL_BCDVERSION < 0x5008005
     if(SvPOK(sv) || SvPOKp(sv)) {
-        RETVAL = looks_like_number(sv);
+        RETVAL = !!looks_like_number(sv);
     }
     else {
         RETVAL = SvFLAGS(sv) & (SVf_NOK|SVp_NOK|SVf_IOK|SVp_IOK);
     }
 #else
-    RETVAL = looks_like_number(sv);
+    RETVAL = !!looks_like_number(sv);
 #endif
 OUTPUT:
     RETVAL
