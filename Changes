@@ -1,3 +1,16 @@
+1.39 -- 2014/06/05 15:54:59
+	[CHANGES]
+	 * Have pairs() return blessed objects that recognise ->key and
+	   ->value as well as being two-element ARRAYs
+	 * Booleanise the result of looks_like_number() so as not to
+	   accidentally leak abstraction (RT94806)
+	 * Document the version each function was added in (RT96220)
+
+	[BUGFIXES]
+	 * Try to preserve UV precision in sum() where possible (RT95902)
+	 * Document known lexical capture in pairmap bug RT95409
+	 * SvGETMAGIC() in set_prototype() (RT72080)
+
 1.38 -- 2014/01/22 15:33:24
         [BUGFIXES]
 	 * Avoid Perl_ckwarn() in unweaken() because it's missing on older
