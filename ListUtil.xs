@@ -237,6 +237,8 @@ CODE:
         retsv = TARG;
 
     switch(accum) {
+    case ACC_SV: /* nothing to do */
+        break;
     case ACC_IV:
         sv_setiv(retsv, retiv);
         break;
