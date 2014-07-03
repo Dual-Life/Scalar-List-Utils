@@ -1066,7 +1066,7 @@ CODE:
     croak("vstrings are not implemented in this release of perl");
 #endif
 
-int
+SV *
 looks_like_number(sv)
     SV *sv
 PROTOTYPE: $
@@ -1078,13 +1078,13 @@ CODE:
     }
 #if PERL_BCDVERSION < 0x5008005
     if(SvPOK(sv) || SvPOKp(sv)) {
-        RETVAL = !!looks_like_number(sv);
+        RETVAL = looks_like_number(sv) ? &PL_sv_yes : &PL_sv_no;
     }
     else {
-        RETVAL = SvFLAGS(sv) & (SVf_NOK|SVp_NOK|SVf_IOK|SVp_IOK);
+        RETVAL = (SvFLAGS(sv) & (SVf_NOK|SVp_NOK|SVf_IOK|SVp_IOK)) ? &PL_sv_yes : &PL_sv_no;
     }
 #else
-    RETVAL = !!looks_like_number(sv);
+    RETVAL = looks_like_number(sv) ? &PL_sv_yes : &PL_sv_no;
 #endif
 OUTPUT:
     RETVAL
