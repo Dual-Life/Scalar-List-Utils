@@ -30,6 +30,7 @@ WriteMakefile(
     : (
       INSTALLDIRS => ($] < 5.011 ? q[perl] : q[site]),
       PREREQ_PM   => {'Test::More' => 0,},
+      MIN_PERL_VERSION => '5.006',
       (eval { ExtUtils::MakeMaker->VERSION(6.31) } ? (LICENSE => 'perl') : ()),
       ( eval { ExtUtils::MakeMaker->VERSION(6.46) } ? (
           META_MERGE => {
