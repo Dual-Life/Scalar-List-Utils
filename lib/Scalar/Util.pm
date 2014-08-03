@@ -7,6 +7,7 @@
 package Scalar::Util;
 
 use strict;
+use warnings;
 require Exporter;
 require List::Util; # List::Util loads the XS
 
