@@ -1230,6 +1230,25 @@ PPCODE:
     PUSHs(sub);
 
 void
+subname(code)
+    SV *code
+PREINIT:
+    CV *cv;
+    GV *gv;
+PPCODE:
+    if (!SvROK(code) && SvGMAGICAL(code))
+        mg_get(code);
+
+    if(!SvROK(code) || SvTYPE(cv = (CV *)SvRV(code)) != SVt_PVCV)
+        croak("Not a subroutine reference");
+
+    if(!(gv = CvGV(cv)))
+        XSRETURN(0);
+
+    mPUSHs(newSVpvf("%s::%s", HvNAME(GvSTASH(gv)), GvNAME(gv)));
+    XSRETURN(1);
+
+void
 openhandle(SV *sv)
 PROTOTYPE: $
 CODE:

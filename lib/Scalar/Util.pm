@@ -15,7 +15,7 @@ our @EXPORT_OK = qw(
   blessed refaddr reftype weaken unweaken isweak
 
   dualvar isdual isvstring looks_like_number openhandle readonly set_prototype
-  set_subname tainted
+  set_subname subname tainted
 );
 our $VERSION    = "1.39";
 $VERSION   = eval $VERSION;
@@ -291,6 +291,24 @@ attach extra information that could be useful in debugging stack traces.
 
 This function was copied from C<Sub::Name::subname> and renamed to the naming
 convention of this module.
+
+=head2 $name = subname( $code )
+
+I<Since version 1.39_001.>
+
+Returns the name of the given C<$code> reference, if it has one. Normal named
+subs will give a fully-qualified name consisting of the package and the
+localname separated by C<::>. Anonymous code references will give C<__ANON__>
+as the localname. If a name has been set using C<set_subname>, this name will
+be returned instead.
+
+This function was inspired by C<sub_fullname> from L<Sub::Identify>. The
+remaining functions that C<Sub::Identify> implements can easily be emulated
+using regexp operations, such as
+
+ sub get_code_info { return (subname $_[0]) =~ m/^(.+)::(.+?)$/ }
+ sub sub_name      { return (get_code_info $_[0])[0] }
+ sub stash_name    { return (get_code_info $_[0])[1] }
 
 =head2 $t = tainted( $var )
 
