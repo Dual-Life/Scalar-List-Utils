@@ -1122,6 +1122,37 @@ CODE:
 }
 
 void
+openhandle(SV *sv)
+PROTOTYPE: $
+CODE:
+{
+    IO *io = NULL;
+    SvGETMAGIC(sv);
+    if(SvROK(sv)){
+        /* deref first */
+        sv = SvRV(sv);
+    }
+
+    /* must be GLOB or IO */
+    if(isGV(sv)){
+        io = GvIO((GV*)sv);
+    }
+    else if(SvTYPE(sv) == SVt_PVIO){
+        io = (IO*)sv;
+    }
+
+    if(io){
+        /* real or tied filehandle? */
+        if(IoIFP(io) || SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)){
+            XSRETURN(1);
+        }
+    }
+    XSRETURN_UNDEF;
+}
+
+MODULE=List::Util       PACKAGE=Sub::Util
+
+void
 set_subname(name, sub)
     char *name
     SV *sub
@@ -1247,35 +1278,6 @@ PPCODE:
 
     mPUSHs(newSVpvf("%s::%s", HvNAME(GvSTASH(gv)), GvNAME(gv)));
     XSRETURN(1);
-
-void
-openhandle(SV *sv)
-PROTOTYPE: $
-CODE:
-{
-    IO *io = NULL;
-    SvGETMAGIC(sv);
-    if(SvROK(sv)){
-        /* deref first */
-        sv = SvRV(sv);
-    }
-
-    /* must be GLOB or IO */
-    if(isGV(sv)){
-        io = GvIO((GV*)sv);
-    }
-    else if(SvTYPE(sv) == SVt_PVIO){
-        io = (IO*)sv;
-    }
-
-    if(io){
-        /* real or tied filehandle? */
-        if(IoIFP(io) || SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)){
-            XSRETURN(1);
-        }
-    }
-    XSRETURN_UNDEF;
-}
 
 BOOT:
 {
