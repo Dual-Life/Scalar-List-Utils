@@ -14,7 +14,8 @@ our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(
   blessed refaddr reftype weaken unweaken isweak
 
-  dualvar isdual isvstring looks_like_number openhandle readonly set_prototype tainted
+  dualvar isdual isvstring looks_like_number openhandle readonly set_prototype
+  set_subname tainted
 );
 our $VERSION    = "1.39";
 $VERSION   = eval $VERSION;
@@ -267,6 +268,30 @@ it if C<$prototype> is C<undef>. Returns the C<$code> reference itself.
 
     set_prototype \&foo, '$$';
 
+=head2 $code = set_subname( $name, $code )
+
+I<Since version 1.39_001.>
+
+Sets the name of the function given by the C<$code> reference. Returns the
+C<$code> reference itself. If the C<$name> is unqualified, the package of the
+caller is used to qualify it.
+
+    my $code = set_subname do_thing => sub { ... };
+
+This is useful for applying names to anonymous CODE references so that stack
+traces and similar situations, to give a useful name rather than having the
+default of C<__ANON__>. Note that this name is only used for this situation;
+the C<set_subname> will not install it into the symbol table; you will have to
+do that yourself if required.
+
+However, since the name is not used by perl except as the return value of
+C<caller>, for stack traces or similar, there is no actual requirement that
+the name be syntactically valid as a perl function name. This could be used to
+attach extra information that could be useful in debugging stack traces.
+
+This function was copied from C<Sub::Name::subname> and renamed to the naming
+convention of this module.
+
 =head2 $t = tainted( $var )
 
 Return true if C<$var> is tainted.
@@ -316,10 +341,19 @@ Copyright (c) 1997-2007 Graham Barr <gbarr@pobox.com>. All rights reserved.
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 
-Except weaken and isweak which are
+Additionally C<weaken> and C<isweak> which are
 
 Copyright (c) 1999 Tuomas J. Lukka <lukka@iki.fi>. All rights reserved.
 This program is free software; you can redistribute it and/or modify it
 under the same terms as perl itself.
+
+Additionally C<set_subname> which is
+
+Matthijs van Duin <xmath@cpan.org>
+
+Copyright (C) 2004, 2008  Matthijs van Duin.  All rights reserved.
+Copyright (C) 2014 cPanel Inc.  All rights reserved.
+This program is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
 
 =cut
