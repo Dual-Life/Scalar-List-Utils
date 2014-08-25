@@ -3,7 +3,7 @@ use warnings;
 
 BEGIN { $^P |= 0x210 }
 
-use Test::More 0.88;
+use Test::More tests => 18;
 
 use B::Deparse;
 use Sub::Util qw( subname set_subname );
@@ -78,5 +78,4 @@ is($x->(), "main::foo");
     'subname of set_subname');
 }
 
-done_testing;
 # vim: ft=perl
