@@ -1,3 +1,8 @@
+1.39_001 -- 2014/08/25 10:31:56
+	[CHANGES]
+	 * Added subname inspired by Sub::Identify
+	 * Added set_subname copied and renamed from Sub::Name
+
 1.39 -- 2014/06/05 15:54:59
 	[CHANGES]
 	 * Have pairs() return blessed objects that recognise ->key and
