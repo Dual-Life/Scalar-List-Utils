@@ -12,6 +12,7 @@ require List::Util; # as it has the XS
 
 our @ISA = qw( Exporter );
 our @EXPORT_OK = qw(
+  set_prototype
   subname set_subname
 );
 
@@ -24,7 +25,7 @@ Sub::Util - A selection of utility subroutines for subs and CODE references
 
 =head1 SYNOPSIS
 
-    use Sub::Util qw( subname set_subname );
+    use Sub::Util qw( set_prototype subname set_subname );
 
 =head1 DESCRIPTION
 
@@ -39,6 +40,29 @@ that its popularity warrants inclusion in a core module, which this is.
 =cut
 
 =head1 FUNCTIONS
+
+=cut
+
+=head2 $code = set_prototype( $prototype, $code )
+
+I<Since version 1.39_002.>
+
+Sets the prototype of the function given by the C<$code> reference, or deletes
+it if C<$prototype> is C<undef>. Returns the C<$code> reference itself.
+
+    my $code = set_prototype '$$' => sub { ... };
+
+I<Caution>: This function takes arguments in a different order to the previous
+copy of the code from C<Scalar::Util>. This is to match the order of
+C<set_subname>, and other potential additions in this file. This order has
+been chosen as it allows a neat and simple chaining of other
+C<Sub::Util::set_*> functions as might become available, such as:
+
+ my $code =
+    set_subname   name_here =>
+    set_prototype '&@'      =>
+    set_attribute ':lvalue' =>
+       sub { ...... };
 
 =cut
 

@@ -1093,35 +1093,6 @@ OUTPUT:
     RETVAL
 
 void
-set_prototype(subref, proto)
-    SV *subref
-    SV *proto
-PROTOTYPE: &$
-CODE:
-{
-    SvGETMAGIC(subref);
-    if(SvROK(subref)) {
-        SV *sv = SvRV(subref);
-        if(SvTYPE(sv) != SVt_PVCV) {
-            /* not a subroutine reference */
-            croak("set_prototype: not a subroutine reference");
-        }
-        if(SvPOK(proto)) {
-            /* set the prototype */
-            sv_copypv(sv, proto);
-        }
-        else {
-            /* delete the prototype */
-            SvPOK_off(sv);
-        }
-    }
-    else {
-        croak("set_prototype: not a reference");
-    }
-    XSRETURN(1);
-}
-
-void
 openhandle(SV *sv)
 PROTOTYPE: $
 CODE:
@@ -1151,6 +1122,33 @@ CODE:
 }
 
 MODULE=List::Util       PACKAGE=Sub::Util
+
+void
+set_prototype(proto, code)
+    SV *proto
+    SV *code
+PREINIT:
+    SV *cv; /* not CV * */
+PPCODE:
+    SvGETMAGIC(code);
+    if(!SvROK(code))
+        croak("set_prototype: not a reference");
+
+    cv = SvRV(code);
+    if(SvTYPE(cv) != SVt_PVCV)
+        croak("set_prototype: not a subroutine reference");
+
+    if(SvPOK(proto)) {
+        /* set the prototype */
+        sv_copypv(cv, proto);
+    }
+    else {
+        /* delete the prototype */
+        SvPOK_off(cv);
+    }
+
+    PUSHs(code);
+    XSRETURN(1);
 
 void
 set_subname(name, sub)

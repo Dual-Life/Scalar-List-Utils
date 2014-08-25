@@ -46,6 +46,13 @@ sub export_fail {
   @_;
 }
 
+# set_prototype has been moved to Sub::Util with a different interface
+sub set_prototype(&$)
+{
+  my ( $code, $proto ) = @_;
+  return Sub::Util::set_prototype( $proto, $code );
+}
+
 1;
 
 __END__
