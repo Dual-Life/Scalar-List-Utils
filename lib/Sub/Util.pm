@@ -60,6 +60,10 @@ using regexp operations, such as
  sub sub_name      { return (get_code_info $_[0])[0] }
  sub stash_name    { return (get_code_info $_[0])[1] }
 
+I<Users of Sub::Name beware>: This function is B<not> the same as
+C<Sub::Name::subname>; it returns the existing name of the sub rather than
+changing it. To set or change a name, see instead C<set_subname>.
+
 =cut
 
 =head2 $code = set_subname( $name, $code )
