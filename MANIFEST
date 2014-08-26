@@ -2,6 +2,7 @@ Changes
 lib/List/Util.pm
 lib/List/Util/XS.pm
 lib/Scalar/Util.pm
+lib/Sub/Util.pm
 ListUtil.xs
 Makefile.PL
 MANIFEST			This list of files
@@ -26,13 +27,15 @@ t/multicall-refcount.t
 t/openhan.t
 t/pair.t
 t/product.t
-t/proto.t
+t/prototype.t
 t/readonly.t
 t/reduce.t
 t/refaddr.t
 t/reftype.t
+t/scalarutil-proto.t
 t/shuffle.t
 t/stack-corruption.t
+t/subname.t
 t/sum.t
 t/sum0.t
 t/tainted.t
