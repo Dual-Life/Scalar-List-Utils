@@ -17,7 +17,7 @@ our @EXPORT_OK = qw(
   dualvar isdual isvstring looks_like_number openhandle readonly set_prototype
   tainted
 );
-our $VERSION    = "1.39_001";
+our $VERSION    = "1.39_003";
 $VERSION   = eval $VERSION;
 
 our @EXPORT_FAIL;

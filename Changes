@@ -1,3 +1,10 @@
+1.39_003 -- 2014/08/26 13:08:09
+	[CHANGES]
+	 * Added entire new module, Sub::Util to contain subname and
+	   set_subname
+	 * Also moved set_prototype into it, with back-compat wrapper in
+	   Scalar::Util
+
 1.39_001 -- 2014/08/25 10:31:56
 	[CHANGES]
 	 * Added subname inspired by Sub::Identify
