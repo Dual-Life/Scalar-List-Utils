@@ -23,7 +23,6 @@ t/max.t
 t/maxstr.t
 t/min.t
 t/minstr.t
-t/multicall-refcount.t
 t/openhan.t
 t/pair.t
 t/product.t
