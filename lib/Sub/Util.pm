@@ -43,14 +43,14 @@ that its popularity warrants inclusion in a core module, which this is.
 
 =cut
 
-=head2 $code = set_prototype( $prototype, $code )
+=head2 set_prototype
+
+    my $code = set_prototype $prototype, $code;
 
 I<Since version 1.39_002.>
 
 Sets the prototype of the function given by the C<$code> reference, or deletes
 it if C<$prototype> is C<undef>. Returns the C<$code> reference itself.
-
-    my $code = set_prototype '$$' => sub { ... };
 
 I<Caution>: This function takes arguments in a different order to the previous
 copy of the code from C<Scalar::Util>. This is to match the order of
@@ -66,7 +66,9 @@ C<Sub::Util::set_*> functions as might become available, such as:
 
 =cut
 
-=head2 $name = subname( $code )
+=head2 subname
+
+    my $name = subname( $code )
 
 I<Since version 1.39_002.>
 
@@ -90,15 +92,15 @@ changing it. To set or change a name, see instead C<set_subname>.
 
 =cut
 
-=head2 $code = set_subname( $name, $code )
+=head2 set_subname
+
+    my $code = set_subname $name, $code;
 
 I<Since version 1.39_002.>
 
 Sets the name of the function given by the C<$code> reference. Returns the
 C<$code> reference itself. If the C<$name> is unqualified, the package of the
 caller is used to qualify it.
-
-    my $code = set_subname do_thing => sub { ... };
 
 This is useful for applying names to anonymous CODE references so that stack
 traces and similar situations, to give a useful name rather than having the

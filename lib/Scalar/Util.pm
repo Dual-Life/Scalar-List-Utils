@@ -83,7 +83,9 @@ By default C<Scalar::Util> does not export any subroutines.
 
 The following functions all perform some useful activity on reference values.
 
-=head2 $pkg = blessed( $ref )
+=head2 blessed
+
+    my $pkg = blessed( $ref );
 
 If C<$ref> is a blessed reference the name of the package that it is blessed
 into is returned. Otherwise C<undef> is returned.
@@ -100,7 +102,9 @@ into is returned. Otherwise C<undef> is returned.
 Take care when using this function simply as a truth test (such as in
 C<if(blessed $ref)...>) because the package name C<"0"> is defined yet false.
 
-=head2 $addr = refaddr( $ref )
+=head2 refaddr
+
+    my $addr = refaddr( $ref );
 
 If C<$ref> is reference the internal memory address of the referenced value is
 returned as a plain integer. Otherwise C<undef> is returned.
@@ -112,7 +116,9 @@ returned as a plain integer. Otherwise C<undef> is returned.
     $obj  = bless {}, "Foo";
     $addr = refaddr $obj;               # eg 88123488
 
-=head2 $type = reftype( $ref )
+=head2 reftype
+
+    my $type = reftype( $ref );
 
 If C<$ref> is a reference the basic Perl type of the variable referenced is
 returned as a plain string (such as C<ARRAY> or C<HASH>). Otherwise C<undef>
@@ -125,9 +131,11 @@ is returned.
     $obj  = bless {}, "Foo";
     $type = reftype $obj;               # HASH
 
-=head2 weaken( REF )
+=head2 weaken
 
-The lvalue C<REF> will be turned into a weak reference. This means that it
+    weaken( $ref );
+
+The lvalue C<$ref> will be turned into a weak reference. This means that it
 will not hold a reference count on the object it references. Also when the
 reference count on that object reaches zero, the reference will be set to
 undef. This function mutates the lvalue passed as its argument and returns no
@@ -162,7 +170,9 @@ references to objects will be strong, causing the remaining objects to never be
 destroyed because there is now always a strong reference to them in the @object
 array.
 
-=head2 unweaken( REF )
+=head2 unweaken
+
+    unweaken( $ref );
 
 I<Since version 1.36.>
 
@@ -181,7 +191,9 @@ otherwise-equivalent code
 (because in particular, simply assigning a weak reference back to itself does
 not work to unweaken it; C<$REF = $REF> does not work).
 
-=head2 $weak = isweak( $ref )
+=head2 isweak
+
+    my $weak = isweak( $ref );
 
 Returns true if C<$ref> is a weak reference.
 
@@ -197,7 +209,9 @@ B<NOTE>: Copying a weak reference creates a normal, strong, reference.
 
 =head1 OTHER FUNCTIONS
 
-=head2 $var = dualvar( $num, $string )
+=head2 dualvar
+
+    my $var = dualvar( $num, $string );
 
 Returns a scalar that has the value C<$num> in a numeric context and the value
 C<$string> in a string context.
@@ -206,7 +220,9 @@ C<$string> in a string context.
     $num = $foo + 2;                    # 12
     $str = $foo . " world";             # Hello world
 
-=head2 $dual = isdual( $var )
+=head2 isdual
+
+    my $dual = isdual( $var );
 
 I<Since version 1.26.>
 
@@ -236,7 +252,9 @@ You can capture its numeric and string content using:
     $err = dualvar $!, $!;
     $dual = isdual($err);               # true
 
-=head2 $vstring = isvstring( $var )
+=head2 isvstring
+
+    my $vstring = isvstring( $var );
 
 If C<$var> is a scalar which was coded as a vstring the result is true.
 
@@ -244,12 +262,16 @@ If C<$var> is a scalar which was coded as a vstring the result is true.
     $fmt  = isvstring($vs) ? "%vd" : "%s"; #true
     printf($fmt,$vs);
 
-=head2 $isnum = looks_like_number( $var )
+=head2 looks_like_number
+
+    my $isnum = looks_like_number( $var );
 
 Returns true if perl thinks C<$var> is a number. See
 L<perlapi/looks_like_number>.
 
-=head2 $fh = openhandle( $fh )
+=head2 openhandle
+
+    my $fh = openhandle( $fh );
 
 Returns C<$fh> itself if C<$fh> may be used as a filehandle and is open, or is
 is a tied handle. Otherwise C<undef> is returned.
@@ -259,7 +281,9 @@ is a tied handle. Otherwise C<undef> is returned.
     $fh = openhandle(*NOTOPEN);         # undef
     $fh = openhandle("scalar");         # undef
 
-=head2 $ro = readonly( $var )
+=head2 readonly
+
+    my $ro = readonly( $var );
 
 Returns true if C<$var> is readonly.
 
@@ -268,14 +292,18 @@ Returns true if C<$var> is readonly.
     $readonly = foo($bar);              # false
     $readonly = foo(0);                 # true
 
-=head2 $code = set_prototype( $code, $prototype )
+=head2 set_prototype
+
+    my $code = set_prototype( $code, $prototype );
 
 Sets the prototype of the function given by the C<$code> reference, or deletes
 it if C<$prototype> is C<undef>. Returns the C<$code> reference itself.
 
     set_prototype \&foo, '$$';
 
-=head2 $t = tainted( $var )
+=head2 tainted
+
+    my $t = tainted( $var );
 
 Return true if C<$var> is tainted.
 
