@@ -134,10 +134,10 @@ instead, as it can short-circuit after the first true result.
 
 I<Since version 1.33.>
 
-Similar to C<any>, except that it requires all elements of the C<@list> to make
-the C<BLOCK> return true. If any element returns false, then it returns false.
-If the C<BLOCK> never returns false or the C<@list> was empty then it returns
-true.
+Similar to L</any>, except that it requires all elements of the C<@list> to
+make the C<BLOCK> return true. If any element returns false, then it returns
+false. If the C<BLOCK> never returns false or the C<@list> was empty then it
+returns true.
 
 =head2 none
 
@@ -149,9 +149,9 @@ true.
 
 I<Since version 1.33.>
 
-Similar to C<any> and C<all>, but with the return sense inverted. C<none>
-returns true only if no value in the LIST causes the BLOCK to return true, and
-C<notall> returns true only if not all of the values do.
+Similar to L</any> and L</all>, but with the return sense inverted. C<none>
+returns true only if no value in the C<@list> causes the C<BLOCK> to return
+true, and C<notall> returns true only if not all of the values do.
 
 =head2 first
 
@@ -181,7 +181,7 @@ empty then C<undef> is returned.
 
     my $str = maxstr @list;
 
-Similar to C<max>, but treats all the entries in the list as strings and
+Similar to L</max>, but treats all the entries in the list as strings and
 returns the highest string as defined by the C<gt> operator. If the list is
 empty then C<undef> is returned.
 
@@ -193,7 +193,7 @@ empty then C<undef> is returned.
 
     my $num = min @list;
 
-Similar to C<max> but returns the entry in the list with the lowest numerical
+Similar to L</max> but returns the entry in the list with the lowest numerical
 value. If the list is empty then C<undef> is returned.
 
     $foo = min 1..10                # 1
@@ -204,7 +204,7 @@ value. If the list is empty then C<undef> is returned.
 
     my $str = minstr @list;
 
-Similar to C<min>, but treats all the entries in the list as strings and
+Similar to L</min>, but treats all the entries in the list as strings and
 returns the lowest string as defined by the C<lt> operator. If the list is
 empty then C<undef> is returned.
 
@@ -241,8 +241,8 @@ compatibility, if C<@list> is empty then C<undef> is returned.
 
 I<Since version 1.26.>
 
-Similar to C<sum>, except this returns 0 when given an empty list, rather than
-C<undef>.
+Similar to L</sum>, except this returns 0 when given an empty list, rather
+than C<undef>.
 
 =cut
 
@@ -288,7 +288,7 @@ will be visible to the caller.
 
 I<Since version 1.30.>
 
-Similar to the C<first> function, but interprets the given list as an
+Similar to the L</first> function, but interprets the given list as an
 even-sized list of pairs. It invokes the C<BLOCK> multiple times, in scalar
 context, with C<$a> and C<$b> set to successive pairs of values from the
 C<@kvlist>.
@@ -403,7 +403,7 @@ Returns the values of the input in a random order
 
 L<https://rt.cpan.org/Ticket/Display.html?id=95409>
 
-If the block of code given to C<pairmap> contains lexical variables that are
+If the block of code given to L</pairmap> contains lexical variables that are
 captured by a returned closure, and the closure is executed after the block
 has been re-used for the next iteration, these lexicals will not see the
 correct values. For example:

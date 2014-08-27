@@ -179,7 +179,7 @@ I<Since version 1.36.>
 The lvalue C<REF> will be turned from a weak reference back into a normal
 (strong) reference again. This function mutates the lvalue passed as its
 argument and returns no value. This undoes the action performed by
-C<weaken()>.
+L</weaken>.
 
 This function is slightly neater and more convenient than the
 otherwise-equivalent code
@@ -319,12 +319,12 @@ Module use may give one of the following errors during import.
 =item Weak references are not implemented in the version of perl
 
 The version of perl that you are using does not implement weak references, to
-use C<isweak> or C<weaken> you will need to use a newer release of perl.
+use L</isweak> or L</weaken> you will need to use a newer release of perl.
 
 =item Vstrings are not implemented in the version of perl
 
 The version of perl that you are using does not implement Vstrings, to use
-C<isvstring> you will need to use a newer release of perl.
+L</isvstring> you will need to use a newer release of perl.
 
 =item C<NAME> is only available with the XS version of Scalar::Util
 
@@ -352,7 +352,7 @@ Copyright (c) 1997-2007 Graham Barr <gbarr@pobox.com>. All rights reserved.
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 
-Additionally C<weaken> and C<isweak> which are
+Additionally L</weaken> and L</isweak> which are
 
 Copyright (c) 1999 Tuomas J. Lukka <lukka@iki.fi>. All rights reserved.
 This program is free software; you can redistribute it and/or modify it

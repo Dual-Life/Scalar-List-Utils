@@ -75,7 +75,7 @@ I<Since version 1.39_002.>
 Returns the name of the given C<$code> reference, if it has one. Normal named
 subs will give a fully-qualified name consisting of the package and the
 localname separated by C<::>. Anonymous code references will give C<__ANON__>
-as the localname. If a name has been set using C<set_subname>, this name will
+as the localname. If a name has been set using L</set_subname>, this name will
 be returned instead.
 
 This function was inspired by C<sub_fullname> from L<Sub::Identify>. The
@@ -88,7 +88,7 @@ using regexp operations, such as
 
 I<Users of Sub::Name beware>: This function is B<not> the same as
 C<Sub::Name::subname>; it returns the existing name of the sub rather than
-changing it. To set or change a name, see instead C<set_subname>.
+changing it. To set or change a name, see instead L</set_subname>.
 
 =cut
 
@@ -123,7 +123,7 @@ convention of this module.
 The general structure of this module was written by Paul Evans
 <leonerd@leonerd.org.uk>.
 
-The XS implementation of C<set_subname> was copied from L<Sub::Name> by
+The XS implementation of L</set_subname> was copied from L<Sub::Name> by
 Matthijs van Duin <xmath@cpan.org>
 
 =cut
