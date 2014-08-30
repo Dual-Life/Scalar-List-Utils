@@ -3,14 +3,16 @@
 use strict;
 use warnings;
 
-use Sub::Util qw( set_prototype );
-use Test::More tests => 11;
+use Sub::Util qw( prototype set_prototype );
+use Test::More tests => 13;
 
 sub f { }
 is( prototype('f'), undef, 'no prototype');
+is( CORE::prototype('f'), undef, 'no prototype from CORE');
 
 my $r = set_prototype('$', \&f);
-is( prototype('f'), '$', 'set prototype');
+is( prototype('f'), '$', 'prototype');
+is( CORE::prototype('f'), '$', 'prototype from CORE');
 is( $r,   \&f, 'return value');
 
 set_prototype(undef, \&f);

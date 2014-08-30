@@ -12,7 +12,7 @@ require List::Util; # as it has the XS
 
 our @ISA = qw( Exporter );
 our @EXPORT_OK = qw(
-  set_prototype
+  prototype set_prototype
   subname set_subname
 );
 
@@ -42,6 +42,22 @@ that its popularity warrants inclusion in a core module, which this is.
 =head1 FUNCTIONS
 
 =cut
+
+=head2 prototype
+
+    my $proto = prototype( $code )
+
+Returns the prototype of the given C<$code> reference, if it has one, as a
+string. This is the same as the C<CORE::prototype> operator; it is included
+here simply for symmetry and completeness with the other functions.
+
+=cut
+
+sub prototype
+{
+  my ( $code ) = @_;
+  return CORE::prototype( $code );
+}
 
 =head2 set_prototype
 
