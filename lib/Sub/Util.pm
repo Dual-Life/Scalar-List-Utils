@@ -16,7 +16,7 @@ our @EXPORT_OK = qw(
   subname set_subname
 );
 
-our $VERSION    = "1.39_004";
+our $VERSION    = "1.40";
 $VERSION   = eval $VERSION;
 
 =head1 NAME
@@ -63,7 +63,7 @@ sub prototype
 
     my $code = set_prototype $prototype, $code;
 
-I<Since version 1.39_002.>
+I<Since version 1.40.>
 
 Sets the prototype of the function given by the C<$code> reference, or deletes
 it if C<$prototype> is C<undef>. Returns the C<$code> reference itself.
@@ -86,7 +86,7 @@ C<Sub::Util::set_*> functions as might become available, such as:
 
     my $name = subname( $code )
 
-I<Since version 1.39_002.>
+I<Since version 1.40.>
 
 Returns the name of the given C<$code> reference, if it has one. Normal named
 subs will give a fully-qualified name consisting of the package and the
@@ -112,7 +112,7 @@ changing it. To set or change a name, see instead L</set_subname>.
 
     my $code = set_subname $name, $code;
 
-I<Since version 1.39_002.>
+I<Since version 1.40.>
 
 Sets the name of the function given by the C<$code> reference. Returns the
 C<$code> reference itself. If the C<$name> is unqualified, the package of the
