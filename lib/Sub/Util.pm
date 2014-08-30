@@ -25,7 +25,7 @@ Sub::Util - A selection of utility subroutines for subs and CODE references
 
 =head1 SYNOPSIS
 
-    use Sub::Util qw( set_prototype subname set_subname );
+    use Sub::Util qw( prototype set_prototype subname set_subname );
 
 =head1 DESCRIPTION
 
