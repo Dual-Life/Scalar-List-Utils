@@ -321,7 +321,7 @@ CODE:
     SAVESPTR(GvSV(agv));
     SAVESPTR(GvSV(bgv));
     GvSV(agv) = ret;
-    SvSetSV(ret, args[1]);
+    SvSetMagicSV(ret, args[1]);
 #ifdef dMULTICALL
     if(!CvISXSUB(cv)) {
         dMULTICALL;
@@ -331,7 +331,7 @@ CODE:
         for(index = 2 ; index < items ; index++) {
             GvSV(bgv) = args[index];
             MULTICALL;
-            SvSetSV(ret, *PL_stack_sp);
+            SvSetMagicSV(ret, *PL_stack_sp);
         }
 #  ifdef PERL_HAS_BAD_MULTICALL_REFCOUNT
         if(CvDEPTH(multicall_cv) > 1)
@@ -349,7 +349,7 @@ CODE:
             PUSHMARK(SP);
             call_sv((SV*)cv, G_SCALAR);
 
-            SvSetSV(ret, *PL_stack_sp);
+            SvSetMagicSV(ret, *PL_stack_sp);
         }
     }
 
