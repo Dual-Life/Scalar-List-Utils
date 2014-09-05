@@ -16,7 +16,7 @@ our @EXPORT_OK = qw(
   subname set_subname
 );
 
-our $VERSION    = "1.40";
+our $VERSION    = "1.41";
 $VERSION   = eval $VERSION;
 
 =head1 NAME
