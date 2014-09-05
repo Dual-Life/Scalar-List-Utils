@@ -47,6 +47,8 @@ that its popularity warrants inclusion in a core module, which this is.
 
     my $proto = prototype( $code )
 
+I<Since version 1.40.>
+
 Returns the prototype of the given C<$code> reference, if it has one, as a
 string. This is the same as the C<CORE::prototype> operator; it is included
 here simply for symmetry and completeness with the other functions.
