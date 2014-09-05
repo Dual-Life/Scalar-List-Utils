@@ -1204,14 +1204,16 @@ PPCODE:
         int old_len = strlen(old_name) + strlen(old_pkg);
         int new_len = strlen(name) + strlen(new_pkg);
 
+        SV **old_data;
         char *full_name;
+
         Newxz(full_name, (old_len > new_len ? old_len : new_len) + 3, char);
 
         strcat(full_name, old_pkg);
         strcat(full_name, "::");
         strcat(full_name, old_name);
 
-        SV **old_data = hv_fetch(hv, full_name, strlen(full_name), 0);
+        old_data = hv_fetch(hv, full_name, strlen(full_name), 0);
 
         if (old_data) {
             strcpy(full_name, new_pkg);
