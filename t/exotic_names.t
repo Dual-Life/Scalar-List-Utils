@@ -50,6 +50,8 @@ sub caller3_ok {
 
 #######################################################################
 
+use Sub::Util 'set_subname';
+
 my @ordinal = ( 1 .. 255 );
 
 # 5.14 is the first perl to start properly handling \0 in identifiers
@@ -64,7 +66,7 @@ push @ordinal,
     0x1f4a9,  # PILE OF POO
     unless $] < 5.008;
 
-plan tests => @ordinal * 2;
+plan tests => @ordinal * 2 * 2;
 
 my $legal_ident_char = "A-Z_a-z0-9'";
 $legal_ident_char .= join '', map chr, 0x100, 0x498
@@ -75,6 +77,9 @@ for my $ord (@ordinal) {
     my $pkg      = sprintf 'test::SOME_%c_STASH', $ord;
     my $subname  = sprintf 'SOME_%c_NAME', $ord;
     my $fullname = join '::', $pkg, $subname;
+
+    $sub = set_subname $fullname => sub { (caller(0))[3] };
+    caller3_ok $sub, $fullname, 'renamed closure', $ord;
 
     # test that we can *always* compile at least within the correct package
     my $expected;
