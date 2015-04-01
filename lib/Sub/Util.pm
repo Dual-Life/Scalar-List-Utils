@@ -8,7 +8,6 @@ use strict;
 use warnings;
 
 require Exporter;
-require List::Util; # as it has the XS
 
 our @ISA = qw( Exporter );
 our @EXPORT_OK = qw(
@@ -18,6 +17,9 @@ our @EXPORT_OK = qw(
 
 our $VERSION    = "1.41";
 $VERSION   = eval $VERSION;
+
+require List::Util; # as it has the XS
+List::Util->VERSION( $VERSION ); # Ensure we got the right XS version (RT#100863)
 
 =head1 NAME
 
