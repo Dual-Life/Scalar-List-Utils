@@ -254,6 +254,32 @@ or just a list of values. The functions will all preserve the original ordering
 of the pairs, and will not be confused by multiple pairs having the same "key"
 value - nor even do they require that the first of each pair be a plain string.
 
+B<NOTE>: At the time of writing, the following C<pair*> functions that take a
+block do not modify the value of C<$_> within the block, and instead operate
+using the C<$a> and C<$b> globals instead. This has turned out to be a poor
+design, as it precludes the ability to provide a C<pairsort> function. Better
+would be to pass pair-like objects as 2-element array references in C<$_>, in
+a style similar to the return value of the C<pairs> function. At some future
+version this behaviour may be added.
+
+Until then, users are alerted B<NOT> to rely on the value of C<$_> remaining
+unmodified between the outside and the inside of the control block. In
+particular, the following example is B<UNSAFE>:
+
+ my @kvlist = ...
+
+ foreach (qw( some keys here )) {
+    my @items = pairgrep { $a eq $_ } @kvlist;
+    ...
+ }
+
+Instead, write this using a lexical variable:
+
+ foreach my $key (qw( some keys here )) {
+    my @items = pairgrep { $a eq $key } @kvlist;
+    ...
+ }
+
 =cut
 
 =head2 pairgrep
