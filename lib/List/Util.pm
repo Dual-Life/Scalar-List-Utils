@@ -12,7 +12,7 @@ require Exporter;
 our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw(
   all any first min max minstr maxstr none notall product reduce sum sum0 shuffle
-  pairmap pairgrep pairfirst pairs pairkeys pairvalues
+  pairmap pairgrep pairfirst pairs unpairs pairkeys pairvalues
 );
 our $VERSION    = "1.41";
 our $XS_VERSION = $VERSION;
@@ -382,6 +382,22 @@ the two methods C<key> and C<value>. The following code is equivalent:
        my $value = $pair->value;
        ...
     }
+
+=head2 unpairs
+
+    my @kvlist = unpairs @pairs
+
+I<Since version 1.42.>
+
+The inverse function to C<pairs>; this function takes a list of ARRAY
+references containing two elements each, and returns a flattened list of the
+two values from each of the pairs, in order. This is notionally equivalent to
+
+    my @kvlist = map { @{$_}[0,1] } @pairs
+
+except that it is implemented more efficiently internally. Specifically, for
+any input item it will extract exactly two values for the output list; using
+C<undef> if the input array references are short.
 
 =head2 pairkeys
 

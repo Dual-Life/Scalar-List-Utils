@@ -798,6 +798,49 @@ PPCODE:
 }
 
 void
+unpairs(...)
+PROTOTYPE: @
+PPCODE:
+{
+    /* Unlike pairs(), we're going to trash the input values on the stack
+     * almost as soon as we start generating output. So clone them first
+     */
+    int i;
+    SV **args_copy;
+    Newx(args_copy, items, SV *);
+    SAVEFREEPV(args_copy);
+
+    Copy(&ST(0), args_copy, items, SV *);
+
+    for(i = 0; i < items; i++) {
+        SV *pair = args_copy[i];
+        SvGETMAGIC(pair);
+
+        if(SvTYPE(pair) != SVt_RV)
+            croak("Not a reference at List::Util::unpack() argument %d", i);
+        if(SvTYPE(SvRV(pair)) != SVt_PVAV)
+            croak("Not an ARRAY reference at List::Util::unpack() argument %d", i);
+
+        // TODO: assert pair is an ARRAY ref
+        AV *pairav = (AV *)SvRV(pair);
+
+        EXTEND(SP, 2);
+
+        if(AvFILL(pairav) >= 0)
+            mPUSHs(newSVsv(AvARRAY(pairav)[0]));
+        else
+            PUSHs(&PL_sv_undef);
+
+        if(AvFILL(pairav) >= 1)
+            mPUSHs(newSVsv(AvARRAY(pairav)[1]));
+        else
+            PUSHs(&PL_sv_undef);
+    }
+
+    XSRETURN(items * 2);
+}
+
+void
 pairkeys(...)
 PROTOTYPE: @
 PPCODE:
