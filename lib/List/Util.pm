@@ -326,6 +326,23 @@ except that it is implemented more efficiently internally. Specifically, for
 any input item it will extract exactly two values for the output list; using
 C<undef> if the input array references are short.
 
+Between C<pairs> and C<unpairs>, a higher-order list function can be used to
+operate on the pairs as single scalars; such as the following near-equivalents
+of the other C<pair*> higher-order functions:
+
+    @kvlist = unpairs grep { FUNC } pairs @kvlist
+    # Like pairgrep, but takes $_ instead of $a and $b
+
+    @kvlist = unpairs map { FUNC } pairs @kvlist
+    # Like pairmap, but takes $_ instead of $a and $b
+
+Note however that these versions will not behave as nicely in scalar context.
+
+Finally, this technique can be used to implement a sort on a keyvalue pair
+list; e.g.:
+
+    @kvlist = unpairs sort { $a->key cmp $b->key } pairs @kvlist
+
 =head2 pairkeys
 
     my @keys = pairkeys @kvlist;
