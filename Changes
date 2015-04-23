@@ -1,3 +1,15 @@
+1.42 -- 2015/04/32 01:25:55
+	[CHANGES]
+	 * Added List::Util::unpairs() - the inverse of pairs()
+	 * Documentation to pre-warn users about the possible behaviour in a
+	   later version where the pair* higher-order functionals are no longer
+	   transparent to $_
+
+	[BUGFIXES]
+	 * Silence some warnings at test time
+	 * Ensure that the List::Util we're loading the XS via is a sufficient
+	   version when Scalar::Util or Sub::Util load it (RT100863)
+
 1.41 -- 2014/09/05 15:49:50
 	[BUGFIXES]
 	 * Avoid pre-C99 declaration after statements (RT98624)
