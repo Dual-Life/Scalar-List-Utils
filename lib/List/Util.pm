@@ -48,7 +48,13 @@ List::Util - A selection of general-utility list subroutines
 
 =head1 SYNOPSIS
 
-    use List::Util qw(first max maxstr min minstr reduce shuffle sum);
+    use List::Util qw{
+         all any none notall first min max minstr maxstr
+         product reduce sum sum0 shuffle
+         pairmap pairgrep pairfirst pairs pairkeys pairvalues
+    };
+
+    my $seven = first { $_ % 2 } (2, 4, 6, 7); # first odd number is 7
 
 =head1 DESCRIPTION
 
