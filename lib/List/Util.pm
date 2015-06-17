@@ -67,7 +67,9 @@ The following set of functions all reduce a list down to a single value.
 
 =cut
 
-=head2 $result = reduce { BLOCK } @list
+=head2 reduce
+
+    $result = reduce { BLOCK } @list
 
 Reduces C<@list> by calling C<BLOCK> in a scalar context multiple times,
 setting C<$a> and C<$b> each time. The first call will be with C<$a> and C<$b>
