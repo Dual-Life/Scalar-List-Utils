@@ -34,8 +34,18 @@ WriteMakefile(
       (eval { ExtUtils::MakeMaker->VERSION(6.31) } ? (LICENSE => 'perl') : ()),
       ( eval { ExtUtils::MakeMaker->VERSION(6.46) } ? (
           META_MERGE => {
+            'meta-spec' => { version => 2 },
+            dynamic_config => 0,
             resources => {    ##
-              repository => 'https://github.com/Scalar-List-Utils/Scalar-List-Utils',
+              repository => {
+                url => 'https://github.com/Scalar-List-Utils/Scalar-List-Utils.git',
+                web => 'https://github.com/Scalar-List-Utils/Scalar-List-Utils',
+                type => 'git',
+              },
+              bugtracker => {
+                mailto => 'bug-Scalar-List-Utils@rt.cpan.org',
+                web => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Scalar-List-Utils',
+              },
             },
           }
           )
