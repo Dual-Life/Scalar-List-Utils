@@ -299,22 +299,23 @@ Instead, write this using a lexical variable:
 I<Since version 1.29.>
 
 A convenient shortcut to operating on even-sized lists of pairs, this function
-returns a list of ARRAY references, each containing two items from the given
-list. It is a more efficient version of
+returns a list of C<ARRAY> references, each containing two items from the
+given list. It is a more efficient version of
 
     @pairs = pairmap { [ $a, $b ] } @kvlist
 
 It is most convenient to use in a C<foreach> loop, for example:
 
-    foreach my $pair ( pairs @KVLIST ) {
+    foreach my $pair ( pairs @kvlist ) {
        my ( $key, $value ) = @$pair;
        ...
     }
 
-Since version C<1.39> these ARRAY references are blessed objects, recognising
-the two methods C<key> and C<value>. The following code is equivalent:
+Since version C<1.39> these C<ARRAY> references are blessed objects,
+recognising the two methods C<key> and C<value>. The following code is
+equivalent:
 
-    foreach my $pair ( pairs @KVLIST ) {
+    foreach my $pair ( pairs @kvlist ) {
        my $key   = $pair->key;
        my $value = $pair->value;
        ...
@@ -326,7 +327,7 @@ the two methods C<key> and C<value>. The following code is equivalent:
 
 I<Since version 1.42.>
 
-The inverse function to C<pairs>; this function takes a list of ARRAY
+The inverse function to C<pairs>; this function takes a list of C<ARRAY>
 references containing two elements each, and returns a flattened list of the
 two values from each of the pairs, in order. This is notionally equivalent to
 
