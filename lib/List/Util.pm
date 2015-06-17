@@ -48,7 +48,15 @@ List::Util - A selection of general-utility list subroutines
 
 =head1 SYNOPSIS
 
-    use List::Util qw(first max maxstr min minstr reduce shuffle sum);
+    use List::Util qw(
+      reduce any all none notall first
+
+      max maxstr min minstr product sum sum0
+
+      pairs pairkeys pairvalues pairfirst pairgrep pairmap
+
+      shuffle
+    );
 
 =head1 DESCRIPTION
 
