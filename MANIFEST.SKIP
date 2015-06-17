@@ -10,3 +10,6 @@ cover_db
 \.bs$
 \.[oc]$
 ^MYMETA\.
+
+.vimrc
+\.NOTYET$
