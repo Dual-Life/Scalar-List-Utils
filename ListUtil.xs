@@ -212,6 +212,9 @@ CODE:
             break;
         case ACC_IV:
             if(is_product) {
+                /* TODO: Consider if product() should shortcircuit the moment its
+                 *   accumulator becomes zero
+                 */
                 if(retiv == 0 ||
                    (!SvNOK(sv) && SvIOK(sv) && (SvIV(sv) < IV_MAX / retiv))) {
                     retiv *= SvIV(sv);
