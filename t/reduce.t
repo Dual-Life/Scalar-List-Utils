@@ -5,7 +5,7 @@ use warnings;
 
 use List::Util qw(reduce min);
 use Test::More;
-plan tests => 30 + ($::PERL_ONLY ? 0 : 2);
+plan tests => 31 + ($::PERL_ONLY ? 0 : 2);
 
 my $v = reduce {};
 
@@ -163,3 +163,10 @@ ok($@ =~ /^Not a subroutine reference/, 'check for code reference');
 my @names = ("a\x{100}c", "d\x{101}efgh", 'ijk');
 my $longest = reduce { length($a) > length($b) ? $a : $b } @names;
 is( length($longest),	6,	'missing SMG rt#121992');
+
+{
+  my @array = (1..5);
+  my $result = reduce { $a += 1; $b += 1; $a + $b } @array;
+  is_deeply \@array, [1, 3..6],
+    '$b is aliased in reduce';
+}
