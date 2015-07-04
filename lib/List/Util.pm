@@ -11,7 +11,7 @@ require Exporter;
 
 our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw(
-  all any first min max minstr maxstr none notall product reduce sum sum0 shuffle
+  all any first min max minstr maxstr none notall product reduce sum sum0 shuffle uniq
   pairs unpairs pairkeys pairvalues pairmap pairgrep pairfirst
 );
 our $VERSION    = "1.42";
