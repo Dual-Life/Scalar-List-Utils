@@ -55,7 +55,7 @@ List::Util - A selection of general-utility list subroutines
 
       pairs pairkeys pairvalues pairfirst pairgrep pairmap
 
-      shuffle
+      shuffle uniq
     );
 
 =head1 DESCRIPTION
@@ -464,6 +464,17 @@ See L</KNOWN BUGS> for a known-bug with C<pairmap>, and a workaround.
 Returns the values of the input in a random order
 
     @cards = shuffle 0..51      # 0..51 in a random order
+
+=head2 uniq
+
+    my @unique = uniq @values;
+
+I<Since version 1.43>
+
+Returns the unique elements of the given array. The output elements appear in
+the same order as which each element first appears in the input. An C<undef>
+is treated as its own value, and is not considered to be equal to C<''> or
+C<0>.
 
 =cut
 
