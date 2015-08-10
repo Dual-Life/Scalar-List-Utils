@@ -92,6 +92,7 @@ is($v, $v1 + 42 + 2, 'bigint + builtin int');
 
 SKIP: {
   skip "IV is not at least 64bit", 1 unless $Config{ivsize} >= 8;
+  skip "No 64bit IV precision with $]", 1 if $] < 5.008;
 
   # Sum using NV will only preserve 53 bits of integer precision
   my $t = sum(1<<60, 1);
