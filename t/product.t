@@ -13,6 +13,9 @@ is( $v, 1, 'no args');
 $v = product(9);
 is( $v, 9, 'one arg');
 
+$v = product(0, 0);
+is( $v, 0, 'two 0');
+
 $v = product(1,2,3,4);
 is( $v, 24, '4 args');
 
