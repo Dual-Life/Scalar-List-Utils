@@ -542,7 +542,7 @@ PPCODE:
         if(SvTYPE(SvRV(pair)) != SVt_PVAV)
             croak("Not an ARRAY reference at List::Util::unpack() argument %d", i);
 
-        // TODO: assert pair is an ARRAY ref
+        /* TODO: assert pair is an ARRAY ref */
         pairav = (AV *)SvRV(pair);
 
         EXTEND(SP, 2);
