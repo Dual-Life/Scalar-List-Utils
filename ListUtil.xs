@@ -808,8 +808,8 @@ PPCODE:
 
         PUSH_MULTICALL(cv);
         for(; argi < items; argi += 2) {
-            SV *a = GvSV(agv) = args_copy ? args_copy[argi] : stack[argi];
-            SV *b = GvSV(bgv) = argi < items-1 ? 
+            GvSV(agv) = args_copy ? args_copy[argi] : stack[argi];
+            GvSV(bgv) = argi < items-1 ?
                 (args_copy ? args_copy[argi+1] : stack[argi+1]) :
                 &PL_sv_undef;
             int count;
@@ -850,8 +850,8 @@ PPCODE:
     {
         for(; argi < items; argi += 2) {
             dSP;
-            SV *a = GvSV(agv) = args_copy ? args_copy[argi] : ST(argi);
-            SV *b = GvSV(bgv) = argi < items-1 ? 
+            GvSV(agv) = args_copy ? args_copy[argi] : ST(argi);
+            GvSV(bgv) = argi < items-1 ?
                 (args_copy ? args_copy[argi+1] : ST(argi+1)) :
                 &PL_sv_undef;
             int count;
