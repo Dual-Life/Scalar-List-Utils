@@ -215,17 +215,69 @@ CODE:
                 /* TODO: Consider if product() should shortcircuit the moment its
                  *   accumulator becomes zero
                  */
-                if(retiv == 0 ||
-                   (!SvNOK(sv) && SvIOK(sv) && (SvIV(sv) < IV_MAX / retiv))) {
-                    retiv *= SvIV(sv);
-                    break;
+                /* XXX testing flags before running get_magic may
+                 * cause some valid tied values to fallback to the NV path
+                 * - DAPM */
+                if(!SvNOK(sv) && SvIOK(sv)) {
+                    IV i = SvIV(sv);
+                    if (retiv == 0) /* avoid later division by zero */
+                        break;
+                    if (retiv < 0) {
+                        if (i < 0) {
+                            if (i >= IV_MAX / retiv) {
+                                retiv *= i;
+                                break;
+                            }
+                        }
+                        else {
+                            if (i <= IV_MIN / retiv) {
+                                retiv *= i;
+                                break;
+                            }
+                        }
+                    }
+                    else {
+                        if (i < 0) {
+                            if (i >= IV_MIN / retiv) {
+                                retiv *= i;
+                                break;
+                            }
+                        }
+                        else {
+                            if (i <= IV_MAX / retiv) {
+                                retiv *= i;
+                                break;
+                            }
+                        }
+                    }
                 }
                 /* else fallthrough */
             }
             else {
-                if(!SvNOK(sv) && SvIOK(sv) && (SvIV(sv) < IV_MAX - retiv)) {
-                    retiv += SvIV(sv);
-                    break;
+                /* XXX testing flags before running get_magic may
+                 * cause some valid tied values to fallback to the NV path
+                 * - DAPM */
+                if(!SvNOK(sv) && SvIOK(sv)) {
+                    IV i = SvIV(sv);
+                    if (retiv >= 0 && i >= 0) {
+                        if (retiv <= IV_MAX - i) {
+                            retiv += i;
+                            break;
+                        }
+                        /* else fallthrough */
+                    }
+                    else if (retiv < 0 && i < 0) {
+                        if (retiv >= IV_MIN - i) {
+                            retiv += i;
+                            break;
+                        }
+                        /* else fallthrough */
+                    }
+                    else {
+                        /* mixed signs can't overflow */
+                        retiv += i;
+                        break;
+                    }
                 }
                 /* else fallthrough */
             }
