@@ -1,3 +1,7 @@
+	[CHANGES]
+    * Added List::Util::uniq() - the implementation and tests are mostly a
+      copy of those in List::MoreUtils (Dave Rolsky)
+
 1.42 -- 2015/04/32 01:25:55
 	[CHANGES]
 	 * Added List::Util::unpairs() - the inverse of pairs()

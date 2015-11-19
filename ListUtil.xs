@@ -990,6 +990,55 @@ CODE:
     XSRETURN(items);
 }
 
+void
+uniq (...)
+PROTOTYPE: @
+CODE:
+{
+    I32 i;
+    IV count = 0, seen_undef = 0;
+    HV *hv = newHV();
+    SV **args = &PL_stack_base[ax];
+    SV *tmp = sv_newmortal();
+    sv_2mortal(newRV_noinc((SV*)hv));
+
+    /* don't build return list in scalar context */
+    if (GIMME_V == G_SCALAR) {
+        for (i = 0; i < items; i++) {
+            SvGETMAGIC(args[i]);
+            if (SvOK(args[i])) {
+                sv_setsv_nomg(tmp, args[i]);
+                if (!hv_exists_ent(hv, tmp, 0)) {
+                    ++count;
+                    hv_store_ent(hv, tmp, &PL_sv_yes, 0);
+                }
+            }
+            else if (0 == seen_undef++) {
+                ++count;
+            }
+        }
+        ST(0) = sv_2mortal(newSVuv(count));
+        XSRETURN(1);
+    }
+
+    /* list context: populate SP with mortal copies */
+    for (i = 0; i < items; i++) {
+        SvGETMAGIC(args[i]);
+        if (SvOK(args[i])) {
+            SvSetSV_nosteal(tmp, args[i]);
+            if (!hv_exists_ent(hv, tmp, 0)) {
+                args[count++] = args[i];
+                hv_store_ent(hv, tmp, &PL_sv_yes, 0);
+            }
+        }
+        else if (0 == seen_undef++) {
+            args[count++] = args[i];
+        }
+    }
+
+    XSRETURN(count);
+}
+
 
 MODULE=List::Util       PACKAGE=Scalar::Util
 
