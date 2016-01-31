@@ -1,3 +1,16 @@
+1.43 -- 2016/XX/XX XX:XX:XX
+	[CHANGES]
+	 * Documentation improvements in List::Util
+
+	[BUGFIXES]
+	 * Fix build on C89 compilers (e.g. VC++) (PR24)
+	 * Avoid divide-by-zero exception if product()'s accumulator is IV zero
+	   (RT105415)
+	 * Expurge C99 comments (PR31)
+	 * Remove unused variables in pairmap() (PR32)
+	 * Fix some integer overflows in List::Util (RT101494)
+	 * Silence some compiler warnings in List Util (RT101494)
+
 1.42 -- 2015/04/32 01:25:55
 	[CHANGES]
 	 * Added List::Util::unpairs() - the inverse of pairs()
