@@ -1,3 +1,14 @@
+1.42_001 2016/02/01 00:54:21
+	[CHANGES]
+	 * Updated documentation
+
+	[BUGFIXES]
+	 * Fix build on C99 compilers
+	 * Avoid divide-by-zero exception if product()'s accumulator is IV zero
+	   (RT105415)
+	 * Possible fix for SvTEMP issues in first and any/all/none/notall
+	   (RT96343)
+
 1.42 -- 2015/04/32 01:25:55
 	[CHANGES]
 	 * Added List::Util::unpairs() - the inverse of pairs()
