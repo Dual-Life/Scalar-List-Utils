@@ -442,7 +442,10 @@ CODE:
         PUSH_MULTICALL(cv);
 
         for(index = 1 ; index < items ; index++) {
-            GvSV(PL_defgv) = args[index];
+            SV *def_sv = GvSV(PL_defgv) = args[index];
+#  ifdef SvTEMP_off
+            SvTEMP_off(def_sv);
+#  endif
             MULTICALL;
             if(SvTRUEx(*PL_stack_sp)) {
 #  ifdef PERL_HAS_BAD_MULTICALL_REFCOUNT
