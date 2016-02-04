@@ -244,7 +244,7 @@ numeric operations:
     $dual = isdual($foo);               # true
 
 Note that although C<$!> appears to be a dual-valued variable, it is
-actually implemented using a tied scalar:
+actually implemented as a magical variable inside the interpreter:
 
     $! = 1;
     print("$!\n");                      # "Operation not permitted"
