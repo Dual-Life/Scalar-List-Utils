@@ -1,3 +1,11 @@
+1.42_002 2016/02/04 15:36:43
+	[CHANGES]
+	 * Updated documentation
+	 * Added MIN_PERL_VERSION to Makefile.PL
+	 * Added "use warnings" to all tests
+	 * Added MANIEST.SKIP patterns for common editor backup/swapfiles
+	 * Test product(0,0) (RT105415)
+
 1.42_001 2016/02/01 00:54:21
 	[CHANGES]
 	 * Updated documentation
