@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 24;
+use Test::More tests => 25;
 
 use Config;
 use List::Util qw(product);
@@ -28,6 +28,9 @@ is( $v, 0, '0 * 1');
 
 $v = product(1, 0);
 is( $v, 0, '1 * 0');
+
+$v = product(0, 0);
+is( $v, 0, 'two 0');
 
 my $x = -3;
 
