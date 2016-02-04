@@ -13,3 +13,5 @@ cover_db
 
 .vimrc
 \.NOTYET$
+\..*\.swp$
+~$
