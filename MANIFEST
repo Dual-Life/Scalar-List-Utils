@@ -29,6 +29,7 @@ t/readonly.t
 t/reduce.t
 t/refaddr.t
 t/reftype.t
+t/rt-96343.t
 t/scalarutil-proto.t
 t/shuffle.t
 t/stack-corruption.t
