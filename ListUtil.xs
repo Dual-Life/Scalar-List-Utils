@@ -14,6 +14,12 @@
 #  include "multicall.h"
 #endif
 
+#if PERL_BCDVERSION < 0x5023008
+#  define UNUSED_VAR_newsp PERL_UNUSED_VAR(newsp)
+#else
+#  define UNUSED_VAR_newsp NOOP
+#endif
+
 #ifndef CvISXSUB
 #  define CvISXSUB(cv) CvXSUB(cv)
 #endif
@@ -383,7 +389,7 @@ CODE:
         dMULTICALL;
         I32 gimme = G_SCALAR;
 
-        PERL_UNUSED_VAR(newsp);
+        UNUSED_VAR_newsp;
         PUSH_MULTICALL(cv);
         for(index = 2 ; index < items ; index++) {
             GvSV(bgv) = args[index];
@@ -438,7 +444,7 @@ CODE:
         dMULTICALL;
         I32 gimme = G_SCALAR;
 
-        PERL_UNUSED_VAR(newsp);
+        UNUSED_VAR_newsp;
         PUSH_MULTICALL(cv);
 
         for(index = 1 ; index < items ; index++) {
@@ -510,7 +516,7 @@ PPCODE:
         I32 gimme = G_SCALAR;
         int index;
 
-        PERL_UNUSED_VAR(newsp);
+        UNUSED_VAR_newsp;
         PUSH_MULTICALL(cv);
         for(index = 1; index < items; index++) {
             SV *def_sv = GvSV(PL_defgv) = args[index];
@@ -694,7 +700,7 @@ PPCODE:
         dMULTICALL;
         I32 gimme = G_SCALAR;
 
-        PERL_UNUSED_VAR(newsp);
+        UNUSED_VAR_newsp;
         PUSH_MULTICALL(cv);
         for(; argi < items; argi += 2) {
             SV *a = GvSV(agv) = stack[argi];
@@ -779,7 +785,7 @@ PPCODE:
         dMULTICALL;
         I32 gimme = G_SCALAR;
 
-        PERL_UNUSED_VAR(newsp);
+        UNUSED_VAR_newsp;
         PUSH_MULTICALL(cv);
         for(; argi < items; argi += 2) {
             SV *a = GvSV(agv) = stack[argi];
@@ -870,7 +876,7 @@ PPCODE:
         dMULTICALL;
         I32 gimme = G_ARRAY;
 
-        PERL_UNUSED_VAR(newsp);
+        UNUSED_VAR_newsp;
         PUSH_MULTICALL(cv);
         for(; argi < items; argi += 2) {
             int count;
