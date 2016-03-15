@@ -11,6 +11,13 @@ use B 'svref_2object';
 # a heuristic with ambiguous eval and looking for octets in the stash
 use if $] >= 5.016, feature => 'unicode_eval';
 
+if ($] >= 5.008) {
+	my $builder = Test::More->builder;
+	binmode $builder->output,         ":encoding(utf8)";
+	binmode $builder->failure_output, ":encoding(utf8)";
+	binmode $builder->todo_output,    ":encoding(utf8)";
+}
+
 sub compile_named_sub {
     my ( $fullname, $body ) = @_;
     my $sub = eval "sub $fullname { $body }" . '\\&{$fullname}';
