@@ -1015,7 +1015,6 @@ CODE:
     int index;
     SV **args = &PL_stack_base[ax];
     HV *seen;
-    SV *keysv;
 
     if(items < 2) {
         retcount = items;
@@ -1024,27 +1023,41 @@ CODE:
 
     sv_2mortal((SV *)(seen = newHV()));
 
-    if(ix)
-        keysv = sv_2mortal(newSV(0));
+    if(ix) {
+        /* A temporary buffer for number stringification */
+        SV *keysv = sv_2mortal(newSV(0));
 
-    for(index = 0 ; index < items ; index++) {
-        STRLEN keylen;
-        char *key;
-        if(ix) {
+        for(index = 0 ; index < items ; index++) {
+            STRLEN keylen;
+            char *key;
+
             sv_setpvf(keysv, "%"NVgf, SvNV(args[index]));
             key = SvPV(keysv, keylen);
+
+            if(hv_exists(seen, key, keylen))
+                continue;
+
+            hv_store(seen, key, keylen, &PL_sv_undef, 0);
+            if(GIMME_V == G_ARRAY)
+                ST(retcount) = args[index];
+            retcount++;
         }
-        else
+    }
+    else
+        for(index = 0 ; index < items ; index++) {
+            STRLEN keylen;
+            char *key;
+
             key = SvPV(args[index], keylen);
 
-        if(hv_exists(seen, key, keylen))
-            continue;
+            if(hv_exists(seen, key, keylen))
+                continue;
 
-        hv_store(seen, key, keylen, &PL_sv_undef, 0);
-        if(GIMME_V == G_ARRAY)
-            ST(retcount) = args[index];
-        retcount++;
-    }
+            hv_store(seen, key, keylen, &PL_sv_undef, 0);
+            if(GIMME_V == G_ARRAY)
+                ST(retcount) = args[index];
+            retcount++;
+        }
 
   finish:
     if(GIMME_V == G_ARRAY)
