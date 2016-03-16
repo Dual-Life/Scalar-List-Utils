@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 16;
+use Test::More tests => 18;
 use List::Util qw( uniq uniqnum );
 
 is_deeply( [ uniq ],
@@ -106,4 +106,16 @@ is( scalar( uniq qw( a b c d a b e ) ), 5, 'uniq() in scalar context' );
     undef @uniq;
     is_deeply( \@destroyed, [ 1, 1, 1 ],
                'all values destroyed' );
+}
+
+{
+    "a a b" =~ m/(.) (.) (.)/;
+    is_deeply( [ uniq $1, $2, $3 ],
+               [qw( a b )],
+               'uniq handles magic' );
+
+    "1 1 2" =~ m/(.) (.) (.)/;
+    is_deeply( [ uniqnum $1, $2, $3 ],
+               [ 1, 2 ],
+               'uniqnum handles magic' );
 }

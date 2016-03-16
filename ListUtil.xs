@@ -1032,12 +1032,14 @@ CODE:
             STRLEN keylen;
             char *key;
 
+            SvGETMAGIC(arg);
+
             if(SvUOK(arg))
-                sv_setpvf(keysv, "%"UVuf, SvUV(arg));
+                sv_setpvf(keysv, "%"UVuf, SvUV_nomg(arg));
             else if(SvIOK(arg))
-                sv_setpvf(keysv, "%"IVdf, SvIV(arg));
+                sv_setpvf(keysv, "%"IVdf, SvIV_nomg(arg));
             else
-                sv_setpvf(keysv, "%"NVgf, SvNV(arg));
+                sv_setpvf(keysv, "%"NVgf, SvNV_nomg(arg));
             key = SvPV(keysv, keylen);
 
             if(hv_exists(seen, key, keylen))
