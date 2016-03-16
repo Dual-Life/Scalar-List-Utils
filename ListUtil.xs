@@ -1029,7 +1029,7 @@ CODE:
 
     if(ix) {
         /* A temporary buffer for number stringification */
-        SV *keysv = sv_2mortal(newSV(0));
+        SV *keysv = sv_newmortal();
 
         for(index = 0 ; index < items ; index++) {
             SV *arg = args[index];
