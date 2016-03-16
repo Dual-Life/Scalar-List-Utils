@@ -1053,18 +1053,10 @@ CODE:
     }
     else
         for(index = 0 ; index < items ; index++) {
-            STRLEN keylen;
-            char *key;
-
-            key = SvPV(args[index], keylen);
-
-            if(SvUTF8(args[index]))
-                keylen = -keylen;
-
-            if(hv_exists(seen, key, keylen))
+            if (hv_exists_ent(seen, args[index], 0))
                 continue;
 
-            hv_store(seen, key, keylen, &PL_sv_undef, 0);
+            hv_store_ent(seen, args[index], &PL_sv_undef, 0);
             if(GIMME_V == G_ARRAY)
                 ST(retcount) = args[index];
             retcount++;
