@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 6;
+use Test::More tests => 9;
 use List::Util qw( uniq uniqnum );
 
 is_deeply( [ uniq ],
@@ -29,3 +29,44 @@ is_deeply( [ uniq qw( 1 1.0 1E0 ) ],
 is_deeply( [ uniqnum qw( 1 1.0 1E0 2 3 ) ],
            [ 1, 2, 3 ],
            'uniqnum compares numbers' );
+
+{
+    package Stringify;
+
+    use overload '""' => sub { return $_[0]->{str} };
+
+    sub new { bless { str => $_[1] }, $_[0] }
+
+    package main;
+
+  my @strs = map { Stringify->new( $_ ) } qw( foo foo bar );
+
+  is_deeply( [ uniq @strs ],
+             [ $strs[0], $strs[2] ],
+             'uniq respects stringify overload' );
+}
+
+{
+    package DestroyNotifier;
+
+    use overload '""' => sub { "SAME" };
+
+    sub new { bless { var => $_[1] }, $_[0] }
+
+    sub DESTROY { ${ $_[0]->{var} }++ }
+
+    package main;
+
+    my @destroyed = (0) x 3;
+    my @notifiers = map { DestroyNotifier->new( \$destroyed[$_] ) } 0 .. 2;
+
+    my @uniq = uniq @notifiers;
+    undef @notifiers;
+
+    is_deeply( \@destroyed, [ 0, 1, 1 ],
+               'values filtered by uniq() are destroyed' );
+
+    undef @uniq;
+    is_deeply( \@destroyed, [ 1, 1, 1 ],
+               'all values destroyed' );
+}
