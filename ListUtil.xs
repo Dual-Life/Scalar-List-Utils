@@ -1041,11 +1041,19 @@ CODE:
             else
                 sv_setpvf(keysv, "%"NVgf, SvNV_nomg(arg));
             key = SvPV(keysv, keylen);
+#ifdef HV_FETCH_EMPTY_HE
+            HE* he = hv_common(seen, NULL, key, keylen, 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
+            if (HeVAL(he))
+                continue;
 
+            HeVAL(he) = &PL_sv_undef;
+#else
             if(hv_exists(seen, key, keylen))
                 continue;
 
             hv_store(seen, key, keylen, &PL_sv_undef, 0);
+#endif
+
             if(GIMME_V == G_ARRAY)
                 ST(retcount) = arg;
             retcount++;
@@ -1053,10 +1061,19 @@ CODE:
     }
     else
         for(index = 0 ; index < items ; index++) {
+#ifdef HV_FETCH_EMPTY_HE
+            HE* he = hv_common(seen, args[index], NULL, 0, 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
+            if (HeVAL(he))
+                continue;
+
+            HeVAL(he) = &PL_sv_undef;
+#else
             if (hv_exists_ent(seen, args[index], 0))
                 continue;
 
             hv_store_ent(seen, args[index], &PL_sv_undef, 0);
+#endif
+
             if(GIMME_V == G_ARRAY)
                 ST(retcount) = args[index];
             retcount++;
