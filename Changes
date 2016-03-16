@@ -1,3 +1,9 @@
+1.43_002 -- 2016/03/16 22:18:00
+	(released from 'uniq' branch)
+
+	[BUGFIXES]
+	 * Perls before 5.14 lack SvNV_nomg() so just fake it with SvNV()
+
 1.43_001 -- 2016/03/16 19:37:47
 	(released from 'uniq' branch)
 
