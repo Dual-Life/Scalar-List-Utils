@@ -1028,10 +1028,16 @@ CODE:
         SV *keysv = sv_2mortal(newSV(0));
 
         for(index = 0 ; index < items ; index++) {
+            SV *arg = args[index];
             STRLEN keylen;
             char *key;
 
-            sv_setpvf(keysv, "%"NVgf, SvNV(args[index]));
+            if(SvUOK(arg))
+                sv_setpvf(keysv, "%"UVuf, SvUV(arg));
+            else if(SvIOK(arg))
+                sv_setpvf(keysv, "%"IVdf, SvIV(arg));
+            else
+                sv_setpvf(keysv, "%"NVgf, SvNV(arg));
             key = SvPV(keysv, keylen);
 
             if(hv_exists(seen, key, keylen))
@@ -1039,7 +1045,7 @@ CODE:
 
             hv_store(seen, key, keylen, &PL_sv_undef, 0);
             if(GIMME_V == G_ARRAY)
-                ST(retcount) = args[index];
+                ST(retcount) = arg;
             retcount++;
         }
     }
