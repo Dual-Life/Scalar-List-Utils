@@ -1015,14 +1015,18 @@ CODE:
     int index;
     SV **args = &PL_stack_base[ax];
     HV *seen = newHV();
+    SV *keysv;
     sv_2mortal((SV *)seen);
+
+    if(ix)
+        keysv = sv_2mortal(newSV(0));
 
     for(index = 0 ; index < items ; index++) {
         STRLEN keylen;
         char *key;
         if(ix) {
-            NV nkey = SvNV(args[index]);
-            key = SvPV(sv_2mortal(newSVnv(nkey)), keylen);
+            sv_setpvf(keysv, "%"NVgf, SvNV(args[index]));
+            key = SvPV(keysv, keylen);
         }
         else
             key = SvPV(args[index], keylen);
