@@ -1463,6 +1463,7 @@ PPCODE:
         namelen -= end - nameptr;
     }
 
+    #ifdef PERL_VERSION < 10
     /* under debugger, provide information about sub location */
     if (PL_DBsub && CvGV(cv)) {
         HV *hv = GvHV(PL_DBsub);
@@ -1497,6 +1498,7 @@ PPCODE:
         }
         Safefree(full_name);
     }
+    #endif
 
     gv = (GV *) newSV(0);
     gv_init_pvn(gv, stash, nameptr, s - nameptr, GV_ADDMULTI | utf8flag);
