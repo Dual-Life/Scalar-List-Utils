@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 9;
+use Test::More tests => 10;
 use List::Util qw( uniq uniqnum );
 
 is_deeply( [ uniq ],
@@ -29,6 +29,10 @@ is_deeply( [ uniq qw( 1 1.0 1E0 ) ],
 is_deeply( [ uniqnum qw( 1 1.0 1E0 2 3 ) ],
            [ 1, 2, 3 ],
            'uniqnum compares numbers' );
+
+is_deeply( [ uniqnum qw( 1 1.1 1.2 1.3 ) ],
+           [ 1, 1.1, 1.2, 1.3 ],
+           'uniqnum distinguishes floats' );
 
 {
     package Stringify;
