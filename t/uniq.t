@@ -79,11 +79,11 @@ is( scalar( uniq qw( a b c d a b e ) ), 5, 'uniq() in scalar context' );
 
     package main;
 
-  my @strs = map { Stringify->new( $_ ) } qw( foo foo bar );
+    my @strs = map { Stringify->new( $_ ) } qw( foo foo bar );
 
-  is_deeply( [ uniq @strs ],
-             [ $strs[0], $strs[2] ],
-             'uniq respects stringify overload' );
+    is_deeply( [ uniq @strs ],
+               [ $strs[0], $strs[2] ],
+               'uniq respects stringify overload' );
 }
 
 {
