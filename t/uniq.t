@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 18;
+use Test::More tests => 19;
 use List::Util qw( uniq uniqnum );
 
 is_deeply( [ uniq ],
@@ -84,6 +84,26 @@ is( scalar( uniq qw( a b c d a b e ) ), 5, 'uniq() in scalar context' );
     is_deeply( [ uniq @strs ],
                [ $strs[0], $strs[2] ],
                'uniq respects stringify overload' );
+}
+
+{
+    package Numify;
+
+    use overload '0+' => sub { return $_[0]->{num} };
+
+    sub new { bless { num => $_[1] }, $_[0] }
+
+    package main;
+    use Scalar::Util qw( refaddr );
+
+    my @nums = map { Numify->new( $_ ) } qw( 2 2 5 );
+
+    # is_deeply wants to use eq overloading
+    my @ret = uniqnum @nums;
+    ok( scalar @ret == 2 &&
+        refaddr $ret[0] == refaddr $nums[0] &&
+        refaddr $ret[1] == refaddr $nums[2],
+               'uniqnum respects numify overload' );
 }
 
 {
