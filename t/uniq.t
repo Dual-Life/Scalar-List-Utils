@@ -53,8 +53,11 @@ is_deeply( [ uniqnum qw( 1 1.1 1.2 1.3 ) ],
            [ 1, 1.1, 1.2, 1.3 ],
            'uniqnum distinguishes floats' );
 
-is_deeply( [ uniqnum qw( 0 1 12345 Inf -Inf NaN 0 Inf NaN ) ],
-           [ 0, 1, 12345, 'Inf', '-Inf', 'NaN' ],
+my $Inf = 0 + "Inf";
+my $NaN = $Inf - $Inf;
+
+is_deeply( [ uniqnum 0, 1, 12345, $Inf, -$Inf, $NaN, 0, $Inf, $NaN ],
+           [ 0, 1, 12345, $Inf, -$Inf, $NaN ],
            'uniqnum preserves the special values of +-Inf and Nan' );
 
 {
