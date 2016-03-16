@@ -1033,8 +1033,6 @@ CODE:
 
         for(index = 0 ; index < items ; index++) {
             SV *arg = args[index];
-            STRLEN keylen;
-            char *key;
 
             SvGETMAGIC(arg);
 
@@ -1044,12 +1042,19 @@ CODE:
                 sv_setpvf(keysv, "%"IVdf, SvIV_nomg(arg));
             else
                 sv_setpvf(keysv, "%"NVgf, SvNV_nomg(arg));
-            key = SvPV(keysv, keylen);
-
-            if(hv_exists(seen, key, keylen))
+#ifdef HV_FETCH_EMPTY_HE
+            HE* he = hv_common(seen, NULL, SvPVX(keysv), SvCUR(keysv), 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
+            if (HeVAL(he))
                 continue;
 
-            hv_store(seen, key, keylen, &PL_sv_undef, 0);
+            HeVAL(he) = &PL_sv_undef;
+#else
+            if(hv_exists(seen, SvPVX(keysv), SvCUR(keysv)))
+                continue;
+
+            hv_store(seen, SvPVX(keysv), SvCUR(keysv), &PL_sv_undef, 0);
+#endif
+
             if(GIMME_V == G_ARRAY)
                 ST(retcount) = arg;
             retcount++;
@@ -1057,18 +1062,19 @@ CODE:
     }
     else
         for(index = 0 ; index < items ; index++) {
-            STRLEN keylen;
-            char *key;
-
-            key = SvPV(args[index], keylen);
-
-            if(SvUTF8(args[index]))
-                keylen = -keylen;
-
-            if(hv_exists(seen, key, keylen))
+#ifdef HV_FETCH_EMPTY_HE
+            HE* he = hv_common(seen, args[index], NULL, 0, 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
+            if (HeVAL(he))
                 continue;
 
-            hv_store(seen, key, keylen, &PL_sv_undef, 0);
+            HeVAL(he) = &PL_sv_undef;
+#else
+            if (hv_exists_ent(seen, args[index], 0))
+                continue;
+
+            hv_store_ent(seen, args[index], &PL_sv_undef, 0);
+#endif
+
             if(GIMME_V == G_ARRAY)
                 ST(retcount) = args[index];
             retcount++;
