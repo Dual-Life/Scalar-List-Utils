@@ -1014,9 +1014,15 @@ CODE:
     int retcount = 0;
     int index;
     SV **args = &PL_stack_base[ax];
-    HV *seen = newHV();
+    HV *seen;
     SV *keysv;
-    sv_2mortal((SV *)seen);
+
+    if(items < 2) {
+        retcount = items;
+        goto finish;
+    }
+
+    sv_2mortal((SV *)(seen = newHV()));
 
     if(ix)
         keysv = sv_2mortal(newSV(0));
@@ -1040,6 +1046,7 @@ CODE:
         retcount++;
     }
 
+  finish:
     if(GIMME_V == G_ARRAY)
         XSRETURN(retcount);
     else
