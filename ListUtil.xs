@@ -1040,7 +1040,7 @@ CODE:
         if(hv_exists(seen, key, keylen))
             continue;
 
-        hv_store(seen, key, keylen, newSV(0), 0);
+        hv_store(seen, key, keylen, &PL_sv_undef, 0);
         if(GIMME_V == G_ARRAY)
             ST(retcount) = args[index];
         retcount++;
