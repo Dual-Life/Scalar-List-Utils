@@ -534,6 +534,21 @@ afterwards. Lexical variables that are only used during the lifetime of the
 block's execution will take their individual values for each invocation, as
 normal.
 
+=head2 uniqnum() on oversized bignums
+
+Due to the way that C<uniqnum()> compares numbers, it cannot distinguish
+differences between bignums (especially bigints) that are too large to fit in
+the native platform types. For example,
+
+ my $x = Math::BigInt->new( "1" x 100 );
+ my $y = $x + 1;
+
+ say for uniqnum( $x, $y );
+
+Will print just the value of C<$x>, believing that C<$y> is a numerically-
+equivalent value. This bug does not affect C<uniq()>, which will correctly
+observe that the two values stringify to different strings.
+
 =head1 SUGGESTED ADDITIONS
 
 The following are additions that have been requested, but I have been reluctant
