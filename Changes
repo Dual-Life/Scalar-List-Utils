@@ -1,3 +1,9 @@
+1.43_001 -- 2016/03/16 19:37:47
+	(released from 'uniq' branch)
+
+	[CHANGES]
+	 * Added an initial implementation of List::Util::uniq() and uniqnum()
+
 1.43 -- 2016/02/08 15:05:23
 	[CHANGES]
 	 * Updated documentation
