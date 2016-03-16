@@ -72,6 +72,10 @@ my_sv_copypv(pTHX_ SV *const dsv, SV *const ssv)
 #  define croak_no_modify() croak("%s", PL_no_modify)
 #endif
 
+#ifndef SvNV_nomg
+#  define SvNV_nomg SvNV
+#endif
+
 enum slu_accum {
     ACC_IV,
     ACC_NV,
