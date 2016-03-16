@@ -479,13 +479,6 @@ numerically instead.
 
 =cut
 
-# TODO: Convert these to XS
-sub uniq
-{
-  my %seen;
-  grep { not $seen{$_}++ } @_;
-}
-
 sub uniqnum
 {
   my %seen;

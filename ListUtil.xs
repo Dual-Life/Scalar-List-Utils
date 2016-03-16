@@ -1003,6 +1003,31 @@ CODE:
 }
 
 
+void
+uniq(...)
+PROTOTYPE: @
+CODE:
+{
+    int retcount = 0;
+    int index;
+    SV **args = &PL_stack_base[ax];
+    HV *seen = newHV();
+    sv_2mortal((SV *)seen);
+
+    for(index = 0 ; index < items ; index++) {
+        STRLEN keylen;
+        char *key = SvPV(args[index], keylen);
+
+        if(hv_exists(seen, key, keylen))
+            continue;
+
+        hv_store(seen, key, keylen, newSV(0), 0);
+        ST(retcount++) = args[index];
+    }
+
+    XSRETURN(retcount);
+}
+
 MODULE=List::Util       PACKAGE=Scalar::Util
 
 void
