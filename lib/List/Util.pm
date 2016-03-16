@@ -12,7 +12,7 @@ require Exporter;
 
 our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw(
-  all any first min max minstr maxstr none notall product reduce sum sum0 shuffle uniq
+  all any first min max minstr maxstr none notall product reduce sum sum0 shuffle uniq uniqnum
   pairs unpairs pairkeys pairvalues pairmap pairgrep pairfirst
 );
 our $VERSION    = "1.43";
@@ -470,6 +470,13 @@ Filters a list of values to remove subsequent duplicates, as judged by a
 string equality test. Preserves the order of unique elements, and retains the
 first value of any duplicate set.
 
+=head2 uniqnum
+
+    my @subset = uniqnum @values
+
+Filters a list of values similarly to L</uniq>, but judges duplicates
+numerically instead.
+
 =cut
 
 # TODO: Convert these to XS
@@ -477,6 +484,12 @@ sub uniq
 {
   my %seen;
   grep { not $seen{$_}++ } @_;
+}
+
+sub uniqnum
+{
+  my %seen;
+  grep { not $seen{$_+0}++ } @_;
 }
 
 =head1 KNOWN BUGS
