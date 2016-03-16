@@ -12,7 +12,7 @@ require Exporter;
 
 our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw(
-  all any first min max minstr maxstr none notall product reduce sum sum0 shuffle
+  all any first min max minstr maxstr none notall product reduce sum sum0 shuffle uniq
   pairs unpairs pairkeys pairvalues pairmap pairgrep pairfirst
 );
 our $VERSION    = "1.43";
@@ -251,7 +251,22 @@ I<Since version 1.26.>
 Similar to L</sum>, except this returns 0 when given an empty list, rather
 than C<undef>.
 
+=head2 uniq
+
+    my @subset = uniq @values
+
+Filters a list of values to remove subsequent duplicates, as judged by a
+string equality test. Preserves the order of unique elements, and retains the
+first value of any duplicate set.
+
 =cut
+
+# TODO: Convert these to XS
+sub uniq
+{
+  my %seen;
+  grep { not $seen{$_}++ } @_;
+}
 
 =head1 KEY/VALUE PAIR LIST FUNCTIONS
 
