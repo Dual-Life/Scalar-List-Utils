@@ -39,10 +39,6 @@ sub import
 sub List::Util::_Pair::key   { shift->[0] }
 sub List::Util::_Pair::value { shift->[1] }
 
-1;
-
-__END__
-
 =head1 NAME
 
 List::Util - A selection of general-utility list subroutines
@@ -540,3 +536,5 @@ Recent additions and current maintenance by
 Paul Evans, <leonerd@leonerd.org.uk>.
 
 =cut
+
+1;
