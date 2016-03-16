@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 10;
+use Test::More tests => 11;
 use List::Util qw( uniq uniqnum );
 
 is_deeply( [ uniq ],
@@ -33,6 +33,10 @@ is_deeply( [ uniqnum qw( 1 1.0 1E0 2 3 ) ],
 is_deeply( [ uniqnum qw( 1 1.1 1.2 1.3 ) ],
            [ 1, 1.1, 1.2, 1.3 ],
            'uniqnum distinguishes floats' );
+
+is_deeply( [ uniqnum qw( 0 1 12345 Inf -Inf NaN 0 Inf NaN ) ],
+           [ 0, 1, 12345, 'Inf', '-Inf', 'NaN' ],
+           'uniqnum preserves the special values of +-Inf and Nan' );
 
 {
     package Stringify;
