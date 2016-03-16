@@ -470,12 +470,22 @@ Filters a list of values to remove subsequent duplicates, as judged by a
 string equality test. Preserves the order of unique elements, and retains the
 first value of any duplicate set.
 
+    my $count = uniq @values
+
+In scalar context, returns the number of elements that would have been
+returned as a list.
+
 =head2 uniqnum
 
     my @subset = uniqnum @values
 
 Filters a list of values similarly to L</uniq>, but judges duplicates
 numerically instead.
+
+    my $count = uniqnum @values
+
+In scalar context, returns the number of elements that would have been
+returned as a list.
 
 =cut
 

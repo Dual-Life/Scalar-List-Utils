@@ -1031,10 +1031,15 @@ CODE:
             continue;
 
         hv_store(seen, key, keylen, newSV(0), 0);
-        ST(retcount++) = args[index];
+        if(GIMME_V == G_ARRAY)
+            ST(retcount) = args[index];
+        retcount++;
     }
 
-    XSRETURN(retcount);
+    if(GIMME_V == G_ARRAY)
+        XSRETURN(retcount);
+    else
+        ST(0) = sv_2mortal(newSViv(retcount));
 }
 
 MODULE=List::Util       PACKAGE=Scalar::Util
