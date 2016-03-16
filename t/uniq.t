@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 12;
+use Test::More tests => 14;
 use List::Util qw( uniq uniqnum );
 
 is_deeply( [ uniq ],
@@ -25,6 +25,17 @@ is_deeply( [ uniq qw( a b a c ) ],
 is_deeply( [ uniq qw( 1 1.0 1E0 ) ],
            [qw( 1 1.0 1E0 )],
            'uniq compares strings' );
+
+{
+    my $warnings = "";
+    local $SIG{__WARN__} = sub { $warnings .= join "", @_ };
+
+    is_deeply( [ uniq "cafe\x{301}" ],
+               [ "cafe\x{301}" ],
+               'uniq is happy with Unicode strings' );
+
+    is( $warnings, "", 'No warnings are printed when handling Unicode strings' );
+}
 
 is_deeply( [ uniqnum qw( 1 1.0 1E0 2 3 ) ],
            [ 1, 2, 3 ],
