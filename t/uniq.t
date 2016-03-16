@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 14;
+use Test::More tests => 15;
 use List::Util qw( uniq uniqnum );
 
 is_deeply( [ uniq ],
@@ -30,9 +30,17 @@ is_deeply( [ uniq qw( 1 1.0 1E0 ) ],
     my $warnings = "";
     local $SIG{__WARN__} = sub { $warnings .= join "", @_ };
 
-    is_deeply( [ uniq "cafe\x{301}" ],
-               [ "cafe\x{301}" ],
+    my $cafe = "cafe\x{301}";
+
+    is_deeply( [ uniq $cafe ],
+               [ $cafe ],
                'uniq is happy with Unicode strings' );
+
+    utf8::encode( my $cafebytes = $cafe );
+
+    is_deeply( [ uniq $cafe, $cafebytes ],
+               [ $cafe, $cafebytes ],
+               'uniq does not squash bytewise-equal but differently-encoded strings' );
 
     is( $warnings, "", 'No warnings are printed when handling Unicode strings' );
 }

@@ -1050,6 +1050,9 @@ CODE:
 
             key = SvPV(args[index], keylen);
 
+            if(SvUTF8(args[index]))
+                keylen = -keylen;
+
             if(hv_exists(seen, key, keylen))
                 continue;
 
