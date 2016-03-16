@@ -251,22 +251,7 @@ I<Since version 1.26.>
 Similar to L</sum>, except this returns 0 when given an empty list, rather
 than C<undef>.
 
-=head2 uniq
-
-    my @subset = uniq @values
-
-Filters a list of values to remove subsequent duplicates, as judged by a
-string equality test. Preserves the order of unique elements, and retains the
-first value of any duplicate set.
-
 =cut
-
-# TODO: Convert these to XS
-sub uniq
-{
-  my %seen;
-  grep { not $seen{$_}++ } @_;
-}
 
 =head1 KEY/VALUE PAIR LIST FUNCTIONS
 
@@ -477,7 +462,22 @@ Returns the values of the input in a random order
 
     @cards = shuffle 0..51      # 0..51 in a random order
 
+=head2 uniq
+
+    my @subset = uniq @values
+
+Filters a list of values to remove subsequent duplicates, as judged by a
+string equality test. Preserves the order of unique elements, and retains the
+first value of any duplicate set.
+
 =cut
+
+# TODO: Convert these to XS
+sub uniq
+{
+  my %seen;
+  grep { not $seen{$_}++ } @_;
+}
 
 =head1 KNOWN BUGS
 
