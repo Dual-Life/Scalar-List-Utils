@@ -479,12 +479,6 @@ numerically instead.
 
 =cut
 
-sub uniqnum
-{
-  my %seen;
-  grep { not $seen{$_+0}++ } @_;
-}
-
 =head1 KNOWN BUGS
 
 =head2 RT #95409

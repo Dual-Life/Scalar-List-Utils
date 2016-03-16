@@ -1006,6 +1006,9 @@ CODE:
 void
 uniq(...)
 PROTOTYPE: @
+ALIAS:
+    uniq    = 0
+    uniqnum = 1
 CODE:
 {
     int retcount = 0;
@@ -1016,7 +1019,13 @@ CODE:
 
     for(index = 0 ; index < items ; index++) {
         STRLEN keylen;
-        char *key = SvPV(args[index], keylen);
+        char *key;
+        if(ix) {
+            NV nkey = SvNV(args[index]);
+            key = SvPV(sv_2mortal(newSVnv(nkey)), keylen);
+        }
+        else
+            key = SvPV(args[index], keylen);
 
         if(hv_exists(seen, key, keylen))
             continue;
