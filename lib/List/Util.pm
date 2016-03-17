@@ -466,6 +466,8 @@ Returns the values of the input in a random order
 
     my @subset = uniq @values
 
+I<Since version 1.44.>
+
 Filters a list of values to remove subsequent duplicates, as judged by a
 string equality test. Preserves the order of unique elements, and retains the
 first value of any duplicate set.
@@ -482,6 +484,8 @@ identically to the empty string, but in addition a warning is produced.
 =head2 uniqnum
 
     my @subset = uniqnum @values
+
+I<Since version 1.44.>
 
 Filters a list of values similarly to L</uniq>, but judges duplicates
 numerically instead.
