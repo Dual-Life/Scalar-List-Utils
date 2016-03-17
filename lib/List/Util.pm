@@ -52,7 +52,7 @@ List::Util - A selection of general-utility list subroutines
 
       pairs pairkeys pairvalues pairfirst pairgrep pairmap
 
-      shuffle
+      shuffle uniq uniqnum
     );
 
 =head1 DESCRIPTION
