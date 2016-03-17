@@ -53,8 +53,11 @@ is_deeply( [ uniqnum qw( 1 1.1 1.2 1.3 ) ],
            [ 1, 1.1, 1.2, 1.3 ],
            'uniqnum distinguishes floats' );
 
-my $Inf = 0 + "Inf";
+my $Inf = 0 + 1E1000;
 my $NaN = $Inf - $Inf;
+
+# If this fails then the test script *itself* is broken on this platform
+$NaN == $NaN and die "ARGH: Failed to create special testing NaN value";
 
 is_deeply( [ uniqnum 0, 1, 12345, $Inf, -$Inf, $NaN, 0, $Inf, $NaN ],
            [ 0, 1, 12345, $Inf, -$Inf, $NaN ],
