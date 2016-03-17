@@ -1,36 +1,8 @@
-1.43_005 -- 2016/03/17 17:27:09
-	(released from 'uniq' branch)
-
-	[BUGFIXES]
-	 * Construct an Inf value dynamically that should work even on
-	   longdouble machines
-
-1.43_004 -- 2016/03/17 16:06:52
-	(released from 'uniq' branch)
-
-	[BUGFIXES]
-	 * Don't rely on Inf to stringify to an infinity during testing
-
-1.43_003 -- 2016/03/17 13:40:50
-	(released from 'uniq' branch)
-
+1.44 -- 2016/03/17 23:08:46
 	[CHANGES]
-	 * Efficiency improvements to uniqnum() (thanks randir)
-
-	[BUGFIXES]
-	 * Don't rely on exact stringification of Inf or Nan during testing
-
-1.43_002 -- 2016/03/16 22:18:00
-        (released from 'uniq' branch)
- 
-        [BUGFIXES]
-         * Perls before 5.14 lack SvNV_nomg() so just fake it with SvNV()
-
-1.43_001 -- 2016/03/16 19:37:47
-	(released from 'uniq' branch)
-
-	[CHANGES]
-	 * Added an initial implementation of List::Util::uniq() and uniqnum()
+	 * Added List::Util::uniq() and uniqnum()
+	   (with thanks to randir and ilmari for assistance writing code and
+	    tests)
 
 1.43 -- 2016/02/08 15:05:23
 	[CHANGES]
