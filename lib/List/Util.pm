@@ -475,6 +475,10 @@ first value of any duplicate set.
 In scalar context, returns the number of elements that would have been
 returned as a list.
 
+Note that C<undef> is not handled specially; it is treated the same as most
+other perl operations that work on strings. That is, C<undef> behaves
+identically to the empty string, but in addition a warning is produced.
+
 =head2 uniqnum
 
     my @subset = uniqnum @values
