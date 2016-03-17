@@ -1,3 +1,18 @@
+1.43_003 -- 2016/03/17 13:40:50
+	(released from 'uniq' branch)
+
+	[CHANGES]
+	 * Efficiency improvements to uniqnum() (thanks randir)
+
+	[BUGFIXES]
+	 * Don't rely on exact stringification of Inf or Nan during testing
+
+1.43_002 -- 2016/03/16 22:18:00
+        (released from 'uniq' branch)
+ 
+        [BUGFIXES]
+         * Perls before 5.14 lack SvNV_nomg() so just fake it with SvNV()
+
 1.43_001 -- 2016/03/16 19:37:47
 	(released from 'uniq' branch)
 
