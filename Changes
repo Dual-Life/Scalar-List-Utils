@@ -1,3 +1,10 @@
+1.43_005 -- 2016/03/17 17:27:09
+	(released from 'uniq' branch)
+
+	[BUGFIXES]
+	 * Construct an Inf value dynamically that should work even on
+	   longdouble machines
+
 1.43_004 -- 2016/03/17 16:06:52
 	(released from 'uniq' branch)
 
