@@ -72,6 +72,10 @@ my_sv_copypv(pTHX_ SV *const dsv, SV *const ssv)
 #  define croak_no_modify() croak("%s", PL_no_modify)
 #endif
 
+#ifndef SvNV_nomg
+#  define SvNV_nomg SvNV
+#endif
+
 enum slu_accum {
     ACC_IV,
     ACC_NV,
@@ -1002,6 +1006,86 @@ CODE:
     XSRETURN(items);
 }
 
+
+void
+uniq(...)
+PROTOTYPE: @
+ALIAS:
+    uniq    = 0
+    uniqnum = 1
+CODE:
+{
+    int retcount = 0;
+    int index;
+    SV **args = &PL_stack_base[ax];
+    HV *seen;
+
+    if(items < 2) {
+        retcount = items;
+        goto finish;
+    }
+
+    sv_2mortal((SV *)(seen = newHV()));
+
+    if(ix) {
+        /* A temporary buffer for number stringification */
+        SV *keysv = sv_newmortal();
+
+        for(index = 0 ; index < items ; index++) {
+            SV *arg = args[index];
+
+            SvGETMAGIC(arg);
+
+            if(SvUOK(arg))
+                sv_setpvf(keysv, "%"UVuf, SvUV_nomg(arg));
+            else if(SvIOK(arg))
+                sv_setpvf(keysv, "%"IVdf, SvIV_nomg(arg));
+            else
+                sv_setpvf(keysv, "%"NVgf, SvNV_nomg(arg));
+#ifdef HV_FETCH_EMPTY_HE
+            HE* he = hv_common(seen, NULL, SvPVX(keysv), SvCUR(keysv), 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
+            if (HeVAL(he))
+                continue;
+
+            HeVAL(he) = &PL_sv_undef;
+#else
+            if(hv_exists(seen, SvPVX(keysv), SvCUR(keysv)))
+                continue;
+
+            hv_store(seen, SvPVX(keysv), SvCUR(keysv), &PL_sv_undef, 0);
+#endif
+
+            if(GIMME_V == G_ARRAY)
+                ST(retcount) = arg;
+            retcount++;
+        }
+    }
+    else
+        for(index = 0 ; index < items ; index++) {
+#ifdef HV_FETCH_EMPTY_HE
+            HE* he = hv_common(seen, args[index], NULL, 0, 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
+            if (HeVAL(he))
+                continue;
+
+            HeVAL(he) = &PL_sv_undef;
+#else
+            if (hv_exists_ent(seen, args[index], 0))
+                continue;
+
+            hv_store_ent(seen, args[index], &PL_sv_undef, 0);
+#endif
+
+            if(GIMME_V == G_ARRAY)
+                ST(retcount) = args[index];
+            retcount++;
+        }
+
+  finish:
+    if(GIMME_V == G_ARRAY)
+        XSRETURN(retcount);
+    else
+        ST(0) = sv_2mortal(newSViv(retcount));
+}
 
 MODULE=List::Util       PACKAGE=Scalar::Util
 

@@ -37,4 +37,5 @@ t/subname.t
 t/sum.t
 t/sum0.t
 t/tainted.t
+t/uniq.t
 t/weak.t
