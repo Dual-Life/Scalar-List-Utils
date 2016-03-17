@@ -1,3 +1,9 @@
+1.43_004 -- 2016/03/17 16:06:52
+	(released from 'uniq' branch)
+
+	[BUGFIXES]
+	 * Don't rely on Inf to stringify to an infinity during testing
+
 1.43_003 -- 2016/03/17 13:40:50
 	(released from 'uniq' branch)
 
