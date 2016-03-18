@@ -481,7 +481,7 @@ returned as a list.
 
     my @subset = uniqstr @values
 
-I<Since version 1.44.>
+I<Since version 1.45.>
 
 Filters a list of values to remove subsequent duplicates, as judged by a
 string equality test. Preserves the order of unique elements, and retains the
