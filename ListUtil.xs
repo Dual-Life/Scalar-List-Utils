@@ -1020,7 +1020,9 @@ CODE:
     SV **args = &PL_stack_base[ax];
     HV *seen;
 
-    if(items < 2) {
+    if(items == 0 || (items == 1 && SvOK(args[0]))) {
+        /* Optimise for the case of the empty list or a defined singleton
+         * Leave a singleton undef for later */
         retcount = items;
         goto finish;
     }
@@ -1056,7 +1058,7 @@ CODE:
 #endif
 
             if(GIMME_V == G_ARRAY)
-                ST(retcount) = arg;
+                ST(retcount) = SvOK(arg) ? arg : sv_2mortal(newSViv(0));
             retcount++;
         }
     }
@@ -1077,7 +1079,7 @@ CODE:
 #endif
 
             if(GIMME_V == G_ARRAY)
-                ST(retcount) = arg;
+                ST(retcount) = SvOK(arg) ? arg : sv_2mortal(newSVpvn("", 0));
             retcount++;
         }
 

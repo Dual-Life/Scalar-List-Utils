@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 23;
+use Test::More tests => 25;
 use List::Util qw( uniqnum uniqstr );
 
 is_deeply( [ uniqstr ],
@@ -35,6 +35,10 @@ is_deeply( [ uniqstr qw( 1 1.0 1E0 ) ],
                'uniqstr considers undef and empty-string equivalent' );
 
     ok( length $warnings, 'uniqstr on undef yields a warning' );
+
+    is_deeply( [ uniqstr undef ],
+               [ "" ],
+               'uniqstr on undef coerces to empty-string' );
 }
 
 {
@@ -90,6 +94,10 @@ is_deeply( [ uniqnum 0, 1, 12345, $Inf, -$Inf, $NaN, 0, $Inf, $NaN ],
                'uniqnum considers undef and zero equivalent' );
 
     ok( length $warnings, 'uniqnum on undef yields a warning' );
+
+    is_deeply( [ uniqnum undef ],
+               [ 0 ],
+               'uniqnum on undef coerces to zero' );
 }
 
 is( scalar( uniqstr qw( a b c d a b e ) ), 5, 'uniqstr() in scalar context' );

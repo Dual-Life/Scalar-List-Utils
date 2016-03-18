@@ -477,6 +477,12 @@ the first value of any duplicate set.
 In scalar context, returns the number of elements that would have been
 returned as a list.
 
+Note that C<undef> is treated much as other numerical operations treat it; it
+compares equal to zero but additionally produces a warning if such warnings
+are enabled (C<use warnings 'uninitialized';>). In addition, an C<undef> in
+the returned list is coerced into a numerical zero, so that the entire list of
+values returned by C<uniqnum> are well-behaved as numbers.
+
 =head2 uniqstr
 
     my @subset = uniqstr @values
@@ -492,9 +498,11 @@ first value of any duplicate set.
 In scalar context, returns the number of elements that would have been
 returned as a list.
 
-Note that C<undef> is not handled specially; it is treated the same as most
-other perl operations that work on strings. That is, C<undef> behaves
-identically to the empty string, but in addition a warning is produced.
+Note that C<undef> is treated much as other string operations treat it; it
+compares equal to the empty string but additionally produces a warning if such
+warnings are enabled (C<use warnings 'uninitialized';>). In addition, an
+C<undef> in the returned list is coerced into an empty string, so that the
+entire list of values returned by C<uniqstr> are well-behaved as strings.
 
 =cut
 
