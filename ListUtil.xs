@@ -1008,10 +1008,10 @@ CODE:
 
 
 void
-uniq(...)
+uniqstr(...)
 PROTOTYPE: @
 ALIAS:
-    uniq    = 0
+    uniqstr = 0
     uniqnum = 1
 CODE:
 {

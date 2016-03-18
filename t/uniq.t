@@ -4,27 +4,27 @@ use strict;
 use warnings;
 
 use Test::More tests => 19;
-use List::Util qw( uniq uniqnum );
+use List::Util qw( uniqnum uniqstr );
 
-is_deeply( [ uniq ],
+is_deeply( [ uniqstr ],
            [],
-           'uniq of empty list' );
+           'uniqstr of empty list' );
 
-is_deeply( [ uniq qw( abc ) ],
+is_deeply( [ uniqstr qw( abc ) ],
            [qw( abc )],
-           'uniq of singleton list' );
+           'uniqstr of singleton list' );
 
-is_deeply( [ uniq qw( x x x ) ],
+is_deeply( [ uniqstr qw( x x x ) ],
            [qw( x )],
-           'uniq of repeated-element list' );
+           'uniqstr of repeated-element list' );
 
-is_deeply( [ uniq qw( a b a c ) ],
+is_deeply( [ uniqstr qw( a b a c ) ],
            [qw( a b c )],
-           'uniq removes subsequent duplicates' );
+           'uniqstr removes subsequent duplicates' );
 
-is_deeply( [ uniq qw( 1 1.0 1E0 ) ],
+is_deeply( [ uniqstr qw( 1 1.0 1E0 ) ],
            [qw( 1 1.0 1E0 )],
-           'uniq compares strings' );
+           'uniqstr compares strings' );
 
 {
     my $warnings = "";
@@ -32,15 +32,15 @@ is_deeply( [ uniq qw( 1 1.0 1E0 ) ],
 
     my $cafe = "cafe\x{301}";
 
-    is_deeply( [ uniq $cafe ],
+    is_deeply( [ uniqstr $cafe ],
                [ $cafe ],
-               'uniq is happy with Unicode strings' );
+               'uniqstr is happy with Unicode strings' );
 
     utf8::encode( my $cafebytes = $cafe );
 
-    is_deeply( [ uniq $cafe, $cafebytes ],
+    is_deeply( [ uniqstr $cafe, $cafebytes ],
                [ $cafe, $cafebytes ],
-               'uniq does not squash bytewise-equal but differently-encoded strings' );
+               'uniqstr does not squash bytewise-equal but differently-encoded strings' );
 
     is( $warnings, "", 'No warnings are printed when handling Unicode strings' );
 }
@@ -70,7 +70,7 @@ is_deeply( [ uniqnum 0, 1, 12345, $Inf, -$Inf, $NaN, 0, $Inf, $NaN ],
                'uniqnum preserves uniqness of full integer range' );
 }
 
-is( scalar( uniq qw( a b c d a b e ) ), 5, 'uniq() in scalar context' );
+is( scalar( uniqstr qw( a b c d a b e ) ), 5, 'uniqstr() in scalar context' );
 
 {
     package Stringify;
@@ -83,9 +83,9 @@ is( scalar( uniq qw( a b c d a b e ) ), 5, 'uniq() in scalar context' );
 
     my @strs = map { Stringify->new( $_ ) } qw( foo foo bar );
 
-    is_deeply( [ uniq @strs ],
+    is_deeply( [ uniqstr @strs ],
                [ $strs[0], $strs[2] ],
-               'uniq respects stringify overload' );
+               'uniqstr respects stringify overload' );
 }
 
 {
@@ -122,22 +122,22 @@ is( scalar( uniq qw( a b c d a b e ) ), 5, 'uniq() in scalar context' );
     my @destroyed = (0) x 3;
     my @notifiers = map { DestroyNotifier->new( \$destroyed[$_] ) } 0 .. 2;
 
-    my @uniq = uniq @notifiers;
+    my @uniqstr = uniqstr @notifiers;
     undef @notifiers;
 
     is_deeply( \@destroyed, [ 0, 1, 1 ],
-               'values filtered by uniq() are destroyed' );
+               'values filtered by uniqstr() are destroyed' );
 
-    undef @uniq;
+    undef @uniqstr;
     is_deeply( \@destroyed, [ 1, 1, 1 ],
                'all values destroyed' );
 }
 
 {
     "a a b" =~ m/(.) (.) (.)/;
-    is_deeply( [ uniq $1, $2, $3 ],
+    is_deeply( [ uniqstr $1, $2, $3 ],
                [qw( a b )],
-               'uniq handles magic' );
+               'uniqstr handles magic' );
 
     "1 1 2" =~ m/(.) (.) (.)/;
     is_deeply( [ uniqnum $1, $2, $3 ],

@@ -12,7 +12,7 @@ require Exporter;
 
 our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw(
-  all any first min max minstr maxstr none notall product reduce sum sum0 shuffle uniq uniqnum
+  all any first min max minstr maxstr none notall product reduce sum sum0 shuffle uniqnum uniqstr
   pairs unpairs pairkeys pairvalues pairmap pairgrep pairfirst
 );
 our $VERSION    = "1.44";
@@ -52,7 +52,7 @@ List::Util - A selection of general-utility list subroutines
 
       pairs pairkeys pairvalues pairfirst pairgrep pairmap
 
-      shuffle uniq uniqnum
+      shuffle uniqnum uniqstr
     );
 
 =head1 DESCRIPTION
@@ -462,9 +462,24 @@ Returns the values of the input in a random order
 
     @cards = shuffle 0..51      # 0..51 in a random order
 
-=head2 uniq
+=head2 uniqnum
 
-    my @subset = uniq @values
+    my @subset = uniqnum @values
+
+I<Since version 1.44.>
+
+Filters a list of values to remove subsequent duplicates, as judged by a
+numerical equality test. Preserves the order of unique elements, and retains
+the first value of any duplicate set.
+
+    my $count = uniqnum @values
+
+In scalar context, returns the number of elements that would have been
+returned as a list.
+
+=head2 uniqstr
+
+    my @subset = uniqstr @values
 
 I<Since version 1.44.>
 
@@ -472,7 +487,7 @@ Filters a list of values to remove subsequent duplicates, as judged by a
 string equality test. Preserves the order of unique elements, and retains the
 first value of any duplicate set.
 
-    my $count = uniq @values
+    my $count = uniqstr @values
 
 In scalar context, returns the number of elements that would have been
 returned as a list.
@@ -480,20 +495,6 @@ returned as a list.
 Note that C<undef> is not handled specially; it is treated the same as most
 other perl operations that work on strings. That is, C<undef> behaves
 identically to the empty string, but in addition a warning is produced.
-
-=head2 uniqnum
-
-    my @subset = uniqnum @values
-
-I<Since version 1.44.>
-
-Filters a list of values similarly to L</uniq>, but judges duplicates
-numerically instead.
-
-    my $count = uniqnum @values
-
-In scalar context, returns the number of elements that would have been
-returned as a list.
 
 =cut
 
@@ -554,7 +555,7 @@ the native platform types. For example,
  say for uniqnum( $x, $y );
 
 Will print just the value of C<$x>, believing that C<$y> is a numerically-
-equivalent value. This bug does not affect C<uniq()>, which will correctly
+equivalent value. This bug does not affect C<uniqstr()>, which will correctly
 observe that the two values stringify to different strings.
 
 =head2 uniqnum() invokes GET magic multiple times before perl 5.14
@@ -563,7 +564,7 @@ Perl versions before 5.14 lack the C<SvNV_nomg()> and related macros. On these
 older versions, C<uniqnum()> will invoke GET magic twice on each argument
 passed in. This ought not cause any major problems other than a slight
 performance penalty, because well-designed GET magic should be idempotent.
-This does not affect C<uniq()>, nor builds for perl 5.14 or later.
+This does not affect C<uniqstr()>, nor builds for perl 5.14 or later.
 
 =head1 SUGGESTED ADDITIONS
 
