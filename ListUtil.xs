@@ -1062,21 +1062,22 @@ CODE:
     }
     else
         for(index = 0 ; index < items ; index++) {
+            SV *arg = args[index];
 #ifdef HV_FETCH_EMPTY_HE
-            HE* he = hv_common(seen, args[index], NULL, 0, 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
+            HE* he = hv_common(seen, arg, NULL, 0, 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
             if (HeVAL(he))
                 continue;
 
             HeVAL(he) = &PL_sv_undef;
 #else
-            if (hv_exists_ent(seen, args[index], 0))
+            if (hv_exists_ent(seen, arg, 0))
                 continue;
 
-            hv_store_ent(seen, args[index], &PL_sv_undef, 0);
+            hv_store_ent(seen, arg, &PL_sv_undef, 0);
 #endif
 
             if(GIMME_V == G_ARRAY)
-                ST(retcount) = args[index];
+                ST(retcount) = arg;
             retcount++;
         }
 
