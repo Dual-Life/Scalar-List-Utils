@@ -1008,11 +1008,12 @@ CODE:
 
 
 void
-uniqstr(...)
+uniq(...)
 PROTOTYPE: @
 ALIAS:
-    uniqstr = 0
-    uniqnum = 1
+    uniqnum = 0
+    uniqstr = 1
+    uniq    = 2
 CODE:
 {
     int retcount = 0;
@@ -1029,7 +1030,8 @@ CODE:
 
     sv_2mortal((SV *)(seen = newHV()));
 
-    if(ix) {
+    if(ix == 0) {
+        /* uniqnum */
         /* A temporary buffer for number stringification */
         SV *keysv = sv_newmortal();
 
@@ -1062,9 +1064,24 @@ CODE:
             retcount++;
         }
     }
-    else
+    else {
+        /* uniqstr or uniq */
+        int seen_undef = 0;
+
         for(index = 0 ; index < items ; index++) {
             SV *arg = args[index];
+            if(ix == 2 && !SvOK(arg)) {
+                /* special handling of undef for uniq() */
+                if(seen_undef)
+                    continue;
+
+                seen_undef++;
+
+                if(GIMME_V == G_ARRAY)
+                    ST(retcount) = arg;
+                retcount++;
+                continue;
+            }
 #ifdef HV_FETCH_EMPTY_HE
             HE* he = hv_common(seen, arg, NULL, 0, 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
             if (HeVAL(he))
@@ -1082,6 +1099,7 @@ CODE:
                 ST(retcount) = SvOK(arg) ? arg : sv_2mortal(newSVpvn("", 0));
             retcount++;
         }
+    }
 
   finish:
     if(GIMME_V == G_ARRAY)

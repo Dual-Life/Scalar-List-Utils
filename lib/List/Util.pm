@@ -12,7 +12,7 @@ require Exporter;
 
 our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw(
-  all any first min max minstr maxstr none notall product reduce sum sum0 shuffle uniqnum uniqstr
+  all any first min max minstr maxstr none notall product reduce sum sum0 shuffle uniq uniqnum uniqstr
   pairs unpairs pairkeys pairvalues pairmap pairgrep pairfirst
 );
 our $VERSION    = "1.44";
@@ -461,6 +461,26 @@ See L</KNOWN BUGS> for a known-bug with C<pairmap>, and a workaround.
 Returns the values of the input in a random order
 
     @cards = shuffle 0..51      # 0..51 in a random order
+
+=head2 uniq
+
+    my @subset = uniq @values
+
+I<Since version 1.45.>
+
+Filters a list of values to remove subsequent duplicates, as judged by a
+DWIM-ish string equality or C<undef> test. Preserves the order of unique
+elements, and retains the first value of any duplicate set.
+
+    my $count = uniq @values
+
+In scalar context, returns the number of elements that would have been
+returned as a list.
+
+The C<undef> value is treated by this function as distinct from the empty
+string, and no warning will be produced. It is left as-is in the returned
+list. Subsequent C<undef> values are still considered identical to the first,
+and will be removed.
 
 =head2 uniqnum
 

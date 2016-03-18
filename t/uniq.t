@@ -3,8 +3,8 @@
 use strict;
 use warnings;
 
-use Test::More tests => 25;
-use List::Util qw( uniqnum uniqstr );
+use Test::More tests => 29;
+use List::Util qw( uniqnum uniqstr uniq );
 
 is_deeply( [ uniqstr ],
            [],
@@ -98,6 +98,25 @@ is_deeply( [ uniqnum 0, 1, 12345, $Inf, -$Inf, $NaN, 0, $Inf, $NaN ],
     is_deeply( [ uniqnum undef ],
                [ 0 ],
                'uniqnum on undef coerces to zero' );
+}
+
+is_deeply( [ uniq () ],
+           [],
+           'uniq of empty list' );
+
+{
+    my $warnings = "";
+    local $SIG{__WARN__} = sub { $warnings .= join "", @_ };
+
+    is_deeply( [ uniq "", undef ],
+               [ "", undef ],
+               'uniq distintinguishes empty-string from undef' );
+
+    is_deeply( [ uniq undef, undef ],
+               [ undef ],
+               'uniq considers duplicate undefs as identical' );
+
+    ok( !length $warnings, 'uniq on undef does not warn' );
 }
 
 is( scalar( uniqstr qw( a b c d a b e ) ), 5, 'uniqstr() in scalar context' );
