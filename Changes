@@ -1,3 +1,9 @@
+1.44_001 -- 2016/03/19 19:30:19
+	[CHANGES]
+	 * Renamed existing uniq() to uniqstr()
+	 * Canonicalise undef to {empty string,zero} in uniq{str,num}()
+	 * Add a new uniq() with more DWIMish semantics around undef
+
 1.44 -- 2016/03/17 23:08:46
 	[CHANGES]
 	 * Added List::Util::uniq() and uniqnum()
