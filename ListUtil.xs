@@ -1021,9 +1021,9 @@ CODE:
     SV **args = &PL_stack_base[ax];
     HV *seen;
 
-    if(items == 0 || (items == 1 && SvOK(args[0]))) {
-        /* Optimise for the case of the empty list or a defined singleton
-         * Leave a singleton undef for later */
+    if(items == 0 || (items == 1 && !SvGAMAGIC(args[0]) && SvOK(args[0]))) {
+        /* Optimise for the case of the empty list or a defined nonmagic
+         * singleton. Leave a singleton magical||undef for the regular case */
         retcount = items;
         goto finish;
     }
