@@ -1,3 +1,8 @@
+1.44_002 -- 2016/03/23 17:58:02
+	[CHANGES]
+	 * Fix uses of GET magic by the uniq*() family of functions. GET magic
+	   is now always invoked exactly once if it exists.
+
 1.44_001 -- 2016/03/19 19:30:19
 	[CHANGES]
 	 * Renamed existing uniq() to uniqstr()
