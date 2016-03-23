@@ -1070,6 +1070,11 @@ CODE:
 
         for(index = 0 ; index < items ; index++) {
             SV *arg = args[index];
+
+            if(SvGAMAGIC(arg))
+                /* clone the value so we don't invoke magic again */
+                arg = sv_mortalcopy(arg);
+
             if(ix == 2 && !SvOK(arg)) {
                 /* special handling of undef for uniq() */
                 if(seen_undef)
