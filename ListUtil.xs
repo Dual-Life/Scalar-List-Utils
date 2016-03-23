@@ -1038,14 +1038,16 @@ CODE:
         for(index = 0 ; index < items ; index++) {
             SV *arg = args[index];
 
-            SvGETMAGIC(arg);
+            if(SvGAMAGIC(arg))
+                /* clone the value so we don't invoke magic again */
+                arg = sv_mortalcopy(arg);
 
             if(SvUOK(arg))
-                sv_setpvf(keysv, "%"UVuf, SvUV_nomg(arg));
+                sv_setpvf(keysv, "%"UVuf, SvUV(arg));
             else if(SvIOK(arg))
-                sv_setpvf(keysv, "%"IVdf, SvIV_nomg(arg));
+                sv_setpvf(keysv, "%"IVdf, SvIV(arg));
             else
-                sv_setpvf(keysv, "%"NVgf, SvNV_nomg(arg));
+                sv_setpvf(keysv, "%"NVgf, SvNV(arg));
 #ifdef HV_FETCH_EMPTY_HE
             HE* he = hv_common(seen, NULL, SvPVX(keysv), SvCUR(keysv), 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
             if (HeVAL(he))

@@ -586,14 +586,6 @@ Will print just the value of C<$x>, believing that C<$y> is a numerically-
 equivalent value. This bug does not affect C<uniqstr()>, which will correctly
 observe that the two values stringify to different strings.
 
-=head2 uniqnum() invokes GET magic multiple times before perl 5.14
-
-Perl versions before 5.14 lack the C<SvNV_nomg()> and related macros. On these
-older versions, C<uniqnum()> will invoke GET magic twice on each argument
-passed in. This ought not cause any major problems other than a slight
-performance penalty, because well-designed GET magic should be idempotent.
-This does not affect C<uniqstr()>, nor builds for perl 5.14 or later.
-
 =head1 SUGGESTED ADDITIONS
 
 The following are additions that have been requested, but I have been reluctant
