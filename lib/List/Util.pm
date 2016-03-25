@@ -114,6 +114,20 @@ C<undef> being returned
 
   $foo = reduce { $a + $b } 0, @values;             # sum with 0 identity value
 
+The above example code blocks also suggest how to use C<reduce> to build a
+more efficient combined version of one of these basic functions and a C<map>
+block. For example, to find the total length of the all the strings in a list,
+we could use
+
+    $total = sum map { length } @strings;
+
+However, this produces a list of temporary integer values as long as the
+original list of strings, only to reduce it down to a single value again. We
+can compute the same result more efficiently by using C<reduce> with a code
+block that accumulates lengths by writing this instead as:
+
+    $total = reduce { $a + length $b } 0, @strings
+
 The remaining list-reduction functions are all specialisations of this generic
 idea.
 
