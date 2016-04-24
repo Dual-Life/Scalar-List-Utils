@@ -2036,7 +2036,7 @@ ROUTINE()
         CV *cv;
     CODE:
         cv = Perl_find_runcv(aTHX_ NULL);
-        if (CvUNIQUE(cv))
+        if (CvUNIQUE(cv) && !CvSPECIAL(cv))
             RETVAL = &PL_sv_undef;
         else
             RETVAL = newRV((SV*)cv);

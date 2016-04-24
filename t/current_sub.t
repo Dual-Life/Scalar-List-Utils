@@ -30,10 +30,10 @@ rassilon();
 
 # specialblocks.t
 
-BEGIN { ok( !defined __SUB__, "Don't point to BEGIN" ); }
-CHECK { ok( !defined __SUB__, "Don't point to CHECK" ); }
-INIT  { ok( !defined __SUB__, "Don't point to INIT" ); }
-END   { ok( !defined __SUB__, "Don't point to END" ); }
+BEGIN { ok( defined __SUB__, "Don't point to BEGIN" ); }
+CHECK { ok( defined __SUB__, "Don't point to CHECK" ); }
+INIT  { ok( defined __SUB__, "Don't point to INIT" ); }
+END   { ok( defined __SUB__, "Don't point to END" ); }
 
 # autoload.t
 
