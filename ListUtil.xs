@@ -2027,3 +2027,19 @@ BOOT:
     sv_setsv(rmcsv, &PL_sv_no);
 #endif
 }
+
+PROTOTYPES: ENABLE
+
+SV *
+ROUTINE()
+    PREINIT:
+        CV *cv;
+    CODE:
+        cv = Perl_find_runcv(aTHX_ NULL);
+        if (CvUNIQUE(cv))
+            RETVAL = &PL_sv_undef;
+        else
+            RETVAL = newRV((SV*)cv);
+    OUTPUT:
+        RETVAL
+
