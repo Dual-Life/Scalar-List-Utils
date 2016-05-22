@@ -114,6 +114,32 @@ static enum slu_accum accum_type(SV *sv) {
 /* Magic for set_subname */
 static MGVTBL subname_vtbl;
 
+/* Initialize Perl's rand() function */
+void my_init_rand() {
+#if (PERL_VERSION < 9)
+    struct op dmy_op;
+    struct op *old_op = PL_op;
+
+    /* We call pp_rand here so that Drand01 get initialized if rand()
+       or srand() has not already been called
+    */
+    memzero((char*)(&dmy_op), sizeof(struct op));
+    /* we let pp_rand() borrow the TARG allocated for this XS sub */
+    dmy_op.op_targ = PL_op->op_targ;
+    PL_op = &dmy_op;
+    (void)*(PL_ppaddr[OP_RAND])(aTHX);
+    PL_op = old_op;
+#else
+    /* Initialize Drand01 if rand() or srand() has
+       not already been called
+    */
+    if(!PL_srand_called) {
+        (void)seedDrand01((Rand_seed_t)Perl_seed(aTHX));
+        PL_srand_called = TRUE;
+    }
+#endif
+}
+
 MODULE=List::Util       PACKAGE=List::Util
 
 void
@@ -1002,28 +1028,7 @@ PROTOTYPE: @
 CODE:
 {
     int index;
-#if (PERL_VERSION < 9)
-    struct op dmy_op;
-    struct op *old_op = PL_op;
-
-    /* We call pp_rand here so that Drand01 get initialized if rand()
-       or srand() has not already been called
-    */
-    memzero((char*)(&dmy_op), sizeof(struct op));
-    /* we let pp_rand() borrow the TARG allocated for this XS sub */
-    dmy_op.op_targ = PL_op->op_targ;
-    PL_op = &dmy_op;
-    (void)*(PL_ppaddr[OP_RAND])(aTHX);
-    PL_op = old_op;
-#else
-    /* Initialize Drand01 if rand() or srand() has
-       not already been called
-    */
-    if(!PL_srand_called) {
-        (void)seedDrand01((Rand_seed_t)Perl_seed(aTHX));
-        PL_srand_called = TRUE;
-    }
-#endif
+    my_init_rand();
 
     for (index = items ; index > 1 ; ) {
         int swap = (int)(Drand01() * (double)(index--));
@@ -1040,28 +1045,7 @@ pick(...)
 PROTOTYPE: @
 CODE:
 {
-#if (PERL_VERSION < 9)
-    struct op dmy_op;
-    struct op *old_op = PL_op;
-
-    /* We call pp_rand here so that Drand01 get initialized if rand()
-       or srand() has not already been called
-    */
-    memzero((char*)(&dmy_op), sizeof(struct op));
-    /* we let pp_rand() borrow the TARG allocated for this XS sub */
-    dmy_op.op_targ = PL_op->op_targ;
-    PL_op = &dmy_op;
-    (void)*(PL_ppaddr[OP_RAND])(aTHX);
-    PL_op = old_op;
-#else
-    /* Initialize Drand01 if rand() or srand() has
-       not already been called
-    */
-    if(!PL_srand_called) {
-        (void)seedDrand01((Rand_seed_t)Perl_seed(aTHX));
-        PL_srand_called = TRUE;
-    }
-#endif
+    my_init_rand();
 
     if ( items <= 0 ) {
         XSRETURN_UNDEF;
