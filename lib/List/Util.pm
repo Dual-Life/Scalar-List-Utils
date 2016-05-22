@@ -12,7 +12,7 @@ require Exporter;
 
 our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw(
-  all any first min max minstr maxstr none notall product reduce sum sum0 shuffle uniq uniqnum uniqstr
+  all any first min max minstr maxstr none notall product reduce sum sum0 shuffle pick uniq uniqnum uniqstr
   pairs unpairs pairkeys pairvalues pairmap pairgrep pairfirst
 );
 our $VERSION    = "1.47";
@@ -52,7 +52,7 @@ List::Util - A selection of general-utility list subroutines
 
       pairs unpairs pairkeys pairvalues pairfirst pairgrep pairmap
 
-      shuffle uniq uniqnum uniqstr
+      pick shuffle uniq uniqnum uniqstr
     );
 
 =head1 DESCRIPTION
@@ -484,6 +484,14 @@ See L</KNOWN BUGS> for a known-bug with C<pairmap>, and a workaround.
 Returns the values of the input in a random order
 
     @cards = shuffle 0..51      # 0..51 in a random order
+
+=head2 pick
+
+    my $value = pick @values;
+
+Returns a single random value from the input list.
+
+    my $num = pick 1..10;       # Pick a number from 1 to 10
 
 =head2 uniq
 
