@@ -50,9 +50,9 @@ List::Util - A selection of general-utility list subroutines
 
       max maxstr min minstr product sum sum0
 
-      pairs pairkeys pairvalues pairfirst pairgrep pairmap
+      pairs unpairs pairkeys pairvalues pairfirst pairgrep pairmap
 
-      shuffle uniqnum uniqstr
+      shuffle uniq uniqnum uniqstr
     );
 
 =head1 DESCRIPTION
