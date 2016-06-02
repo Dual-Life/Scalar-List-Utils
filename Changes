@@ -1,3 +1,13 @@
+1.45_03 -- 2016/06/02
+	[CHANGES]
+        * fix a wrong assert
+	[BUGFIXES]
+        * fix tests for 5.6.2
+
+1.45_02 -- 2016/05/28
+	[BUGFIXES]
+        * support binary and utf8 names
+
 1.45 -- 2016/03/25 16:09:40
 	[CHANGES]
 	 * Renamed existing uniq() to uniqstr()
