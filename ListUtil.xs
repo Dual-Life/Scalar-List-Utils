@@ -1456,24 +1456,25 @@ PPCODE:
             end = s - 1;
             begin = ++s;
             if (seen_quote)
-                seen_quote++;
+                need_subst++;
         }
         else if (*s && s[-1] == '\'') {
             end = s - 1;
             begin = s;
-            seen_quote++;
+            if (seen_quote++)
+                need_subst++;
         }
     }
     s--;
     if (end) {
         SV* tmp;
-        if (seen_quote > 1) {
-            STRLEN length = end - nameptr + seen_quote;
+        if (need_subst) {
+            STRLEN length = end - nameptr + seen_quote - (*end == '\'' ? 1 : 0);
             char* left;
             int i, j;
             tmp = newSV(length);
             left = SvPVX(tmp);
-            for (i = 0, j = 0; j <= end - nameptr; ++i, ++j) {
+            for (i = 0, j = 0; j < end - nameptr; ++i, ++j) {
                 if (nameptr[j] == '\'') {
                     left[i] = ':';
                     left[++i] = ':';
@@ -1482,7 +1483,7 @@ PPCODE:
                     left[i] = nameptr[j];
                 }
             }
-            stash = gv_stashpvn(left, i - 2, GV_ADD | utf8flag);
+            stash = gv_stashpvn(left, length, GV_ADD | utf8flag);
             SvREFCNT_dec(tmp);
         }
         else
