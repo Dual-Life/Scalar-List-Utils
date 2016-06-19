@@ -1451,11 +1451,12 @@ PREINIT:
     CV *cv = NULL;
     GV *gv;
     HV *stash = CopSTASH(PL_curcop);
-    const char *s, *end = NULL;
+    const char *s, *end = NULL, *begin = NULL;
     MAGIC *mg;
     STRLEN namelen;
     int utf8flag = SvUTF8(name);
     const char* nameptr = SvPV(name, namelen);
+    int seen_quote = 0, need_subst = 0;
 PPCODE:
     if (!SvROK(sub) && SvGMAGICAL(sub))
         mg_get(sub);
@@ -1475,16 +1476,43 @@ PPCODE:
     if (SvTYPE(cv) != SVt_PVCV && SvTYPE(cv) != SVt_PVFM)
         croak("Not a subroutine reference");
     for (s = nameptr; s <= nameptr + namelen; s++) {
-        if (*s == ':' && s[-1] == ':')
-            end = ++s;
-        else if (*s && s[-1] == '\'')
-            end = s;
+        if (*s == ':' && s[-1] == ':') {
+            end = s - 1;
+            begin = ++s;
+            if (seen_quote)
+                seen_quote++;
+        }
+        else if (*s && s[-1] == '\'') {
+            end = s - 1;
+            begin = s;
+            seen_quote++;
+        }
     }
     s--;
     if (end) {
-        stash = GvHV(gv_fetchpvn_flags(nameptr, end - nameptr, GV_ADD | utf8flag, SVt_PVHV));
-        nameptr = end;
-        namelen -= end - nameptr;
+        SV* tmp;
+        if (seen_quote > 1) {
+            STRLEN length = end - nameptr + seen_quote;
+            char* left;
+            int i, j;
+            tmp = newSV(length);
+            left = SvPVX(tmp);
+            for (i = 0, j = 0; j <= end - nameptr; ++i, ++j) {
+                if (nameptr[j] == '\'') {
+                    left[i] = ':';
+                    left[++i] = ':';
+                }
+                else {
+                    left[i] = nameptr[j];
+                }
+            }
+            stash = gv_stashpvn(left, i - 2, GV_ADD | utf8flag);
+            SvREFCNT_dec(tmp);
+        }
+        else
+            stash = gv_stashpvn(nameptr, end - nameptr, GV_ADD | utf8flag);
+        nameptr = begin;
+        namelen -= begin - nameptr;
     }
 
     #ifdef PERL_VERSION < 10
