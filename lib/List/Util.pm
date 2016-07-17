@@ -517,6 +517,10 @@ are enabled (C<use warnings 'uninitialized';>). In addition, an C<undef> in
 the returned list is coerced into a numerical zero, so that the entire list of
 values returned by C<uniqnum> are well-behaved as numbers.
 
+Note also that multiple IEEE C<NaN> values are treated as duplicates of
+each other, regardless of any differences in their payloads, and despite
+the fact that C<< 0+'NaN' == 0+'NaN' >> yields false.
+
 =head2 uniqstr
 
     my @subset = uniqstr @values
