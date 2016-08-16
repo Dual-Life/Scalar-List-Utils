@@ -1535,6 +1535,7 @@ subname(code)
 PREINIT:
     CV *cv;
     GV *gv;
+    HV *hv;
 PPCODE:
     if (!SvROK(code) && SvGMAGICAL(code))
         mg_get(code);
@@ -1545,7 +1546,9 @@ PPCODE:
     if(!(gv = CvGV(cv)))
         XSRETURN(0);
 
-    mPUSHs(newSVpvf("%s::%s", HvNAME(GvSTASH(gv)), GvNAME(gv)));
+    hv = GvSTASH(gv);
+
+    mPUSHs(newSVpvf("%s::%s", (hv ? HvNAME(hv) : "__ANON__"), GvNAME(gv)));
     XSRETURN(1);
 
 BOOT:
