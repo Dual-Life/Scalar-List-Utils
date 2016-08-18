@@ -1454,8 +1454,8 @@ PREINIT:
     const char *s, *end = NULL, *begin = NULL;
     MAGIC *mg;
     STRLEN namelen;
-    int utf8flag = SvUTF8(name);
     const char* nameptr = SvPV(name, namelen);
+    int utf8flag = SvUTF8(name);
     int seen_quote = 0, need_subst = 0;
 PPCODE:
     if (!SvROK(sub) && SvGMAGICAL(sub))
