@@ -137,8 +137,8 @@ SKIP: {
 
     my @strs = map { Stringify->new( $_ ) } qw( foo foo bar );
 
-    is_deeply( [ uniqstr @strs ],
-               [ $strs[0], $strs[2] ],
+    is_deeply( [ map "$_", uniqstr @strs ],
+               [ map "$_", $strs[0], $strs[2] ],
                'uniqstr respects stringify overload' );
 }
 
