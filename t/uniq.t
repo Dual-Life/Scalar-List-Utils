@@ -84,10 +84,14 @@ is_deeply( [ uniqnum 0, 1, 12345, $Inf, -$Inf, $NaN, 0, $Inf, $NaN ],
            'uniqnum preserves the special values of +-Inf and Nan' );
 
 {
-    my $maxint = ~0;
+    my $maxuint = ~0;
+    my $maxint = ~0 >> 1;
+    my $minint = -(~0 >> 1) - 1;
 
-    is_deeply( [ uniqnum $maxint, $maxint-1, -1 ],
-               [ $maxint, $maxint-1, -1 ],
+    my @nums = ($maxuint, $maxuint-1, -1, $Inf, $NaN, $maxint, $minint, 1 );
+
+    is_deeply( [ uniqnum @nums, 1.0 ],
+               [ @nums ],
                'uniqnum preserves uniqness of full integer range' );
 }
 
