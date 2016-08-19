@@ -54,11 +54,15 @@ SKIP: {
                [ $cafe ],
                'uniqstr is happy with Unicode strings' );
 
-    utf8::encode( my $cafebytes = $cafe );
+    SKIP: {
+      skip "utf8::encode not available", 1
+        unless defined &utf8::encode;
+      utf8::encode( my $cafebytes = $cafe );
 
-    is_deeply( [ uniqstr $cafe, $cafebytes ],
-               [ $cafe, $cafebytes ],
-               'uniqstr does not squash bytewise-equal but differently-encoded strings' );
+      is_deeply( [ uniqstr $cafe, $cafebytes ],
+                [ $cafe, $cafebytes ],
+                'uniqstr does not squash bytewise-equal but differently-encoded strings' );
+    }
 
     is( $warnings, "", 'No warnings are printed when handling Unicode strings' );
 }
