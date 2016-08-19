@@ -1114,7 +1114,7 @@ CODE:
             if(hv_exists(seen, SvPVX(keysv), SvCUR(keysv)))
                 continue;
 
-            hv_store(seen, SvPVX(keysv), SvCUR(keysv), &PL_sv_undef, 0);
+            hv_store(seen, SvPVX(keysv), SvCUR(keysv), &PL_sv_yes, 0);
 #endif
 
             if(GIMME_V == G_ARRAY)
@@ -1158,7 +1158,7 @@ CODE:
             if (hv_exists_ent(seen, arg, 0))
                 continue;
 
-            hv_store_ent(seen, arg, &PL_sv_undef, 0);
+            hv_store_ent(seen, arg, &PL_sv_yes, 0);
 #endif
 
             if(GIMME_V == G_ARRAY)
