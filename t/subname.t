@@ -82,11 +82,12 @@ is($x->(), "main::foo");
 {
   {
     package Blarf;
-    sub gorp { 1 }
+    sub gorp { (caller(0))[3] }
   }
   my $sub = \&Blarf::gorp;
   delete $::{'Blarf::'};
-  like subname($sub), qr/^(?:Blarf|__ANON__)::gorp/,
+  my $name = $sub->();
+  is subname($sub), $name,
     'subname works when stash deleted';
 }
 
