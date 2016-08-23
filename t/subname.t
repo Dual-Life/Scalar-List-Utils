@@ -86,7 +86,9 @@ is($x->(), "main::foo");
   }
   my $sub = \&Blarf::gorp;
   delete $::{'Blarf::'};
-  like subname($sub), qr/^(?:Blarf|__ANON__)::gorp/,
+  my $package = "$]" < 5.010 ? 'Blarf' : '__ANON__';
+  my $subname = "$]" < 5.012 || "$]" >= 5.014 ? 'gorp' : '__ANON__';
+  is subname($sub), $package.'::'.$subname,
     'subname works when stash deleted';
 }
 
