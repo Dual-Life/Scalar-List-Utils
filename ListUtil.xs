@@ -389,6 +389,7 @@ CODE:
     GvSV(agv) = ret;
     SvSetMagicSV(ret, args[1]);
 #ifdef dMULTICALL
+    assert(cv);
     if(!CvISXSUB(cv)) {
         dMULTICALL;
         I32 gimme = G_SCALAR;
@@ -444,6 +445,7 @@ CODE:
 
     SAVESPTR(GvSV(PL_defgv));
 #ifdef dMULTICALL
+    assert(cv);
     if(!CvISXSUB(cv)) {
         dMULTICALL;
         I32 gimme = G_SCALAR;
@@ -515,6 +517,7 @@ PPCODE:
 
     SAVESPTR(GvSV(PL_defgv));
 #ifdef dMULTICALL
+    assert(cv);
     if(!CvISXSUB(cv)) {
         dMULTICALL;
         I32 gimme = G_SCALAR;
@@ -697,6 +700,7 @@ PPCODE:
     SAVESPTR(GvSV(agv));
     SAVESPTR(GvSV(bgv));
 #ifdef dMULTICALL
+    assert(cv);
     if(!CvISXSUB(cv)) {
         /* Since MULTICALL is about to move it */
         SV **stack = PL_stack_base + ax;
@@ -781,6 +785,7 @@ PPCODE:
     SAVESPTR(GvSV(agv));
     SAVESPTR(GvSV(bgv));
 #ifdef dMULTICALL
+    assert(cv);
     if(!CvISXSUB(cv)) {
         /* Since MULTICALL is about to move it */
         SV **stack = PL_stack_base + ax;
@@ -871,6 +876,7 @@ PPCODE:
  * Skip it on those versions (RT#87857)
  */
 #if defined(dMULTICALL) && (PERL_BCDVERSION > 0x5010000 || PERL_BCDVERSION < 0x5008009)
+    assert(cv);
     if(!CvISXSUB(cv)) {
         /* Since MULTICALL is about to move it */
         SV **stack = PL_stack_base + ax;
