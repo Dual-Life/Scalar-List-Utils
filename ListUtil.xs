@@ -38,19 +38,23 @@
 #  include "multicall.h"
 #endif
 
-#if PERL_VERSION_LE(5,8,8)
+#if PERL_VERSION_LE(5,8,8) && PERL_VERSION_GE(5,7,0)
 #define COP_SEQ_RANGE_LOW(sv)	U_32(SvNVX(sv))
 #define COP_SEQ_RANGE_HIGH(sv)	U_32(SvUVX(sv))
 #endif
 
 #if PERL_VERSION_LE(5,8,9)
-/* non-destructive variant */
+/* non-destructive variant, without cloning */
 STATIC PADOFFSET
 find_rundefsvoffset(pTHX)
 {
+#if PERL_VERSION_LE(5,7,0)
+    return NOT_IN_PAD;
+#else
     const char *name = "$_";
     PADOFFSET newoff = 0;
     const CV* innercv = Perl_find_runcv(pTHX_ NULL);
+    CV* innercv;
     CV *cv;
     I32 off = 0;
     SV *sv;
@@ -106,6 +110,7 @@ find_rundefsvoffset(pTHX)
 	}
     }
     return NOT_IN_PAD;
+#endif
 }
 #endif
 
@@ -546,12 +551,14 @@ CODE:
         if (targlex == NOT_IN_PAD)
             SAVESPTR(GvSV(PL_defgv));
         for(index = 1 ; index < items ; index++) {
+#  if PERL_VERSION_GE(5,7,0)
             if (targlex != NOT_IN_PAD) {
                 PAD_SVl(targlex) = args[index];
                 SvREFCNT_inc_NN(PAD_SVl(targlex));
             }
             else
-                GvSV(PL_defgv) = args[index];
+#  endif
+              GvSV(PL_defgv) = args[index];
             MULTICALL;
             if(SvTRUEx(*PL_stack_sp)) {
 #  ifdef PERL_HAS_BAD_MULTICALL_REFCOUNT
@@ -622,10 +629,13 @@ PPCODE:
         if (targlex == NOT_IN_PAD)
             SAVESPTR(GvSV(PL_defgv));
         for(index = 1; index < items; index++) {
+#  if PERL_VERSION_GE(5,7,0)
             if (targlex != NOT_IN_PAD) {
                 PAD_SVl(targlex) = args[index];
                 SvREFCNT_inc_NN(PAD_SVl(targlex));
-            } else {
+            } else
+#  endif
+            {
 #  ifdef SvTEMP_off
                 SV *def_sv =
 #  endif
