@@ -43,18 +43,25 @@
 #define COP_SEQ_RANGE_HIGH(sv)	U_32(SvUVX(sv))
 #endif
 
+#if PERL_VERSION_GE(5,25,0) && !defined(USE_CPERL)
+STATIC PADOFFSET
+Perl_find_rundefsvoffset(pTHX)
+{
+    return NOT_IN_PAD;
+}
+#endif
+
 #if PERL_VERSION_LE(5,8,9)
 /* non-destructive variant, without cloning */
 STATIC PADOFFSET
-find_rundefsvoffset(pTHX)
+Perl_find_rundefsvoffset(pTHX)
 {
-#if PERL_VERSION_LE(5,7,0)
+# if PERL_VERSION_LE(5,7,0)
     return NOT_IN_PAD;
-#else
+# else
     const char *name = "$_";
     PADOFFSET newoff = 0;
-    const CV* innercv = Perl_find_runcv(pTHX_ NULL);
-    CV* innercv;
+    const CV* innercv = Perl_find_runcv(aTHX_ NULL);
     CV *cv;
     I32 off = 0;
     SV *sv;
@@ -110,7 +117,7 @@ find_rundefsvoffset(pTHX)
 	}
     }
     return NOT_IN_PAD;
-#endif
+# endif
 }
 #endif
 
@@ -547,7 +554,7 @@ CODE:
 
         UNUSED_VAR_newsp;
         PUSH_MULTICALL(cv);
-        targlex = find_rundefsvoffset();
+        targlex = Perl_find_rundefsvoffset(aTHX);
         if (targlex == NOT_IN_PAD)
             SAVESPTR(GvSV(PL_defgv));
         for(index = 1 ; index < items ; index++) {
@@ -625,7 +632,7 @@ PPCODE:
 
         UNUSED_VAR_newsp;
         PUSH_MULTICALL(cv);
-        targlex = find_rundefsvoffset();
+        targlex = Perl_find_rundefsvoffset(aTHX);
         if (targlex == NOT_IN_PAD)
             SAVESPTR(GvSV(PL_defgv));
         for(index = 1; index < items; index++) {
