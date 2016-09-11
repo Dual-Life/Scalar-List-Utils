@@ -1604,34 +1604,36 @@ PPCODE:
         nameptr = begin;
         namelen -= begin - nameptr;
     }
-#if PERL_VERSION < 10
+
     /* under debugger, provide information about sub location */
     if (PL_DBsub && CvGV(cv)) {
         HV *hv = GvHV(PL_DBsub);
         GV *oldgv = CvGV(cv);
         HV *oldpkg = GvSTASH(oldgv);
+        int is_utf8 = HvNAMEUTF8(oldpkg) | GvNAMEUTF8(oldgv);
         SV *full_name = newSVpvn_flags(HvNAME(oldpkg), HvNAMELEN_get(oldpkg),
-                                       HvNAMEUTF8(oldpkg) ? SVf_UTF8 : 0);
+                                       is_utf8 ? SVf_UTF8 : 0);
         SV** old_data;
 
         sv_catpvs(full_name, "::");
         sv_catpvn(full_name, GvNAME(oldgv), GvNAMELEN(oldgv));
 
-        old_data = hv_fetch(hv, SvPVX(full_name), SvCUR(full_name), 0);
+        old_data = (SV**)hv_fetch_ent(hv, full_name, HV_FETCH_JUST_SV, 0);
         if (old_data) {
             SvREFCNT_dec(full_name);
+            is_utf8 = HvNAMEUTF8(stash) || utf8flag;
             full_name = newSVpvn_flags(HvNAME(stash), HvNAMELEN_get(stash),
-                                       HvNAMEUTF8(stash) ? SVf_UTF8 : 0);
+                                       is_utf8 ? SVf_UTF8 : 0);
             sv_catpvs(full_name, "::");
-            sv_catpvn(full_name, s, namelen);
+            sv_catpvn(full_name, nameptr, namelen);
 
             SvREFCNT_inc(*old_data);
-            if (!hv_store(hv, SvPVX(full_name), SvCUR(full_name), *old_data, 0))
+            if (!hv_store_ent(hv, full_name, *old_data, 0))
                 SvREFCNT_dec(*old_data);
         }
         SvREFCNT_dec(full_name);
     }
-#endif
+
     gv = (GV *) newSV(0);
 #if PERL_VERSION >= 16
     gv_init_pvn(gv, stash, nameptr, s - nameptr, GV_ADDMULTI | utf8flag);
