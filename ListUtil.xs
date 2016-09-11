@@ -1554,7 +1554,7 @@ PPCODE:
     /* TODO: If there exists a UTF8 codepoint with ending ':' we are screwed.
        But perl5 does not care neither. */
     for (s = nameptr; s <= nameptr + namelen; s++) {
-        if (*s == ':' && s[-1] == ':') {
+        if (s > nameptr && *s == ':' && s[-1] == ':') {
             end = s - 1;
             begin = ++s;
             if (seen_quote)
@@ -1563,7 +1563,7 @@ PPCODE:
 #ifdef PERL_HAS_QUOTE_PKGSEPERATOR
         /* "In the year 2525, if man is still alive
            If 4 is finally gone" - gv.c:S_parse_gv_stash_name */
-        else if (*s && s[-1] == '\'') {
+        else if (s > nameptr && *s != '\0' && s[-1] == '\'') {
             end = s - 1;
             begin = s;
             seen_quote++;
