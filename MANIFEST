@@ -11,9 +11,11 @@ ppport.h
 README
 t/00version.t
 t/any-all.t
+t/any-all-524.inc
 t/blessed.t
 t/dualvar.t
 t/first.t
+t/first-524.inc
 t/getmagic-once.t
 t/isvstring.t
 t/lln.t

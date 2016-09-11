@@ -1,3 +1,15 @@
+1.45_04 -- Fri Jun 24 09:41:52 2016 rurban
+	[CHANGES]
+        *  make the XS code ppport.h free when in core @bulk88
+	[BUGFIXES]
+        * fix set_subname, from
+        github.com/Leont/Sub-Name.git, branch: safe.
+        Replace all ' with :: as in gv.c:S_parse_gv_stash_name
+        but only when the first pkg seperator is a ', not a ::
+        * fix lexical $_ and undeprecate find_rundefsvoffset.
+        See also https://rt.cpan.org/Ticket/Display.html?id=113939
+        * fix compile-time overflow, cperl only, t/product.t
+
 1.45_03 -- 2016/06/02
 	[CHANGES]
         * fix a wrong assert
