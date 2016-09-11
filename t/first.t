@@ -128,7 +128,9 @@ eval { &first(+{},1,2,3) };
 ok($@ =~ /^Not a subroutine reference/, 'check for code reference');
 
 SKIP: {
-    skip "lexical topic fixed only in cperl, usable < 5.24", 1
-        if $] > 5.023 and !$Config{usecperl};
-    do "t/first-524.inc";
+    skip "lexical topic fixed only in cperl, usable 5.10 - 5.24", 1
+      if ($] > 5.023 && !$Config{usecperl}) or $] < 5.010;
+    chdir "t";
+    do "first-524.inc";
+    chdir "..";
 }

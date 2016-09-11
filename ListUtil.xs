@@ -38,6 +38,77 @@
 #  include "multicall.h"
 #endif
 
+#if PERL_VERSION_LE(5,8,8)
+#define COP_SEQ_RANGE_LOW(sv)	U_32(SvNVX(sv))
+#define COP_SEQ_RANGE_HIGH(sv)	U_32(SvUVX(sv))
+#endif
+
+#if PERL_VERSION_LE(5,8,9)
+/* non-destructive variant */
+STATIC PADOFFSET
+find_rundefsvoffset(pTHX)
+{
+    const char *name = "$_";
+    PADOFFSET newoff = 0;
+    const CV* innercv = Perl_find_runcv(pTHX_ NULL);
+    CV *cv;
+    I32 off = 0;
+    SV *sv;
+    CV* startcv;
+    U32 seq;
+    I32 depth;
+    AV *oldpad;
+    SV *oldsv;
+    AV *curlist;
+
+    seq = CvOUTSIDE_SEQ(innercv);
+    startcv = CvOUTSIDE(innercv);
+
+    for (cv = startcv; cv; seq = CvOUTSIDE_SEQ(cv), cv = CvOUTSIDE(cv)) {
+	SV **svp;
+	AV *curname;
+	I32 fake_off = 0;
+
+	curlist = CvPADLIST(cv);
+	if (!curlist)
+	    continue; /* an undef CV */
+	svp = av_fetch(curlist, 0, FALSE);
+	if (!svp || *svp == &PL_sv_undef)
+	    continue;
+	curname = (AV*)*svp;
+	svp = AvARRAY(curname);
+
+	depth = CvDEPTH(cv);
+	for (off = AvFILLp(curname); off > 0; off--) {
+	    sv = svp[off];
+	    if (!sv || sv == &PL_sv_undef || !strEQ(SvPVX_const(sv), name))
+		continue;
+	    if (SvFAKE(sv)) {
+		/* we'll use this later if we don't find a real entry */
+		fake_off = off;
+		continue;
+	    }
+	    else {
+		if (   seq >  COP_SEQ_RANGE_LOW(sv)	/* min */
+		    && seq <= COP_SEQ_RANGE_HIGH(sv)	/* max */
+		    && !(newoff && !depth) /* ignore inactive when cloning */
+		)
+                  return off;
+	    }
+	}
+
+	/* no real entry - but did we find a fake one? */
+	if (fake_off) {
+	    if (newoff && !depth)
+		return NOT_IN_PAD; /* don't clone from inactive stack frame */
+	    off = fake_off;
+            return off;
+	}
+    }
+    return NOT_IN_PAD;
+}
+#endif
+
 #if !PERL_VERSION_GE(5,23,8)
 #  define UNUSED_VAR_newsp PERL_UNUSED_VAR(newsp)
 #else
@@ -471,7 +542,6 @@ CODE:
 
         UNUSED_VAR_newsp;
         PUSH_MULTICALL(cv);
-
         targlex = find_rundefsvoffset();
         if (targlex == NOT_IN_PAD)
             SAVESPTR(GvSV(PL_defgv));
@@ -548,7 +618,6 @@ PPCODE:
 
         UNUSED_VAR_newsp;
         PUSH_MULTICALL(cv);
-
         targlex = find_rundefsvoffset();
         if (targlex == NOT_IN_PAD)
             SAVESPTR(GvSV(PL_defgv));

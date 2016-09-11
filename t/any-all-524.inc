@@ -1,6 +1,8 @@
 #!./perl
 
 warnings->unimport('experimental::lexical_topic')
-    unless $Config{usecperl};
+  if !$Config{usecperl} and $] > 5.018;
 my $_ = "foo";
-ok( any { $_ eq "a" } qw(a b c), 'any my $_');
+my $ok = any { $_ eq "a" } qw(a b c);
+warn $ok;
+ok( $ok, 'any my $_');
