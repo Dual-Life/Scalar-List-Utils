@@ -5,7 +5,8 @@ use warnings;
 
 use Test::More tests => 2;
 
-{
+SKIP: {
+  skip "5.6", 1 if $] < 5.008;
   use List::Util qw( first );
 
   my $hash = {

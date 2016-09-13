@@ -43,6 +43,18 @@
 #define COP_SEQ_RANGE_HIGH(sv)	U_32(SvUVX(sv))
 #endif
 
+/* since 5.16.0 */
+#ifndef GvNAMEUTF8
+#  define GvNAMEUTF8(gv) 0
+#endif
+#ifndef HvNAMEUTF8
+#  define HvNAMEUTF8(hv) 0
+#endif
+/* since 5.8.9 */
+#ifndef HV_FETCH_JUST_SV
+#  define HV_FETCH_JUST_SV 0
+#endif
+
 #if PERL_VERSION_GE(5,25,0) && !defined(USE_CPERL)
 STATIC PADOFFSET
 Perl_find_rundefsvoffset(pTHX)
