@@ -1619,6 +1619,8 @@ PPCODE:
 
     /* under debugger, provide information about sub location */
     if (PL_DBsub && CvGV(cv)) {
+        /* WIP utf8 support */
+#if 0
         HV *hv = GvHV(PL_DBsub);
         GV *oldgv = CvGV(cv);
         HV *oldpkg = GvSTASH(oldgv);
@@ -1644,6 +1646,39 @@ PPCODE:
                 SvREFCNT_dec(*old_data);
         }
         SvREFCNT_dec(full_name);
+#else
+        HV *hv = GvHV(PL_DBsub);
+
+        char *new_pkg = HvNAME(stash);
+
+        char *old_name = GvNAME( CvGV(cv) );
+        char *old_pkg = HvNAME( GvSTASH(CvGV(cv)) );
+
+        int old_len = strlen(old_name) + strlen(old_pkg);
+        int new_len = namelen + strlen(new_pkg);
+
+        SV **old_data;
+        char *full_name;
+
+        Newxz(full_name, (old_len > new_len ? old_len : new_len) + 3, char);
+
+        strcat(full_name, old_pkg);
+        strcat(full_name, "::");
+        strcat(full_name, old_name);
+
+        old_data = hv_fetch(hv, full_name, strlen(full_name), 0);
+
+        if (old_data) {
+            strcpy(full_name, new_pkg);
+            strcat(full_name, "::");
+            strcat(full_name, nameptr);
+
+            SvREFCNT_inc(*old_data);
+            if (!hv_store(hv, full_name, strlen(full_name), *old_data, 0))
+                SvREFCNT_dec(*old_data);
+        }
+        Safefree(full_name);
+#endif
     }
 
     gv = (GV *) newSV(0);
