@@ -1,3 +1,12 @@
+1.45_05 -- Tue Sep 13 14:07:32 2016 rurban
+        [CHANGES]
+        * provide a Perl_find_rundefsvoffset() backport for older perls, but dont
+          use it. we don't want to add pad_add also to clone it into the current padlist.
+        * provide 5.24-safe test variants for lexical topic, runtime included.
+	[BUGFIXES]
+        * fix setting &DB::sub in set_subname
+        * fixes for older perls
+
 1.45_04 -- Fri Jun 24 09:41:52 2016 rurban
 	[CHANGES]
         *  make the XS code ppport.h free when in core @bulk88
