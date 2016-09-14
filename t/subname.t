@@ -82,12 +82,13 @@ is($x->(), "main::foo");
 {
   {
     package Blarf;
-    sub gorp { (caller(0))[3] }
+    sub gorp { 1 }
   }
   my $sub = \&Blarf::gorp;
   delete $::{'Blarf::'};
-  my $name = $sub->();
-  is subname($sub), $name,
+  my $package = $] < 5.010 ? 'Blarf' : '__ANON__';
+  my $subname = $] < 5.012 || $] >= 5.014 ? 'gorp' : '__ANON__';
+  is subname($sub), $package.'::'.$subname,
     'subname works when stash deleted';
 }
 
