@@ -114,6 +114,7 @@ CODE:
         XSRETURN_UNDEF;
 
     retsv = ST(0);
+    SvGETMAGIC(retsv);
     magic = SvAMAGIC(retsv);
     if(!magic)
       retval = slu_sv_value(retsv);
@@ -121,6 +122,7 @@ CODE:
     for(index = 1 ; index < items ; index++) {
         SV *stacksv = ST(index);
         SV *tmpsv;
+        SvGETMAGIC(stacksv);
         if((magic || SvAMAGIC(stacksv)) && (tmpsv = amagic_call(retsv, stacksv, gt_amg, 0))) {
              if(SvTRUE(tmpsv) ? !ix : ix) {
                   retsv = stacksv;
@@ -174,6 +176,7 @@ CODE:
         }
 
     sv    = ST(0);
+    SvGETMAGIC(sv);
     switch((accum = accum_type(sv))) {
     case ACC_SV:
         retsv = TARG;
@@ -189,6 +192,7 @@ CODE:
 
     for(index = 1 ; index < items ; index++) {
         sv = ST(index);
+        SvGETMAGIC(sv);
         if(accum < ACC_SV && SvAMAGIC(sv)){
             if(!retsv)
                 retsv = TARG;
@@ -1026,9 +1030,6 @@ CODE:
     int index;
     SV **args = &PL_stack_base[ax];
     HV *seen;
-#ifdef HV_FETCH_EMPTY_HE
-    HE *he;
-#endif
 
     if(items == 0 || (items == 1 && !SvGAMAGIC(args[0]) && SvOK(args[0]))) {
         /* Optimise for the case of the empty list or a defined nonmagic
@@ -1046,6 +1047,9 @@ CODE:
 
         for(index = 0 ; index < items ; index++) {
             SV *arg = args[index];
+#ifdef HV_FETCH_EMPTY_HE
+            HE* he;
+#endif
 
             if(SvGAMAGIC(arg))
                 /* clone the value so we don't invoke magic again */
@@ -1058,7 +1062,7 @@ CODE:
             else
                 sv_setpvf(keysv, "%"NVgf, SvNV(arg));
 #ifdef HV_FETCH_EMPTY_HE
-            he = hv_common(seen, NULL, SvPVX(keysv), SvCUR(keysv), 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
+            he = (HE*) hv_common(seen, NULL, SvPVX(keysv), SvCUR(keysv), 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
             if (HeVAL(he))
                 continue;
 
@@ -1081,6 +1085,9 @@ CODE:
 
         for(index = 0 ; index < items ; index++) {
             SV *arg = args[index];
+#ifdef HV_FETCH_EMPTY_HE
+            HE *he;
+#endif
 
             if(SvGAMAGIC(arg))
                 /* clone the value so we don't invoke magic again */
@@ -1099,7 +1106,7 @@ CODE:
                 continue;
             }
 #ifdef HV_FETCH_EMPTY_HE
-            he = hv_common(seen, arg, NULL, 0, 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
+            he = (HE*) hv_common(seen, arg, NULL, 0, 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
             if (HeVAL(he))
                 continue;
 
