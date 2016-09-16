@@ -1,3 +1,7 @@
+1.45_06 -- ... rurban
+	[BUGFIXES]
+        * sum/min/max in List::Util need to call SvGETMAGIC (demerphq)
+
 1.45_05 -- Tue Sep 13 14:07:32 2016 rurban
         [CHANGES]
         * provide a Perl_find_rundefsvoffset() backport for older perls, but dont
