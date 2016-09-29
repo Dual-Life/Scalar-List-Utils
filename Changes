@@ -1,3 +1,12 @@
+1.46 -- 2016/09/28 23:17:07
+	[CHANGES]
+	 * Remember to add unpairs and uniq to SYNOPSIS
+	 * Document the behaviour of uniqnum() on NaN
+
+	[BUGFIXES]
+	 * C89 fixes
+	 * Various internal bugfixes backported from perl core
+
 1.45 -- 2016/03/25 16:09:40
 	[CHANGES]
 	 * Renamed existing uniq() to uniqstr()
