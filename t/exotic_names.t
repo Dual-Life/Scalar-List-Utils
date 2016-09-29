@@ -99,9 +99,16 @@ for my $ord (@ordinal) {
         $sub = compile_named_sub $expected => '(caller(0))[3]';
     }
     else { # not a legal identifier but at least test the package name by aliasing
-        $expected = "${pkg}::foo";
-        { no strict 'refs'; *palatable:: = *{"${pkg}::"} } # now palatable:: literally means ${pkg}::
-        $sub = compile_named_sub 'palatable::foo' => '(caller(0))[3]';
+        $expected = "aliased::native::$fullname";
+        {
+          no strict 'refs';
+          *palatable:: = *{"aliased::native::${pkg}::"};
+          # now palatable:: literally means aliased::native::${pkg}::
+          ${"palatable::$subname"} = 1;
+          ${"palatable::"}{"sub"} = ${"palatable::"}{$subname};
+          # and palatable::sub means aliased::native::${pkg}::${subname}
+        }
+        $sub = compile_named_sub 'palatable::sub' => '(caller(0))[3]';
     }
     caller3_ok $sub, $expected, 'natively compiled sub', $ord;
 }
