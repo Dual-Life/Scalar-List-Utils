@@ -43,6 +43,30 @@
 #  define CvISXSUB(cv) CvXSUB(cv)
 #endif
 
+#ifndef HvNAMELEN_get
+#define HvNAMELEN_get(stash) strlen(HvNAME(stash))
+#endif
+
+#ifndef HvNAMEUTF8
+#define HvNAMEUTF8(stash) 0
+#endif
+
+#ifndef GvNAMEUTF8
+#ifdef GvNAME_HEK
+#define GvNAMEUTF8(gv) HEK_UTF8(GvNAME_HEK(gv))
+#else
+#define GvNAMEUTF8(gv) 0
+#endif
+#endif
+
+#ifndef SV_CATUTF8
+#define SV_CATUTF8 0
+#endif
+
+#ifndef SV_CATBYTES
+#define SV_CATBYTES 0
+#endif
+
 /* Some platforms have strict exports. And before 5.7.3 cxinc (or Perl_cxinc)
    was not exported. Therefore platforms like win32, VMS etc have problems
    so we redefine it here -- GMB
@@ -1492,42 +1516,31 @@ PPCODE:
         namelen -= begin - nameptr;
     }
 
-    #ifdef PERL_VERSION < 10
     /* under debugger, provide information about sub location */
     if (PL_DBsub && CvGV(cv)) {
-        HV *hv = GvHV(PL_DBsub);
+        HV* DBsub = GvHV(PL_DBsub);
+        HE* old_data;
 
-        char *new_pkg = HvNAME(stash);
+        GV* oldgv = CvGV(cv);
+        HV* oldhv = GvSTASH(oldgv);
+        SV* old_full_name = newSVpvn_flags(HvNAME(oldhv), HvNAMELEN_get(oldhv), HvNAMEUTF8(oldhv) ? SVf_UTF8 : 0);
+        sv_catpvn(old_full_name, "::", 2);
+        sv_catpvn_flags(old_full_name, GvNAME(oldgv), GvNAMELEN(oldgv), GvNAMEUTF8(oldgv) ? SV_CATUTF8 : SV_CATBYTES);
 
-        char *old_name = GvNAME( CvGV(cv) );
-        char *old_pkg = HvNAME( GvSTASH(CvGV(cv)) );
+        old_data = hv_fetch_ent(DBsub, old_full_name, 0, 0);
 
-        int old_len = strlen(old_name) + strlen(old_pkg);
-        int new_len = namelen + strlen(new_pkg);
+        SvREFCNT_dec(old_full_name);
 
-        SV **old_data;
-        char *full_name;
-
-        Newxz(full_name, (old_len > new_len ? old_len : new_len) + 3, char);
-
-        strcat(full_name, old_pkg);
-        strcat(full_name, "::");
-        strcat(full_name, old_name);
-
-        old_data = hv_fetch(hv, full_name, strlen(full_name), 0);
-
-        if (old_data) {
-            strcpy(full_name, new_pkg);
-            strcat(full_name, "::");
-            strcat(full_name, nameptr);
-
-            SvREFCNT_inc(*old_data);
-            if (!hv_store(hv, full_name, strlen(full_name), *old_data, 0))
-                SvREFCNT_dec(*old_data);
+        if (old_data && HeVAL(old_data)) {
+            SV* new_full_name = newSVpvn_flags(HvNAME(stash), HvNAMELEN_get(stash), HvNAMEUTF8(stash) ? SVf_UTF8 : 0);
+            sv_catpvn(new_full_name, "::", 2);
+            sv_catpvn_flags(new_full_name, nameptr, s - nameptr, utf8flag ? SV_CATUTF8 : SV_CATBYTES);
+            SvREFCNT_inc(HeVAL(old_data));
+            if (hv_store_ent(DBsub, new_full_name, HeVAL(old_data), 0) != NULL)
+                SvREFCNT_inc(HeVAL(old_data));
+            SvREFCNT_dec(new_full_name);
         }
-        Safefree(full_name);
     }
-    #endif
 
     gv = (GV *) newSV(0);
     gv_init_pvn(gv, stash, nameptr, s - nameptr, GV_ADDMULTI | utf8flag);
