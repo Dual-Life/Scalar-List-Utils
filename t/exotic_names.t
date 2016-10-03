@@ -54,7 +54,13 @@ sub caller3_ok {
 
     is $stash_name, $expected, "stash name for $type is correct $for_what";
     is $sub->(), $expected, "caller() in $type returns correct name $for_what";
-    ok $DB::sub{$expected}, "%DB::sub entry for $type is correct $for_what";
+    SKIP: {
+      skip '%DB::sub not populated when enabled at runtime', 1
+        unless keys %DB::sub;
+      my ($prefix) = $expected =~ /^(.*?test::[^:]+::)/;
+      my ($db_found) = grep /^$prefix/, keys %DB::sub;
+      is $db_found, $expected, "%DB::sub entry for $type is correct $for_what";
+    }
 }
 
 #######################################################################
