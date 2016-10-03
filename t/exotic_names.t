@@ -104,8 +104,10 @@ for my $ord (@ordinal) {
           no strict 'refs';
           *palatable:: = *{"aliased::native::${pkg}::"};
           # now palatable:: literally means aliased::native::${pkg}::
-          ${"palatable::$subname"} = 1;
-          ${"palatable::"}{"sub"} = ${"palatable::"}{$subname};
+          my $encoded_sub = $subname;
+          utf8::encode($encoded_sub) if "$]" < 5.016 and $ord > 255;
+          ${"palatable::$encoded_sub"} = 1;
+          ${"palatable::"}{"sub"} = ${"palatable::"}{$encoded_sub};
           # and palatable::sub means aliased::native::${pkg}::${subname}
         }
         $sub = compile_named_sub 'palatable::sub' => '(caller(0))[3]';
