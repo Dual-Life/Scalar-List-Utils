@@ -10,6 +10,7 @@
 #ifdef USE_PPPORT_H
 #  define NEED_sv_2pv_flags 1
 #  define NEED_newSVpvn_flags 1
+#  define NEED_sv_catpvn_flags
 #  include "ppport.h"
 #endif
 
@@ -65,6 +66,10 @@
 
 #ifndef SV_CATBYTES
 #define SV_CATBYTES 0
+#endif
+
+#ifndef sv_catpvn_flags
+#define sv_catpvn_flags(b,n,l,f) sv_catpvn(b,n,l)
 #endif
 
 /* Some platforms have strict exports. And before 5.7.3 cxinc (or Perl_cxinc)
