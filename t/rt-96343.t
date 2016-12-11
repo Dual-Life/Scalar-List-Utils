@@ -5,7 +5,8 @@ use warnings;
 
 use Test::More;
 
-{
+TODO: {
+    local $TODO = '5.20' if $] > 5.019 and $] < 5.022;
   use List::Util qw( first );
 
   my $hash = {
