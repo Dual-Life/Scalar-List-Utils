@@ -30,7 +30,7 @@ my $line = __LINE__ - 1;
 my $file = __FILE__;
 my $anon = $DB::sub{"main::__ANON__[${file}:${line}]"};
 
-is($x->(), "main::foo");
+is($x->(), "main::foo", "set name by coderef");
 
 {
   package Blork;
@@ -67,9 +67,9 @@ is($x->(), "main::foo");
       B::Deparse->new->coderef2text(set_subname foo => sub{ @_ });
   };
 
-  ok !$@;
+  ok !$@, "Deparse without error";
 
-  like $source, qr/\@\_/;
+  like($source, qr/\@\_/, 'Deparse has @_');
 }
 
 # subname of set_subname
