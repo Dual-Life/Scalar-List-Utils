@@ -55,8 +55,7 @@ sub caller3_ok {
     # this is apparently how things worked before 5.16
     utf8::encode($expected) if $] < 5.016 and $ord > 255;
     # before 5.16 and after v5.25.2c names with NUL are stripped
-    my $strip_nul = ($] < 5.016 or ($Config{usecperl} and $] >= 5.025002));
-    if (!$ord and $strip_nul) {
+    if (!$ord and ($] < 5.016 or ($Config{usecperl} and $] >= 5.025002))) {
       $expected =~ s/\0.*//;
     }
 
@@ -189,6 +188,11 @@ for my $ord (@test_ordinals) {
         $sub = compile_named_sub $fullname => '(caller(0))[3]';
     }
     else { # not a legal identifier but at least test the package name by aliasing
+        # unicode quirks <5.16
+        if (($ord == 0x2122 or $ord == 0x1f4a9) and $] < 5.015) {
+            $subname  = "sub";
+            $fullname = $pkg . '::' . $subname;
+        }
         $expected = "aliased::native::$fullname";
         {
             no strict 'refs';
