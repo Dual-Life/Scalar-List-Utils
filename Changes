@@ -1,3 +1,12 @@
+1.47 -- 2016/12/22 18:54:45
+	[CHANGES]
+	 * Make XS code ppport.h-free when in core
+
+	[BUGFIXES]
+	 * Fix compliling on C++11
+	 * Perform taint checks using $^X instead of some %ENV key because of
+	   the Test::Simple vars (RT119169)
+
 1.46 -- 2016/09/28 23:17:07
 	[CHANGES]
 	 * Remember to add unpairs and uniq to SYNOPSIS
