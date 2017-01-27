@@ -3,6 +3,7 @@ use warnings;
 
 use Test::More;
 use B 'svref_2object';
+BEGIN { $^P |= 0x210 }
 
 # This is a mess. The stash can supposedly handle Unicode but the behavior
 # is literally undefined before 5.16 (with crashes beyond the basic plane),
@@ -53,6 +54,7 @@ sub caller3_ok {
 
     is $stash_name, $expected, "stash name for $type is correct $for_what";
     is $sub->(), $expected, "caller() in $type returns correct name $for_what";
+    ok $DB::sub{$expected}, "%DB::sub entry for $type is correct $for_what";
 }
 
 #######################################################################
@@ -73,16 +75,18 @@ push @ordinal,
     0x1f4a9,  # PILE OF POO
     unless $] < 5.008;
 
-plan tests => @ordinal * 2 * 2;
+plan tests => @ordinal * 2 * 3;
 
 my $legal_ident_char = "A-Z_a-z0-9'";
 $legal_ident_char .= join '', map chr, 0x100, 0x498
     unless $] < 5.008;
 
+my $uniq = 'A000';
 for my $ord (@ordinal) {
     my $sub;
-    my $pkg      = sprintf 'test::SOME_%c_STASH', $ord;
-    my $subname  = sprintf 'SOME_%c_NAME', $ord;
+    $uniq++;
+    my $pkg      = sprintf 'test::%s::SOME_%c_STASH', $uniq, $ord;
+    my $subname  = sprintf 'SOME_%s_%c_NAME', $uniq, $ord;
     my $fullname = join '::', $pkg, $subname;
 
     $sub = set_subname $fullname => sub { (caller(0))[3] };
@@ -91,8 +95,8 @@ for my $ord (@ordinal) {
     # test that we can *always* compile at least within the correct package
     my $expected;
     if ( chr($ord) =~ m/^[$legal_ident_char]$/o ) { # compile directly
-        $expected = $fullname;
-        $sub = compile_named_sub $fullname => '(caller(0))[3]';
+        $expected = "native::$fullname";
+        $sub = compile_named_sub $expected => '(caller(0))[3]';
     }
     else { # not a legal identifier but at least test the package name by aliasing
         $expected = "${pkg}::foo";
