@@ -487,11 +487,14 @@ Returns the values of the input in a random order
 
 =head2 pick
 
-    my $value = pick @values;
+    my $value = pick $count, @values;
 
-Returns a single random value from the input list.
+Returns a number of random values from the input list (up to $count). No
+individual item is picked more than once. If $count is more than the
+number of values, returns a shuffled values list.
 
-    my $num = pick 1..10;       # Pick a number from 1 to 10
+    my $num = pick 1 => 1..10;       # Pick a number from 1 to 10
+    my @hand = pick 5 => @cards;     # Pick 5 items from the deck of cards
 
 =head2 uniq
 

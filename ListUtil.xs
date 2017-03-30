@@ -1041,19 +1041,42 @@ CODE:
 }
 
 void
-pick(...)
-PROTOTYPE: @
+pick(num, ...)
+    int num;
+PROTOTYPE: $@
 CODE:
 {
     my_init_rand();
 
-    if ( items <= 0 ) {
-        XSRETURN_UNDEF;
+    if ( num <= 0 || items <= 1 ) {
+        XSRETURN_EMPTY;
     }
 
-    int index = (int)(Drand01() * (double)(items));
-    ST(0) = ST(index);
-    XSRETURN(1);
+    if ( num > items - 1 ) {
+        num = items - 1;
+    }
+
+    int found[num];
+    int i = 0;
+    while ( i < num ) {
+        bool redo = false;
+        int index = (int)(Drand01() * (double)(items-1));
+        for ( int x = 0; x < i; x++ ) {
+            if ( found[x] == index ) {
+                redo = true;
+                break;
+            }
+        }
+        if ( redo == true ) {
+            continue;
+        }
+
+        ST(i) = ST(index+1);
+        found[i] = index;
+        i++;
+    }
+
+    XSRETURN(i);
 }
 
 void
