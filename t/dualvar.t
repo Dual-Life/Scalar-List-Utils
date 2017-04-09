@@ -6,7 +6,7 @@ use warnings;
 use Scalar::Util ();
 use Test::More  (grep { /dualvar/ } @Scalar::Util::EXPORT_FAIL)
 			? (skip_all => 'dualvar requires XS version')
-			: (tests => 41);
+			: (tests => 55);
 use Config;
 
 Scalar::Util->import('dualvar');
@@ -131,3 +131,28 @@ SKIP: {
   ok(isdual($ary[2]), 'Is a dualvar');
 }
 
+ok !eval { dualvar() }, "arg count gets checked";
+ok !eval { dualvar(2, "a", "meep") }, "arg count gets checked";
+
+{
+  my $warning;
+  local $SIG{__WARN__} = sub { $warning = shift };
+
+  my $var = dualvar(undef, undef);
+  like($warning, qr/Use of uninitialized value in subroutine entry/, 'undef arg warning');
+  ok( isdual($var),	'Is a dualvar');
+  ok( $var == undef, 'Numeric value');
+  ok( $var eq undef, 'String value');
+
+  my $var2 = dualvar(2.2, undef);
+  like($warning, qr/Use of uninitialized value in subroutine entry/, 'undef arg warning');
+  ok( isdual($var2), 'Is a dualvar');
+  ok( $var2 == 2.2, 'Numeric value');
+  ok( $var2 eq undef, 'String value');
+
+  my $var3 = dualvar(undef, "string");
+  like($warning, qr/Use of uninitialized value in subroutine entry/, 'undef arg warning');
+  ok( isdual($var3), 'Is a dualvar');
+  ok( $var3 == undef, 'Numeric value');
+  ok( $var3 eq "string", 'String value');
+}

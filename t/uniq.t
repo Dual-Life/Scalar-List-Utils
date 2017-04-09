@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 30;
+use Test::More tests => 33;
 use List::Util qw( uniqnum uniqstr uniq );
 
 use Tie::Array;
@@ -210,4 +210,14 @@ is( scalar( uniqstr qw( a b c d a b e ) ), 5, 'uniqstr() in scalar context' );
         [ 1 .. 10, 'a' .. 'z' ],
         'uniq uniquifies mixed numbers and strings correctly in a tied array'
     );
+}
+
+{
+  my $warning;
+  local $SIG{__WARN__} = sub { $warning = shift };
+
+  my @set = uniqnum("a");
+  is(@set, 1, 'string arg');
+  is($set[0], "a", 'string arg');
+  is($warning, undef, 'no string arg warning'); # XXX
 }

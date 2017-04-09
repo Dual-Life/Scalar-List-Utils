@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Scalar::Util qw(readonly);
-use Test::More tests => 11;
+use Test::More tests => 13;
 
 ok( readonly(1),	'number constant');
 
@@ -41,3 +41,11 @@ $var = 123;
     ok( try ("abc"), 'reference a constant in a sub');
 }
 ok( !try ($var), 'reference a non-constant in a sub');
+
+{
+  my $warning;
+  local $SIG{__WARN__} = sub { $warning = shift };
+
+  ok(readonly(undef), 'undef is readonly');
+  is($warning, undef, 'no warning on undef');
+}

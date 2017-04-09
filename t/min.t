@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 22;
+use Test::More tests => 30;
 use List::Util qw(min);
 
 my $v;
@@ -79,4 +79,22 @@ is($v, 1, 'bigint and normal int');
         my $max= List::Util::max( 0, $#list );
         ok( $max == $size-1, "max(\$#list, 0) == $size-1");
     }
+}
+
+{
+  my $warning;
+  local $SIG{__WARN__} = sub { $warning = shift };
+
+  is(min(), undef, 'no arg');
+  is($warning, undef, 'no args no warning');
+
+  is(min(undef), undef, 'undef arg');
+  like($warning, qr/Use of uninitialized value in subroutine entry/, 'undef arg warning');
+
+  is(min("a"), "a", 'non-numeric arg');
+  like($warning, qr/Argument "a" isn't numeric in subroutine entry/, 'non-numeric arg warning');
+
+  is(min(2, undef), undef, 'undef is smaller than 2');
+
+  is(min(-2, undef), -2, 'undef is larger than -2');
 }

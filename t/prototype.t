@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Sub::Util qw( prototype set_prototype );
-use Test::More tests => 13;
+use Test::More tests => 17;
 
 sub f { }
 is( prototype('f'), undef, 'no prototype');
@@ -38,3 +38,16 @@ is( prototype('f_decl'), '$$$$', 'forward declaration');
 
 set_prototype('\%', \&f_decl);
 is( prototype('f_decl'), '\%', 'change forward declaration');
+
+{
+  my $warning;
+  local $SIG{__WARN__} = sub { $warning = shift };
+
+  my @c = prototype();
+  is( scalar @c, 0, 'no arg results in empty list'); # XXX
+  like($warning, qr/Use of uninitialized value in subroutine prototype/, 'no arg results in undef arg warning');
+  undef $warning;
+
+  is( prototype(undef), undef, 'undef arg');
+  like($warning, qr/Use of uninitialized value in subroutine prototype/, 'undef arg warning');
+}
