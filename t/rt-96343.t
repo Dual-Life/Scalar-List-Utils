@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More;
+use Test::More tests => 2;
 
 TODO: {
     local $TODO = '5.20' if $] > 5.019 and $] < 5.022;
@@ -32,5 +32,3 @@ TODO: {
   is( $var, 'HellO WorlD',
     'any (lc$_) leaves value undisturbed' );
 }
-
-done_testing;
