@@ -1,3 +1,12 @@
+1.48 -- 2017/06/23 17:29:42
+	[CHANGES]
+	 * Note in documentation that outer function's @_ can be accessed in
+	   some blocks, but ought not be (thanks wchristian)
+
+	[BUGFIXES]
+	 * Ensure pairmap extends its stack correctly (thanks davem)
+	 * Fix name of List::Util::unpairs in its error messages
+
 1.47 -- 2016/12/22 18:54:45
 	[CHANGES]
 	 * Make XS code ppport.h-free when in core
