@@ -757,9 +757,9 @@ PPCODE:
         SvGETMAGIC(pair);
 
         if(SvTYPE(pair) != SVt_RV)
-            croak("Not a reference at List::Util::unpack() argument %d", i);
+            croak("Not a reference at List::Util::unpairs() argument %d", i);
         if(SvTYPE(SvRV(pair)) != SVt_PVAV)
-            croak("Not an ARRAY reference at List::Util::unpack() argument %d", i);
+            croak("Not an ARRAY reference at List::Util::unpairs() argument %d", i);
 
         /* TODO: assert pair is an ARRAY ref */
         pairav = (AV *)SvRV(pair);
