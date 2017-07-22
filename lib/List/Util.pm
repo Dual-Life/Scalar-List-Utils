@@ -116,7 +116,7 @@ C<undef> being returned
 
 The above example code blocks also suggest how to use C<reduce> to build a
 more efficient combined version of one of these basic functions and a C<map>
-block. For example, to find the total length of the all the strings in a list,
+block. For example, to find the total length of all the strings in a list,
 we could use
 
     $total = sum map { length } @strings;
