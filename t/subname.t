@@ -3,7 +3,7 @@ use warnings;
 
 BEGIN { $^P |= 0x210 }
 
-use Test::More tests => 18;
+use Test::More tests => 19;
 
 use B::Deparse;
 use Sub::Util qw( subname set_subname );
@@ -76,6 +76,20 @@ is($x->(), "main::foo");
 {
   is(subname(set_subname "my-scary-name-here", sub {}), "main::my-scary-name-here",
     'subname of set_subname');
+}
+
+# RT116961
+{
+  {
+    package Blarf;
+    sub gorp { 1 }
+  }
+  my $sub = \&Blarf::gorp;
+  delete $::{'Blarf::'};
+  my $package = $] < 5.010 ? 'Blarf' : '__ANON__';
+  my $subname = $] < 5.012 || $] >= 5.014 ? 'gorp' : '__ANON__';
+  is subname($sub), $package.'::'.$subname,
+    'subname works when stash deleted';
 }
 
 # vim: ft=perl

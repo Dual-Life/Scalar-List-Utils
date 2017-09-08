@@ -10,6 +10,7 @@
 #ifdef USE_PPPORT_H
 #  define NEED_sv_2pv_flags 1
 #  define NEED_newSVpvn_flags 1
+#  define NEED_sv_catpvn_flags
 #  include "ppport.h"
 #endif
 
@@ -41,6 +42,34 @@
 
 #ifndef CvISXSUB
 #  define CvISXSUB(cv) CvXSUB(cv)
+#endif
+
+#ifndef HvNAMELEN_get
+#define HvNAMELEN_get(stash) strlen(HvNAME(stash))
+#endif
+
+#ifndef HvNAMEUTF8
+#define HvNAMEUTF8(stash) 0
+#endif
+
+#ifndef GvNAMEUTF8
+#ifdef GvNAME_HEK
+#define GvNAMEUTF8(gv) HEK_UTF8(GvNAME_HEK(gv))
+#else
+#define GvNAMEUTF8(gv) 0
+#endif
+#endif
+
+#ifndef SV_CATUTF8
+#define SV_CATUTF8 0
+#endif
+
+#ifndef SV_CATBYTES
+#define SV_CATBYTES 0
+#endif
+
+#ifndef sv_catpvn_flags
+#define sv_catpvn_flags(b,n,l,f) sv_catpvn(b,n,l)
 #endif
 
 /* Some platforms have strict exports. And before 5.7.3 cxinc (or Perl_cxinc)
@@ -1114,7 +1143,7 @@ CODE:
             if(hv_exists(seen, SvPVX(keysv), SvCUR(keysv)))
                 continue;
 
-            hv_store(seen, SvPVX(keysv), SvCUR(keysv), &PL_sv_undef, 0);
+            hv_store(seen, SvPVX(keysv), SvCUR(keysv), &PL_sv_yes, 0);
 #endif
 
             if(GIMME_V == G_ARRAY)
@@ -1158,7 +1187,7 @@ CODE:
             if (hv_exists_ent(seen, arg, 0))
                 continue;
 
-            hv_store_ent(seen, arg, &PL_sv_undef, 0);
+            hv_store_ent(seen, arg, &PL_sv_yes, 0);
 #endif
 
             if(GIMME_V == G_ARRAY)
@@ -1445,14 +1474,18 @@ PPCODE:
 
 void
 set_subname(name, sub)
-    char *name
+    SV *name
     SV *sub
 PREINIT:
     CV *cv = NULL;
     GV *gv;
     HV *stash = CopSTASH(PL_curcop);
-    char *s, *end = NULL;
+    const char *s, *end = NULL, *begin = NULL;
     MAGIC *mg;
+    STRLEN namelen;
+    const char* nameptr = SvPV(name, namelen);
+    int utf8flag = SvUTF8(name);
+    int seen_quote = 0, need_subst = 0;
 PPCODE:
     if (!SvROK(sub) && SvGMAGICAL(sub))
         mg_get(sub);
@@ -1465,63 +1498,81 @@ PPCODE:
     else if (PL_op->op_private & HINT_STRICT_REFS)
         croak("Can't use string (\"%.32s\") as %s ref while \"strict refs\" in use",
               SvPV_nolen(sub), "a subroutine");
-    else if ((gv = gv_fetchpv(SvPV_nolen(sub), FALSE, SVt_PVCV)))
+    else if ((gv = gv_fetchsv(sub, FALSE, SVt_PVCV)))
         cv = GvCVu(gv);
     if (!cv)
         croak("Undefined subroutine %s", SvPV_nolen(sub));
     if (SvTYPE(cv) != SVt_PVCV && SvTYPE(cv) != SVt_PVFM)
         croak("Not a subroutine reference");
-    for (s = name; *s++; ) {
-        if (*s == ':' && s[-1] == ':')
-            end = ++s;
-        else if (*s && s[-1] == '\'')
-            end = s;
+    for (s = nameptr; s <= nameptr + namelen; s++) {
+        if (s > nameptr && *s == ':' && s[-1] == ':') {
+            end = s - 1;
+            begin = ++s;
+            if (seen_quote)
+                need_subst++;
+        }
+        else if (s > nameptr && *s != '\0' && s[-1] == '\'') {
+            end = s - 1;
+            begin = s;
+            if (seen_quote++)
+                need_subst++;
+        }
     }
     s--;
     if (end) {
-        char *namepv = savepvn(name, end - name);
-        stash = GvHV(gv_fetchpv(namepv, TRUE, SVt_PVHV));
-        Safefree(namepv);
-        name = end;
+        SV* tmp;
+        if (need_subst) {
+            STRLEN length = end - nameptr + seen_quote - (*end == '\'' ? 1 : 0);
+            char* left;
+            int i, j;
+            tmp = newSV(length);
+            left = SvPVX(tmp);
+            for (i = 0, j = 0; j < end - nameptr; ++i, ++j) {
+                if (nameptr[j] == '\'') {
+                    left[i] = ':';
+                    left[++i] = ':';
+                }
+                else {
+                    left[i] = nameptr[j];
+                }
+            }
+            stash = gv_stashpvn(left, length, GV_ADD | utf8flag);
+            SvREFCNT_dec(tmp);
+        }
+        else
+            stash = gv_stashpvn(nameptr, end - nameptr, GV_ADD | utf8flag);
+        nameptr = begin;
+        namelen -= begin - nameptr;
     }
 
     /* under debugger, provide information about sub location */
     if (PL_DBsub && CvGV(cv)) {
-        HV *hv = GvHV(PL_DBsub);
+        HV* DBsub = GvHV(PL_DBsub);
+        HE* old_data;
 
-        char *new_pkg = HvNAME(stash);
+        GV* oldgv = CvGV(cv);
+        HV* oldhv = GvSTASH(oldgv);
+        SV* old_full_name = newSVpvn_flags(HvNAME(oldhv), HvNAMELEN_get(oldhv), HvNAMEUTF8(oldhv) ? SVf_UTF8 : 0);
+        sv_catpvn(old_full_name, "::", 2);
+        sv_catpvn_flags(old_full_name, GvNAME(oldgv), GvNAMELEN(oldgv), GvNAMEUTF8(oldgv) ? SV_CATUTF8 : SV_CATBYTES);
 
-        char *old_name = GvNAME( CvGV(cv) );
-        char *old_pkg = HvNAME( GvSTASH(CvGV(cv)) );
+        old_data = hv_fetch_ent(DBsub, old_full_name, 0, 0);
 
-        int old_len = strlen(old_name) + strlen(old_pkg);
-        int new_len = strlen(name) + strlen(new_pkg);
+        SvREFCNT_dec(old_full_name);
 
-        SV **old_data;
-        char *full_name;
-
-        Newxz(full_name, (old_len > new_len ? old_len : new_len) + 3, char);
-
-        strcat(full_name, old_pkg);
-        strcat(full_name, "::");
-        strcat(full_name, old_name);
-
-        old_data = hv_fetch(hv, full_name, strlen(full_name), 0);
-
-        if (old_data) {
-            strcpy(full_name, new_pkg);
-            strcat(full_name, "::");
-            strcat(full_name, name);
-
-            SvREFCNT_inc(*old_data);
-            if (!hv_store(hv, full_name, strlen(full_name), *old_data, 0))
-                SvREFCNT_dec(*old_data);
+        if (old_data && HeVAL(old_data)) {
+            SV* new_full_name = newSVpvn_flags(HvNAME(stash), HvNAMELEN_get(stash), HvNAMEUTF8(stash) ? SVf_UTF8 : 0);
+            sv_catpvn(new_full_name, "::", 2);
+            sv_catpvn_flags(new_full_name, nameptr, s - nameptr, utf8flag ? SV_CATUTF8 : SV_CATBYTES);
+            SvREFCNT_inc(HeVAL(old_data));
+            if (hv_store_ent(DBsub, new_full_name, HeVAL(old_data), 0) != NULL)
+                SvREFCNT_inc(HeVAL(old_data));
+            SvREFCNT_dec(new_full_name);
         }
-        Safefree(full_name);
     }
 
     gv = (GV *) newSV(0);
-    gv_init(gv, stash, name, s - name, TRUE);
+    gv_init_pvn(gv, stash, nameptr, s - nameptr, GV_ADDMULTI | utf8flag);
 
     /*
      * set_subname needs to create a GV to store the name. The CvGV field of a
@@ -1559,6 +1610,7 @@ subname(code)
 PREINIT:
     CV *cv;
     GV *gv;
+    HV *hv;
 PPCODE:
     if (!SvROK(code) && SvGMAGICAL(code))
         mg_get(code);
@@ -1569,7 +1621,9 @@ PPCODE:
     if(!(gv = CvGV(cv)))
         XSRETURN(0);
 
-    mPUSHs(newSVpvf("%s::%s", HvNAME(GvSTASH(gv)), GvNAME(gv)));
+    hv = GvSTASH(gv);
+
+    mPUSHs(newSVpvf("%s::%s", (hv ? HvNAME(hv) : "__ANON__"), GvNAME(gv)));
     XSRETURN(1);
 
 BOOT:
