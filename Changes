@@ -1,3 +1,8 @@
+1.49 -- 2017-09-08 12:25:54
+	[CHANGES]
+	 * Fixes for unit tests to pass on perl 5.6.2
+	 * Fix typo in documentation
+
 1.48 -- 2017/06/23 17:29:42
 	[CHANGES]
 	 * Note in documentation that outer function's @_ can be accessed in
