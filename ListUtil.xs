@@ -1287,7 +1287,10 @@ PROTOTYPE: $
 INIT:
     SV *tsv;
 CODE:
-#ifdef SvWEAKREF
+#if defined(sv_rvunweaken)
+    PERL_UNUSED_VAR(tsv);
+    sv_rvunweaken(sv);
+#elif defined(SvWEAKREF)
     /* This code stolen from core's sv_rvweaken() and modified */
     if (!SvOK(sv))
         return;
