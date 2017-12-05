@@ -10,3 +10,4 @@ ListUtil.c
 Scalar-List-Utils*
 MYMETA.json
 MYMETA.yml
+.gdbinit
