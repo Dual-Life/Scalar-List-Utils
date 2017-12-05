@@ -114,9 +114,9 @@ SKIP: {
   is($t, (1<<31) - (1<<62), 'max * min');
 
   SKIP: {
-  skip "known to fail on $]", 1 if $] le "5.006002";
-  $t = product($max, $max);
-  is($t,  (1<<62)-(1<<32)+1, 'max * max');
+    skip "$] has no proper stringify overload", 1 if $] < 5.008;
+    $t = product($max, $max);
+    is($t,  (1<<62)-(1<<32)+1, 'max * max');
   }
 
   $t = product($min*8, $min);
