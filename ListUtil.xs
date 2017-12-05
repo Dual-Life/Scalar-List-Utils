@@ -61,7 +61,7 @@
 #endif
 
 
-#if PERL_VERSION_GE(5,25,7) && !defined(USE_CPERL)
+#if PERL_VERSION_GE(5,25,7) && !defined(USE_CPERL) && !defined(find_rundefsvoffset)
 STATIC PADOFFSET
 Perl_find_rundefsvoffset(pTHX)
 {
