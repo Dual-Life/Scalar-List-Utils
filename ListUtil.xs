@@ -1279,7 +1279,7 @@ CODE:
         SvIsUV_on(TARG);
     }
 #endif
-    else {
+    if(SvIOK(num)) {
         SvIV_set(TARG, SvIV(num));
         SvIOK_on(TARG);
     }
