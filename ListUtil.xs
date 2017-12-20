@@ -114,6 +114,261 @@ static enum slu_accum accum_type(SV *sv) {
 /* Magic for set_subname */
 static MGVTBL subname_vtbl;
 
+#define NEWXS(x)                                                  \
+    static void                                                   \
+    xs_ ## x(pTHX_ CV *cv)                                        \
+    {                                                             \
+        dXSARGS;                                                  \
+        if (items != 1)                                           \
+            Perl_croak(aTHX_ "Usage: Scalar::Util::" # x "(sv)"); \
+        my_ ## x(aTHX);                                           \
+    }
+
+#if defined(cv_set_call_checker) && defined(XopENTRY_set)
+
+/*  This function extracts the args for the custom op, & deletes the remaining
+    ops from memory, so they can then be replaced entirely by the custom op.
+
+    This is how the ops will look like:
+
+    $ perl -MO=Concise -E'is_arrayref($foo)'
+    7  <@> leave[1 ref] vKP/REFC ->(end)
+    1     <0> enter ->2
+    2     <;> nextstate(main 47 -e:1) v:%,{,469764096 ->3
+    6     <1> entersub[t4] vKS/TARG ->7
+    -        <1> ex-list K ->6
+    3           <0> pushmark s ->4
+    -           <1> ex-rv2sv sKM/1 ->5
+    4              <#> gvsv[*foo] s ->5
+    -           <1> ex-rv2cv sK ->-
+    5              <#> gv[*is_arrayref] ->6
+*/
+static OP *
+call_checker(pTHX_ OP *entersubop, GV *namegv, SV *ckobj, OP* (*op)(pTHX))
+{
+    OP *arg    = NULL;
+    OP *pushop = NULL;
+    OP *newop  = NULL;
+
+    /* fix up argument structures */
+    entersubop = ck_entersub_args_proto(entersubop, namegv, ckobj);
+
+    /* extract the args for the custom op, and delete the remaining ops
+       NOTE: this is the *single* arg version, multi-arg is more
+       complicated, see Hash::SharedMem's THX_ck_entersub_args_hsm */
+
+    /* These comments will visualize how the op tree look like after
+       each operation. We usually start out with this: */
+    /* --> entersub( list( push, arg1, cv ) ) */
+    /* Though in rare cases it can also look like this: */
+    /* --> entersub( push, arg1, cv ) */
+
+    /* first, get the real pushop, after which comes the arg list */
+
+    /* Cast the entersub op as an op with a single child */
+    /* and get that child (the args list or pushop). */
+    pushop = cUNOPx( entersubop )->op_first;
+
+    /* At this point we're still not sure if it's the right op,
+       (because it should normally be a list() with the push inside it)
+       so we check whether it has siblings or not. The list() has no
+       siblings */
+    /* Go one layer deeper to get at the real pushop. */
+    if( !OpHAS_SIBLING( pushop ) )
+      /* Fetch the actual push op from inside the list() op */
+      pushop = cUNOPx( pushop )->op_first;
+
+    /* then extract the arg */
+    /* Get a pointer to the first arg op */
+    /* so we can attach it to the custom op later on. */
+    /* Notice "ex-rv2sv" calls are optimized away. */
+    arg = OpSIBLING( pushop );
+
+    /* --> entersub( list( push, arg1, cv ) ) + ( arg1, cv ) */
+
+    /* and prepare to delete the other ops */
+    /* Replace the first op of the arg list with the last arg op
+       (the cv op, i.e. pointer to original xs function),
+       which allows recursive deletion of all unneeded ops
+       while keeping the arg list. */
+    OpMORESIB_set( pushop, OpSIBLING( arg ) );
+    /* --> entersub( list( push, cv ) ) + ( arg1, cv ) */
+
+    /* Remove the trailing cv op from the arg list,
+       by declaring the arg to be the last sibling in the arg list. */
+    OpLASTSIB_set( arg, NULL );
+    /* --> entersub( list( push, cv ) ) */
+    /* --> arg1                         */
+
+    /* Recursively free entersubop + children,
+       as it'll be replaced by the op we return. */
+    op_free( entersubop );
+    /* --> ( arg1 ) */
+
+    /* create and return new op */
+    newop = newUNOP( OP_NULL, 0, arg );
+    /* can't do this in the new above, due to crashes pre-5.22 */
+    newop->op_type   = OP_CUSTOM;
+    newop->op_ppaddr = op;
+    /* --> custom_op( arg1 ) */
+
+    return newop;
+}
+
+#define INSTALL(x)                                                           \
+{                                                                            \
+    CV *cv;                                                                  \
+    XopENTRY_set(&xop_ ## x, xop_name, # x);                                 \
+    XopENTRY_set(&xop_ ## x, xop_class, OA_UNOP);                            \
+    Perl_custom_op_register(aTHX_ op_ ## x, &xop_ ## x);                      \
+    cv = newXSproto_portable("Scalar::Util::" # x, xs_ ## x, __FILE__, "$"); \
+    cv_set_call_checker(cv, call_checker_ ## x, (SV*)cv);                    \
+}
+
+#define DECLARE(x)                                                      \
+    static XOP xop_ ## x;                                               \
+                                                                        \
+    static OP *                                                         \
+    op_ ## x(pTHX)                                                      \
+    {                                                                   \
+        my_ ## x(aTHX);                                                 \
+        return NORMAL;                                                  \
+    }                                                                   \
+                                                                        \
+    static OP *                                                         \
+    call_checker_ ## x(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)     \
+    {                                                                   \
+        return call_checker(aTHX_ entersubop, namegv, ckobj, op_ ## x); \
+    }                                                                   \
+                                                                        \
+    NEWXS(x)
+
+#else
+
+#define INSTALL(x) newXSproto("Scalar::Util::" # x, xs_ ## x, __FILE__, "$")
+
+#define DECLARE(x) NEWXS(x)
+
+#endif
+
+static void
+my_blessed(pTHX)
+{
+    dSP;
+    dXSTARG;
+    SV *sv = TOPs;
+    SvGETMAGIC(sv);
+
+    if (SvROK(sv) && SvOBJECT(SvRV(sv)))
+    {
+        sv_setpv(TARG, sv_reftype(SvRV(sv), TRUE));
+        SETs(TARG);
+    }
+    else
+        SETs(&PL_sv_undef);
+}
+
+static void
+my_isdual(pTHX)
+{
+    dSP;
+    SV *sv = TOPs;
+    SvGETMAGIC(sv);
+    SETs((SvPOK(sv) || SvPOKp(sv)) && (SvNIOK(sv) || SvNIOKp(sv)) ? &PL_sv_yes : &PL_sv_no);
+}
+
+static void
+my_isvstring(pTHX)
+{
+#ifdef SvVOK
+    dSP;
+    SV *sv = TOPs;
+    SvGETMAGIC(sv);
+    SETs(SvVOK(sv) ? &PL_sv_yes : &PL_sv_no);
+#else
+    croak("vstrings are not implemented in this release of perl");
+#endif
+}
+
+static void
+my_isweak(pTHX)
+{
+#ifdef SvWEAKREF
+    dSP;
+    SV *sv = TOPs;
+    SvGETMAGIC(sv);
+    SETs(SvROK(sv) && SvWEAKREF(sv) ? &PL_sv_yes : &PL_sv_no);
+#else
+    croak("weak references are not implemented in this release of perl");
+#endif
+}
+
+/* FIXME My CPP-fu is too weak to make this play nice without this hack :-( */
+#undef looks_like_number
+
+static void
+my_looks_like_number(pTHX)
+{
+    dSP;
+    SV *sv = TOPs;
+    SV *tempsv;
+    SvGETMAGIC(sv);
+    if(SvAMAGIC(sv) && (tempsv = AMG_CALLun(sv, numer)))
+        sv = tempsv;
+#if !PERL_VERSION_GE(5,8,5)
+    if(SvPOK(sv) || SvPOKp(sv))
+        SETs(Perl_looks_like_number(aTHX_ sv) ? &PL_sv_yes : &PL_sv_no);
+    else
+        SETs((SvFLAGS(sv) & (SVf_NOK|SVp_NOK|SVf_IOK|SVp_IOK)) ? &PL_sv_yes : &PL_sv_no);
+#else
+    SETs(Perl_looks_like_number(aTHX_ sv) ? &PL_sv_yes : &PL_sv_no);
+#endif
+}
+
+static void
+my_readonly(pTHX)
+{
+    dSP;
+    SV *sv = TOPs;
+    SvGETMAGIC(sv);
+    SETs(SvREADONLY(sv) ? &PL_sv_yes : &PL_sv_no);
+}
+
+static void
+my_reftype(pTHX)
+{
+    dSP;
+    dXSTARG;
+    SV *sv = TOPs;
+    SvGETMAGIC(sv);
+
+    if (SvROK(sv))
+    {
+        sv_setpv(TARG, sv_reftype(SvRV(sv), FALSE));
+        SETs(TARG);
+    }
+    else
+        SETs(&PL_sv_undef);
+}
+
+static void
+my_tainted(pTHX)
+{
+    dSP;
+    SV *sv = TOPs;
+    SvGETMAGIC(sv);
+    SETs(SvTAINTED(sv) ? &PL_sv_yes : &PL_sv_no);
+}
+
+DECLARE(blessed);
+DECLARE(isdual);
+DECLARE(isvstring);
+DECLARE(isweak);
+DECLARE(looks_like_number);
+DECLARE(readonly);
+DECLARE(reftype);
+DECLARE(tainted);
+
 MODULE=List::Util       PACKAGE=List::Util
 
 void
@@ -1176,6 +1431,18 @@ CODE:
 
 MODULE=List::Util       PACKAGE=Scalar::Util
 
+BOOT:
+{
+    INSTALL(blessed);
+    INSTALL(isdual);
+    INSTALL(isvstring);
+    INSTALL(isweak);
+    INSTALL(looks_like_number);
+    INSTALL(readonly);
+    INSTALL(reftype);
+    INSTALL(tainted);
+}
+
 void
 dualvar(num,str)
     SV *num
@@ -1211,48 +1478,6 @@ CODE:
     ST(0) = TARG;
     XSRETURN(1);
 }
-
-void
-isdual(sv)
-    SV *sv
-PROTOTYPE: $
-CODE:
-    if(SvMAGICAL(sv))
-        mg_get(sv);
-
-    ST(0) = boolSV((SvPOK(sv) || SvPOKp(sv)) && (SvNIOK(sv) || SvNIOKp(sv)));
-    XSRETURN(1);
-
-char *
-blessed(sv)
-    SV *sv
-PROTOTYPE: $
-CODE:
-{
-    SvGETMAGIC(sv);
-
-    if(!(SvROK(sv) && SvOBJECT(SvRV(sv))))
-        XSRETURN_UNDEF;
-
-    RETVAL = (char*)sv_reftype(SvRV(sv),TRUE);
-}
-OUTPUT:
-    RETVAL
-
-char *
-reftype(sv)
-    SV *sv
-PROTOTYPE: $
-CODE:
-{
-    SvGETMAGIC(sv);
-    if(!SvROK(sv))
-        XSRETURN_UNDEF;
-
-    RETVAL = (char*)sv_reftype(SvRV(sv),FALSE);
-}
-OUTPUT:
-    RETVAL
 
 UV
 refaddr(sv)
@@ -1316,74 +1541,6 @@ CODE:
 #else
     croak("weak references are not implemented in this release of perl");
 #endif
-
-void
-isweak(sv)
-    SV *sv
-PROTOTYPE: $
-CODE:
-#ifdef SvWEAKREF
-    ST(0) = boolSV(SvROK(sv) && SvWEAKREF(sv));
-    XSRETURN(1);
-#else
-    croak("weak references are not implemented in this release of perl");
-#endif
-
-int
-readonly(sv)
-    SV *sv
-PROTOTYPE: $
-CODE:
-    SvGETMAGIC(sv);
-    RETVAL = SvREADONLY(sv);
-OUTPUT:
-    RETVAL
-
-int
-tainted(sv)
-    SV *sv
-PROTOTYPE: $
-CODE:
-    SvGETMAGIC(sv);
-    RETVAL = SvTAINTED(sv);
-OUTPUT:
-    RETVAL
-
-void
-isvstring(sv)
-    SV *sv
-PROTOTYPE: $
-CODE:
-#ifdef SvVOK
-    SvGETMAGIC(sv);
-    ST(0) = boolSV(SvVOK(sv));
-    XSRETURN(1);
-#else
-    croak("vstrings are not implemented in this release of perl");
-#endif
-
-SV *
-looks_like_number(sv)
-    SV *sv
-PROTOTYPE: $
-CODE:
-    SV *tempsv;
-    SvGETMAGIC(sv);
-    if(SvAMAGIC(sv) && (tempsv = AMG_CALLun(sv, numer))) {
-        sv = tempsv;
-    }
-#if !PERL_VERSION_GE(5,8,5)
-    if(SvPOK(sv) || SvPOKp(sv)) {
-        RETVAL = looks_like_number(sv) ? &PL_sv_yes : &PL_sv_no;
-    }
-    else {
-        RETVAL = (SvFLAGS(sv) & (SVf_NOK|SVp_NOK|SVf_IOK|SVp_IOK)) ? &PL_sv_yes : &PL_sv_no;
-    }
-#else
-    RETVAL = looks_like_number(sv) ? &PL_sv_yes : &PL_sv_no;
-#endif
-OUTPUT:
-    RETVAL
 
 void
 openhandle(SV *sv)

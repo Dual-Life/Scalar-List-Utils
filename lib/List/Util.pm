@@ -39,6 +39,24 @@ sub import
 sub List::Util::_Pair::key   { shift->[0] }
 sub List::Util::_Pair::value { shift->[1] }
 
+BEGIN
+{
+    for my $op (qw(
+        blessed
+        isdual
+        isvstring
+        isweak
+        looks_like_number
+        readonly
+        reftype
+        tainted
+    )) {
+        no strict 'refs';
+
+        *{"B::Deparse::pp_$op"} = sub { "$op " . $_[0]->deparse($_[1]->first) };
+    }
+}
+
 =head1 NAME
 
 List::Util - A selection of general-utility list subroutines
