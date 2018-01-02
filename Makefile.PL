@@ -54,9 +54,3 @@ WriteMakefile(
     )
   ),
 );
-
-# authors only!
-if (not -f 'META.yml') {
-    require Devel::PPPort;
-    Devel::PPPort::WriteFile();
-}
