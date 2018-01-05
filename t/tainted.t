@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 5;
+use Test::More tests => 7;
 
 use Scalar::Util qw(tainted);
 
@@ -26,3 +26,11 @@ ok( tainted($var),	'copy of interpreter variable');
 
 tie my $tiedvar, 'Tainted';
 ok( tainted($tiedvar), 'for magic variables');
+
+{
+  my $warning;
+  local $SIG{__WARN__} = sub { $warning = shift };
+
+  ok(!tainted(undef), 'undef is not tainted');
+  is($warning, undef, 'no undef arg warning');
+}

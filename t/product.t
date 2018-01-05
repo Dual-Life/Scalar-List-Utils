@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 25;
+use Test::More tests => 30;
 
 use Config;
 use List::Util qw(product);
@@ -128,4 +128,17 @@ SKIP: {
   $t = product($max, $max*8);
   cmp_ok($t, '>',  (1<<61), 'max*max*8'); # may be an NV
 
+}
+
+{
+  my $warning;
+  local $SIG{__WARN__} = sub { $warning = shift };
+
+  is(product(undef), 0, 'undef arg');
+  like($warning, qr/Use of uninitialized value in subroutine entry/, 'undef arg warning');
+
+  is(product("a"), 0, 'non-numeric arg');
+  like($warning, qr/Argument "a" isn't numeric in subroutine entry/, 'non-numeric arg warning');
+
+  is(product(undef, 1), 0, 'undef is 0');
 }

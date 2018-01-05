@@ -131,6 +131,16 @@ block that accumulates lengths by writing this instead as:
 The remaining list-reduction functions are all specialisations of this generic
 idea.
 
+For functions operating specifically on numbers, non-numerical values, such as
+undef and strings, are compared like core numeric operators do; namely by
+treating them as zero and raising a warning in the uninitialized or numeric
+categories.
+
+For string-specific functions undef is also compared like core string operators
+do; namely by treating undef as an empty string and raising a warning in the
+uninitialized category.
+
+
 =head2 any
 
     my $bool = any { BLOCK } @list;

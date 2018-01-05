@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 32;
+use Test::More tests => 34;
 
 use Scalar::Util qw(reftype);
 use vars qw(*F);
@@ -43,6 +43,14 @@ foreach my $test (@test) {
 
   bless $what, "0";
   is( reftype($what), $type, $n);
+}
+
+{
+  my $warning;
+  local $SIG{__WARN__} = sub { $warning = shift };
+
+  is(reftype(undef), undef, 'undef arg');
+  is($warning, undef, 'no undef arg warning'); # XXX
 }
 
 package MyTie;

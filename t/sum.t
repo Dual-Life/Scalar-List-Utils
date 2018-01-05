@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 17;
+use Test::More tests => 23;
 
 use Config;
 use List::Util qw(sum);
@@ -38,6 +38,20 @@ my $thr = Foo->new(3);
 $v = sum($one,$two,$thr);
 is($v, 6, 'overload');
 
+{
+  my $warning;
+  local $SIG{__WARN__} = sub { $warning = shift };
+
+  is(sum(undef), 0, 'undef arg');
+  like($warning, qr/Use of uninitialized value in subroutine entry/, 'undef arg warning');
+
+  is(sum("a"), 0, 'non-numeric arg');
+  like($warning, qr/Argument "a" isn't numeric in subroutine entry/, 'non-numeric arg warning');
+
+  is(sum(2, undef), 2, 'undef gets forced to 0');
+
+  is(sum(2, "a"), 2, 'strings get forced to 0');
+}
 
 { package Foo;
 
