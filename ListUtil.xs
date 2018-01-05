@@ -190,8 +190,8 @@ CODE:
     if(!items)
         switch(ix) {
             case 0: XSRETURN_UNDEF;
-            case 1: ST(0) = newSViv(0); XSRETURN(1);
-            case 2: ST(0) = newSViv(1); XSRETURN(1);
+            case 1: ST(0) = sv_2mortal(newSViv(0)); XSRETURN(1);
+            case 2: ST(0) = sv_2mortal(newSViv(1)); XSRETURN(1);
         }
 
     sv    = ST(0);
