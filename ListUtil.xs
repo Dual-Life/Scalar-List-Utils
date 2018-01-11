@@ -1526,7 +1526,7 @@ PPCODE:
             STRLEN length = end - nameptr + quotes_seen - (*end == '\'' ? 1 : 0);
             char* left;
             int i, j;
-            tmp = newSV(length);
+            tmp = sv_2mortal(newSV(length));
             left = SvPVX(tmp);
             for (i = 0, j = 0; j < end - nameptr; ++i, ++j) {
                 if (nameptr[j] == '\'') {
@@ -1538,7 +1538,6 @@ PPCODE:
                 }
             }
             stash = gv_stashpvn(left, length, GV_ADD | utf8flag);
-            SvREFCNT_dec(tmp);
         }
         else
             stash = gv_stashpvn(nameptr, end - nameptr, GV_ADD | utf8flag);
@@ -1553,22 +1552,19 @@ PPCODE:
 
         GV* oldgv = CvGV(cv);
         HV* oldhv = GvSTASH(oldgv);
-        SV* old_full_name = newSVpvn_flags(HvNAME(oldhv), HvNAMELEN_get(oldhv), HvNAMEUTF8(oldhv) ? SVf_UTF8 : 0);
+        SV* old_full_name = sv_2mortal(newSVpvn_flags(HvNAME(oldhv), HvNAMELEN_get(oldhv), HvNAMEUTF8(oldhv) ? SVf_UTF8 : 0));
         sv_catpvn(old_full_name, "::", 2);
         sv_catpvn_flags(old_full_name, GvNAME(oldgv), GvNAMELEN(oldgv), GvNAMEUTF8(oldgv) ? SV_CATUTF8 : SV_CATBYTES);
 
         old_data = hv_fetch_ent(DBsub, old_full_name, 0, 0);
 
-        SvREFCNT_dec(old_full_name);
-
         if (old_data && HeVAL(old_data)) {
-            SV* new_full_name = newSVpvn_flags(HvNAME(stash), HvNAMELEN_get(stash), HvNAMEUTF8(stash) ? SVf_UTF8 : 0);
+            SV* new_full_name = sv_2mortal(newSVpvn_flags(HvNAME(stash), HvNAMELEN_get(stash), HvNAMEUTF8(stash) ? SVf_UTF8 : 0));
             sv_catpvn(new_full_name, "::", 2);
             sv_catpvn_flags(new_full_name, nameptr, s - nameptr, utf8flag ? SV_CATUTF8 : SV_CATBYTES);
             SvREFCNT_inc(HeVAL(old_data));
             if (hv_store_ent(DBsub, new_full_name, HeVAL(old_data), 0) != NULL)
                 SvREFCNT_inc(HeVAL(old_data));
-            SvREFCNT_dec(new_full_name);
         }
     }
 
