@@ -1,3 +1,9 @@
+sudo: false
+addons:
+  apt:
+    packages:
+      - aspell
+      - aspell-en
 language: perl
 perl:
   - "blead"
@@ -26,5 +32,19 @@ perl:
   - "5.8-thr"
   - "5.6.2"
   - "5.6.2-thr"
+env:
+  global:
+    - AUTHOR_TESTING=1
+    - AUTOMATED_TESTING=1
+    - RELEASE_TESTING=0
 before_install:
-  - if [ "$TRAVIS_PERL_VERSION" = "5.6.2" ]; then eval $(curl https://travis-perl.github.io/init) --auto; fi
+  - git clone git://github.com/travis-perl/helpers ~/travis-perl-helpers
+  - source ~/travis-perl-helpers/init --always-upgrade-modules --auto
+  - build-perl
+  - perl -V
+  - build-dist
+  - cd $BUILD_DIR
+script:
+  - perl Makefile.PL
+  - make
+  - prove -b -r -s -j$(test-jobs) $(test-files)
