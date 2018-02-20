@@ -1,3 +1,18 @@
+1.50 -- 2018-02-20 19:13:27
+	[CHANGES]
+	 * Added head() and tail() functions (thanks preaction)
+	 * Support binary and Unicode in symbol names for set_subname()
+
+	[BUGFIXES]
+	 * Fix building with C++ and C89 compilers
+	 * Fix uniq() test for old Test::More
+	 * Fix example get_code_info for unnamed subs (RT#116962)
+	 * Fixes for symbol names containing ' characters
+         * Don't leak SVs from sum0/product1 when called with zero args
+	   (RT#124017)
+         * Use sv_rvunweaken() in Scalar::Util::unweaken() (thanks ilmari)
+	 * Misc. fixes for perl 5.6
+
 1.49 -- 2017-09-08 12:25:54
 	[CHANGES]
 	 * Fixes for unit tests to pass on perl 5.6.2
