@@ -1,3 +1,35 @@
+1.49 -- 2017-09-08 12:25:54
+	[CHANGES]
+	 * Fixes for unit tests to pass on perl 5.6.2
+	 * Fix typo in documentation
+
+1.48 -- 2017/06/23 17:29:42
+	[CHANGES]
+	 * Note in documentation that outer function's @_ can be accessed in
+	   some blocks, but ought not be (thanks wchristian)
+
+	[BUGFIXES]
+	 * Ensure pairmap extends its stack correctly (thanks davem)
+	 * Fix name of List::Util::unpairs in its error messages
+
+1.47 -- 2016/12/22 18:54:45
+	[CHANGES]
+	 * Make XS code ppport.h-free when in core
+
+	[BUGFIXES]
+	 * Fix compliling on C++11
+	 * Perform taint checks using $^X instead of some %ENV key because of
+	   the Test::Simple vars (RT119169)
+
+1.46 -- 2016/09/28 23:17:07
+	[CHANGES]
+	 * Remember to add unpairs and uniq to SYNOPSIS
+	 * Document the behaviour of uniqnum() on NaN
+
+	[BUGFIXES]
+	 * C89 fixes
+	 * Various internal bugfixes backported from perl core
+
 1.45 -- 2016/03/25 16:09:40
 	[CHANGES]
 	 * Renamed existing uniq() to uniqstr()

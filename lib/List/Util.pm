@@ -15,7 +15,7 @@ our @EXPORT_OK  = qw(
   all any first min max minstr maxstr none notall product reduce sum sum0 shuffle uniq uniqnum uniqstr
   head tail pairs unpairs pairkeys pairvalues pairmap pairgrep pairfirst
 );
-our $VERSION    = "1.45";
+our $VERSION    = "1.49";
 our $XS_VERSION = $VERSION;
 $VERSION    = eval $VERSION;
 
@@ -50,9 +50,9 @@ List::Util - A selection of general-utility list subroutines
 
       max maxstr min minstr product sum sum0
 
-      pairs pairkeys pairvalues pairfirst pairgrep pairmap
+      pairs unpairs pairkeys pairvalues pairfirst pairgrep pairmap
 
-      shuffle uniqnum uniqstr
+      shuffle uniq uniqnum uniqstr
     );
 
 =head1 DESCRIPTION
@@ -116,7 +116,7 @@ C<undef> being returned
 
 The above example code blocks also suggest how to use C<reduce> to build a
 more efficient combined version of one of these basic functions and a C<map>
-block. For example, to find the total length of the all the strings in a list,
+block. For example, to find the total length of all the strings in a list,
 we could use
 
     $total = sum map { length } @strings;
@@ -149,6 +149,9 @@ instead, as it can short-circuit after the first true result.
         # at least one string has more than 10 characters
     }
 
+Note: Due to XS issues the block passed may be able to access the outer @_
+directly. This is not intentional and will break under debugger.
+
 =head2 all
 
     my $bool = all { BLOCK } @list;
@@ -159,6 +162,9 @@ Similar to L</any>, except that it requires all elements of the C<@list> to
 make the C<BLOCK> return true. If any element returns false, then it returns
 false. If the C<BLOCK> never returns false or the C<@list> was empty then it
 returns true.
+
+Note: Due to XS issues the block passed may be able to access the outer @_
+directly. This is not intentional and will break under debugger.
 
 =head2 none
 
@@ -173,6 +179,9 @@ I<Since version 1.33.>
 Similar to L</any> and L</all>, but with the return sense inverted. C<none>
 returns true only if no value in the C<@list> causes the C<BLOCK> to return
 true, and C<notall> returns true only if not all of the values do.
+
+Note: Due to XS issues the block passed may be able to access the outer @_
+directly. This is not intentional and will break under debugger.
 
 =head2 first
 
@@ -516,6 +525,10 @@ compares equal to zero but additionally produces a warning if such warnings
 are enabled (C<use warnings 'uninitialized';>). In addition, an C<undef> in
 the returned list is coerced into a numerical zero, so that the entire list of
 values returned by C<uniqnum> are well-behaved as numbers.
+
+Note also that multiple IEEE C<NaN> values are treated as duplicates of
+each other, regardless of any differences in their payloads, and despite
+the fact that C<< 0+'NaN' == 0+'NaN' >> yields false.
 
 =head2 uniqstr
 
