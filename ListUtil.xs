@@ -626,7 +626,7 @@ PPCODE:
     int end = 0;
     int i = 0;
 
-    size = SvIV( ST(0) );
+    size = SvIV(*(SP + 1));
 
     if ( ix == 0 ) {
         start = 1;
@@ -651,16 +651,12 @@ PPCODE:
         }
     }
 
-    if ( end < start ) {
-        XSRETURN(0);
+    while (start < end--) {
+        ++SP;
+        *SP = *(SP + start);
     }
-    else {
-        EXTEND( SP, end - start );
-        for ( i = start; i <= end; i++ ) {
-            PUSHs( sv_2mortal( newSVsv( ST(i) ) ) );
-        }
-        XSRETURN( end - start );
-    }
+
+    PUTBACK;
 }
 
 void
