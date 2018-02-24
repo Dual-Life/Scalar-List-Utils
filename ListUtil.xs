@@ -623,35 +623,21 @@ PPCODE:
 {
     int size = 0;
     int start = 0;
-    int end = 0;
-    int i = 0;
 
-    size = SvIV(*(SP + 1));
+    if (items > 1) {
+        size = SvIV(*(SP + 1));
 
-    if ( ix == 0 ) {
-        start = 1;
-        end = start + size;
-        if ( size < 0 ) {
-            end += items - 1;
-        }
-        if ( end > items ) {
-            end = items;
-        }
-    }
-    else {
-        end = items;
-        if ( size < 0 ) {
-            start = -size + 1;
-        }
-        else {
-            start = end - size;
-        }
-        if ( start < 1 ) {
-            start = 1;
+        if (ix) start = items - size - 1;
+        start = 1 + (start + items - 1) % (items - 1);
+
+        if (size > items - 1) {
+            size = items - 1;
+        } else if (size < 0) {
+            size = size + items - 1;
         }
     }
 
-    while (start < end--) {
+    while (--size >= 0) {
         ++SP;
         *SP = *(SP + start);
     }
