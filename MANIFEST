@@ -13,8 +13,10 @@ t/00version.t
 t/any-all.t
 t/blessed.t
 t/dualvar.t
+t/exotic_names.t
 t/first.t
 t/getmagic-once.t
+t/head-tail.t
 t/isvstring.t
 t/lln.t
 t/max.t
