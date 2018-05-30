@@ -276,8 +276,8 @@ L<perlapi/looks_like_number>.
 
     my $fh = openhandle( $fh );
 
-Returns C<$fh> itself if C<$fh> may be used as a filehandle and is open, or is
-is a tied handle. Otherwise C<undef> is returned.
+Returns C<$fh> itself, if C<$fh> may be used as a filehandle and is open, or if
+it is a tied handle. Otherwise C<undef> is returned.
 
     $fh = openhandle(*STDIN);           # \*STDIN
     $fh = openhandle(\*STDIN);          # \*STDIN
