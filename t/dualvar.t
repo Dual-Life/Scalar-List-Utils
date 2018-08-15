@@ -131,6 +131,10 @@ SKIP: {
   ok(isdual($ary[2]), 'Is a dualvar');
 }
 
-# RT #122582: dual var not copying numeric value correctly
-my $a = "4611686018427387915";
-is $a - (1<<62), dualvar($a, "foo") - (1<<62), 'Should match';
+SKIP: {
+    skip("Test only works on 64 bit architectures", 1) unless log(~0 +1)/log(2) == 64;
+
+    # RT #122582: dual var not copying numeric value correctly
+    my $a = "4611686018427387915";
+    is $a - (1<<62), dualvar($a, "foo") - (1<<62), 'Should match';
+}
