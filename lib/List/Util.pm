@@ -557,6 +557,8 @@ entire list of values returned by C<uniqstr> are well-behaved as strings.
 
     my @values = head $size, @list;
 
+I<Since version 1.50.>
+
 Returns the first C<$size> elements from C<@list>. If C<$size> is negative, returns
 all but the last C<$size> elements from C<@list>.
 
@@ -569,6 +571,8 @@ all but the last C<$size> elements from C<@list>.
 =head2 tail
 
     my @values = tail $size, @list;
+
+I<Since version 1.50.>
 
 Returns the last C<$size> elements from C<@list>. If C<$size> is negative, returns
 all but the first C<$size> elements from C<@list>.
