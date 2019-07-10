@@ -4,7 +4,7 @@ use warnings;
 use List::Util;
 
 our $VERSION = "1.50";       # FIXUP
-$VERSION = eval $VERSION;    # FIXUP
+$VERSION =~ tr/_//d;         # FIXUP
 
 1;
 __END__

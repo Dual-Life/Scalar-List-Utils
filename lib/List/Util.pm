@@ -17,7 +17,7 @@ our @EXPORT_OK  = qw(
 );
 our $VERSION    = "1.50";
 our $XS_VERSION = $VERSION;
-$VERSION    = eval $VERSION;
+$VERSION =~ tr/_//d;
 
 require XSLoader;
 XSLoader::load('List::Util', $XS_VERSION);

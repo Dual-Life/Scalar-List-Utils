@@ -16,7 +16,7 @@ our @EXPORT_OK = qw(
 );
 
 our $VERSION    = "1.50";
-$VERSION   = eval $VERSION;
+$VERSION =~ tr/_//d;
 
 require List::Util; # as it has the XS
 List::Util->VERSION( $VERSION ); # Ensure we got the right XS version (RT#100863)
