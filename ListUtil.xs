@@ -1601,15 +1601,18 @@ PPCODE:
     /* under debugger, provide information about sub location */
     if (PL_DBsub && CvGV(cv)) {
         HV* DBsub = GvHV(PL_DBsub);
-        HE* old_data;
+        HE* old_data = NULL;
 
         GV* oldgv = CvGV(cv);
         HV* oldhv = GvSTASH(oldgv);
-        SV* old_full_name = sv_2mortal(newSVpvn_flags(HvNAME(oldhv), HvNAMELEN_get(oldhv), HvNAMEUTF8(oldhv) ? SVf_UTF8 : 0));
-        sv_catpvn(old_full_name, "::", 2);
-        sv_catpvn_flags(old_full_name, GvNAME(oldgv), GvNAMELEN(oldgv), GvNAMEUTF8(oldgv) ? SV_CATUTF8 : SV_CATBYTES);
 
-        old_data = hv_fetch_ent(DBsub, old_full_name, 0, 0);
+        if (oldhv) {
+            SV* old_full_name = sv_2mortal(newSVpvn_flags(HvNAME(oldhv), HvNAMELEN_get(oldhv), HvNAMEUTF8(oldhv) ? SVf_UTF8 : 0));
+            sv_catpvn(old_full_name, "::", 2);
+            sv_catpvn_flags(old_full_name, GvNAME(oldgv), GvNAMELEN(oldgv), GvNAMEUTF8(oldgv) ? SV_CATUTF8 : SV_CATBYTES);
+
+            old_data = hv_fetch_ent(DBsub, old_full_name, 0, 0);
+        }
 
         if (old_data && HeVAL(old_data)) {
             SV* new_full_name = sv_2mortal(newSVpvn_flags(HvNAME(stash), HvNAMELEN_get(stash), HvNAMEUTF8(stash) ? SVf_UTF8 : 0));
@@ -1660,6 +1663,7 @@ subname(code)
 PREINIT:
     CV *cv;
     GV *gv;
+    const char *stashname;
 PPCODE:
     if (!SvROK(code) && SvGMAGICAL(code))
         mg_get(code);
@@ -1670,7 +1674,12 @@ PPCODE:
     if(!(gv = CvGV(cv)))
         XSRETURN(0);
 
-    mPUSHs(newSVpvf("%s::%s", HvNAME(GvSTASH(gv)), GvNAME(gv)));
+    if(GvSTASH(gv))
+        stashname = HvNAME(GvSTASH(gv));
+    else
+        stashname = "__ANON__";
+
+    mPUSHs(newSVpvf("%s::%s", stashname, GvNAME(gv)));
     XSRETURN(1);
 
 BOOT:
