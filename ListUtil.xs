@@ -1177,12 +1177,15 @@ CODE:
                 /* clone the value so we don't invoke magic again */
                 arg = sv_mortalcopy(arg);
 
-            if(SvUOK(arg))
+            if(SvOK(arg) && !(SvUOK(arg) || SvIOK(arg) || SvNOK(arg)))
+                SvNV(arg); /* sets SVf_IOK/SVf_UOK if it's an integer */
+
+            if(!SvOK(arg) || SvUOK(arg))
                 sv_setpvf(keysv, "%" UVuf, SvUV(arg));
             else if(SvIOK(arg))
                 sv_setpvf(keysv, "%" IVdf, SvIV(arg));
             else
-                sv_setpvf(keysv, "%" NVgf, SvNV(arg));
+                sv_setpvf(keysv, "%.15" NVgf, SvNV(arg));
 #ifdef HV_FETCH_EMPTY_HE
             he = (HE*) hv_common(seen, NULL, SvPVX(keysv), SvCUR(keysv), 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
             if (HeVAL(he))
