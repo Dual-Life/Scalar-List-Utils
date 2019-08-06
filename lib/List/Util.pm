@@ -38,6 +38,7 @@ sub import
 # For objects returned by pairs()
 sub List::Util::_Pair::key   { shift->[0] }
 sub List::Util::_Pair::value { shift->[1] }
+sub List::Util::_Pair::TO_JSON { [ @{+shift} ] }
 
 =head1 NAME
 
@@ -340,6 +341,9 @@ equivalent:
        my $value = $pair->value;
        ...
     }
+
+Since version C<1.51> they also have a C<TO_JSON> method to ease
+serialisation.
 
 =head2 unpairs
 
