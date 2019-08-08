@@ -1,3 +1,12 @@
+1.51 -- 2019-08-08 14:31:32
+	[CHANGES]
+	 * Add TO_JSON to List::Util::_Pair (thanks ilmari)
+	 * Various minor docs fixes
+	
+	[BUGFIXES]
+	 * Don't segfault in subname() on deleted stashes (thanks ilmari)
+	 * Fix uniqnum for large floats and numeric strings (thanks ilmari)
+
 1.50 -- 2018-02-20 19:13:27
 	[CHANGES]
 	 * Added head() and tail() functions (thanks preaction)
