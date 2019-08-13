@@ -1178,7 +1178,7 @@ CODE:
                 arg = sv_mortalcopy(arg);
 
             if(SvOK(arg) && !(SvUOK(arg) || SvIOK(arg) || SvNOK(arg)))
-                SvNV(arg); /* sets SVf_IOK/SVf_UOK if it's an integer */
+                SvIV(arg); /* sets SVf_IOK/SVf_IsUV if it's an integer */
 
             if(!SvOK(arg) || SvUOK(arg))
                 sv_setpvf(keysv, "%" UVuf, SvUV(arg));
