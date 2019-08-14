@@ -1177,8 +1177,13 @@ CODE:
                 /* clone the value so we don't invoke magic again */
                 arg = sv_mortalcopy(arg);
 
-            if(SvOK(arg) && !(SvUOK(arg) || SvIOK(arg) || SvNOK(arg)))
+            if(SvOK(arg) && !(SvUOK(arg) || SvIOK(arg) || SvNOK(arg))) {
+#if PERL_VERSION >= 8
                 SvIV(arg); /* sets SVf_IOK/SVf_IsUV if it's an integer */
+#else
+                SvNV(arg); /* SvIV() sets SVf_IOK even on floats on 5.6 */
+#endif
+            }
 
             if(!SvOK(arg) || SvUOK(arg))
                 sv_setpvf(keysv, "%" UVuf, SvUV(arg));
