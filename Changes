@@ -1,3 +1,8 @@
+1.52 -- 2019-08-17 19:08:18
+	[BUGFIXES]
+	 * Fix uniqnum() on large stringified integers on long- and 
+	   quad-double perls (thanks ilmari)
+
 1.51 -- 2019-08-08 14:31:32
 	[CHANGES]
 	 * Add TO_JSON to List::Util::_Pair (thanks ilmari)
