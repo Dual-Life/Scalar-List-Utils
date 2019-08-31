@@ -72,6 +72,19 @@
 #define sv_catpvn_flags(b,n,l,f) sv_catpvn(b,n,l)
 #endif
 
+#ifdef UNIQ_PREC_LOSS
+#define UNIQ_BUFF_SIZE 33                    /* nvsize == 8, ivsize == 8 */
+
+#elif UNIQ_LOOP_END == 8                     /* nvsize == 8, ivsize < 8 **/
+#define UNIQ_BUFF_SIZE 17
+
+#elif UNIQ_LOOP_END == 10                    /* NV is 10 bytes ***********/
+#define UNIQ_BUFF_SIZE 21
+
+#else
+#define UNIQ_BUFF_SIZE 33                    /* NV is 16 bytes ***********/
+#endif
+
 /* Some platforms have strict exports. And before 5.7.3 cxinc (or Perl_cxinc)
    was not exported. Therefore platforms like win32, VMS etc have problems
    so we redefine it here -- GMB
@@ -1152,6 +1165,15 @@ CODE:
     int index;
     SV **args = &PL_stack_base[ax];
     HV *seen;
+    size_t i;
+    NV nv_arg;
+    void *p = &nv_arg;
+    char s[UNIQ_BUFF_SIZE];
+    char * buff = s;
+#ifdef UNIQ_PREC_LOSS
+    size_t ivstring = 0, offset = 0;
+    IV int_arg;
+#endif
 
     if(items == 0 || (items == 1 && !SvGAMAGIC(args[0]) && SvOK(args[0]))) {
         /* Optimise for the case of the empty list or a defined nonmagic
@@ -1185,12 +1207,106 @@ CODE:
 #endif
             }
 
-            if(!SvOK(arg) || SvUOK(arg))
-                sv_setpvf(keysv, "%" UVuf, SvUV(arg));
-            else if(SvIOK(arg))
-                sv_setpvf(keysv, "%" IVdf, SvIV(arg));
-            else
-                sv_setpvf(keysv, "%.15" NVgf, SvNV(arg));
+            /* Assign appropriate value to nv_arg */
+
+            if(!SvOK(arg) || SvUOK(arg)) {
+                nv_arg = (NV)SvUV(arg);
+#ifdef UNIQ_PREC_LOSS
+                if(SvUV(arg) > 9007199254740992) { /* UV to NV conversion could lose precision */
+                    ivstring = 1;
+                    int_arg = SvIV(arg); /* SvIV(arg) and SvuV(arg) have the same byte structure *
+                                          * and it's only the byte structure that interests us   */
+                }
+#endif
+            }
+
+            else if(SvIOK(arg)) {
+                nv_arg = (NV)SvIV(arg);
+#ifdef UNIQ_PREC_LOSS
+                int_arg = SvIV(arg);
+                if(int_arg < -4503599627370496)  /* IV to NV conversion could lose precision */
+                    ivstring = 1;
+#endif
+            }
+
+            else {
+                nv_arg = SvNV(arg);
+            }
+
+            /* Handle NaN, zeros and Infs */
+
+            if(nv_arg != nv_arg) {
+                sv_setpvf(keysv, "%s", "NaN");
+#ifdef UNIQ_PREC_LOSS
+                ivstring = 0;
+#endif
+            }
+
+            else if(nv_arg == 0) {
+                sv_setpvf(keysv, "%s", "0");
+#ifdef UNIQ_PREC_LOSS
+                ivstring = 0;
+#endif
+            }
+
+            else if(nv_arg/nv_arg != 1) {
+                if(nv_arg < 0) sv_setpvf(keysv, "%s", "-Inf");
+                else sv_setpvf(keysv, "%s", "Inf");
+#ifdef UNIQ_PREC_LOSS
+                ivstring = 0;
+#endif
+            }
+
+            /* Handle all values other than NaN, zeros and Infs */
+
+            else {
+#ifdef UNIQ_PREC_LOSS
+                if(ivstring) { 
+
+                    /* Read the bytes of iv_arg into the string buffer, in hex */
+
+                    sprintf(buff, "%016" UVxf, int_arg);
+                    buff += 16;
+                    offset = 16;
+                }
+
+
+                /* Take appropriate action if nv_arg holds an integer value    *  
+                 * within the IV and UV range that can lose precision as an NV */
+
+                else if(ceil(nv_arg) == nv_arg
+                        && ((nv_arg  <  1.8446744073709552e+19 && nv_arg > 9007199254740992)
+                             ||
+                            (nv_arg < -4503599627370496 && nv_arg  >= -9.2233720368547758e+18)) ) {
+
+                    int_arg = SvIV(arg);
+
+                    /* Read the bytes of int_arg into the string buffer, in hex */
+
+                    sprintf(buff, "%016" UVxf, int_arg);
+                    buff += 16;
+                    offset = 16; /* the buff pointer has been incremented by 16 */
+                }
+
+                ivstring = 0;
+
+                for(i = 0; i < 8; i++) {
+                    sprintf(buff, "%02x", ((unsigned char*)p)[i]);
+                    buff += 2;
+                }
+
+                buff -= 16 + offset; /* return pointer to original position */
+                offset = 0;
+#else
+                for(i = 0; i < UNIQ_LOOP_END; i++) {
+                    sprintf(buff, "%02x", ((unsigned char*)p)[i]);
+                    buff += 2;
+                }
+
+                buff -= 2 * UNIQ_LOOP_END; /* return pointer to original position */
+#endif
+                sv_setpvf(keysv, "%s", buff);
+            }
 #ifdef HV_FETCH_EMPTY_HE
             he = (HE*) hv_common(seen, NULL, SvPVX(keysv), SvCUR(keysv), 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
             if (HeVAL(he))

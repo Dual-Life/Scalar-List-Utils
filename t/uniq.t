@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Config; # to determine nvsize
-use Test::More tests => 35;
+use Test::More tests => 36;
 use List::Util qw( uniqnum uniqstr uniq );
 
 use Tie::Array;
@@ -67,9 +67,19 @@ SKIP: {
     is( $warnings, "", 'No warnings are printed when handling Unicode strings' );
 }
 
-is_deeply( [ uniqnum qw( 1 1.0 1E0 2 3 ) ],
-           [ 1, 2, 3 ],
-           'uniqnum compares numbers' );
+if($Config{nvsize} == 8 && $Config{ivsize} == 8) {
+
+  is_deeply( [ uniqnum qw( 1 1.0 1E0 2 3 9223372036854775808 9.2233720368547758e+18) ],
+             [ 1, 2, 3, 9223372036854775808 ],
+             'uniqnum compares numbers' );
+}
+
+else {
+
+  is_deeply( [ uniqnum qw( 1 1.0 1E0 2 3 ) ],
+             [ 1, 2, 3 ],
+             'uniqnum compares numbers' );
+}
 
 is_deeply( [ uniqnum qw( 1 1.1 1.2 1.3 ) ],
            [ 1, 1.1, 1.2, 1.3 ],
@@ -87,7 +97,7 @@ is_deeply( [ uniqnum qw( 1 1.1 1.2 1.3 ) ],
                'uniqnum distinguishes large floats (stringified)' );
 }
 
-my ($uniq_count1, $uniq_count2, $equiv, $expected_count);
+my ($uniq_count1, $uniq_count2, $equiv);
 
 if($Config{nvsize} == 8) {
   # NV is either 'double' or 8-byte 'long double'
@@ -95,29 +105,11 @@ if($Config{nvsize} == 8) {
   # The 2 values should be unequal - but just in case perl is buggy:
   $equiv = 1 if 1.4142135623730951 == 1.4142135623730954;
 
-  if($Config{ivsize} == 8) {
-    $uniq_count1 = List::Util::uniqnum (1.4142135623730951,
-                                        1.4142135623730954,
-                                        9223372036854775808,
-                                        9.2233720368547758e+18 );
-
-    $uniq_count2 = List::Util::uniqnum('1.4142135623730951',
-                                       '1.4142135623730954',
-                                       '9223372036854775808',
-                                       '9.2233720368547758e+18' );
-
-    $expected_count = 3;
-  }
-
-  else {
-    $uniq_count1 = List::Util::uniqnum (1.4142135623730951,
+  $uniq_count1 = List::Util::uniqnum (1.4142135623730951,
                                         1.4142135623730954 );
 
-    $uniq_count2 = List::Util::uniqnum('1.4142135623730951',
+  $uniq_count2 = List::Util::uniqnum('1.4142135623730951',
                                        '1.4142135623730954' );
-
-    $expected_count = 2;
-  }
 }
 
 elsif(length(sqrt(2)) > 25) {
@@ -136,8 +128,6 @@ elsif(length(sqrt(2)) > 25) {
 
     $uniq_count2 = List::Util::uniqnum('4.0564819207303340847894502572035e31',
                                        '4.0564819207303340847894502572034e31' );
-
-    $expected_count = 2;
   }
 
   else {
@@ -151,8 +141,6 @@ elsif(length(sqrt(2)) > 25) {
 
     $uniq_count2 = List::Util::uniqnum('1.7320508075688772935274463415058722',
                                        '1.73205080756887729352744634150587224' );
-
-    $expected_count = 2;
   }
 }
 
@@ -167,18 +155,43 @@ else {
 
   $uniq_count2 = List::Util::uniqnum('2.2360679774997896963',
                                      '2.23606797749978969634' );
-
-  $expected_count = 2;
 }
 
 if($equiv) {
-  is($uniq_count1, $expected_count - 1, 'uniqnum preserves uniqness of high precision floats');
-  is($uniq_count2, $expected_count - 1, 'uniqnum preserves uniqness of high precision floats (stringified)');
+  is($uniq_count1, 1, 'uniqnum preserves uniqness of high precision floats');
+  is($uniq_count2, 1, 'uniqnum preserves uniqness of high precision floats (stringified)');
 }
 
 else {
-  is($uniq_count1, $expected_count, 'uniqnum preserves uniqness of high precision floats');
-  is($uniq_count2, $expected_count, 'uniqnum preserves uniqness of high precision floats (stringified)');
+  is($uniq_count1, 2, 'uniqnum preserves uniqness of high precision floats');
+  is($uniq_count2, 2, 'uniqnum preserves uniqness of high precision floats (stringified)');
+}
+
+SKIP: {
+    skip ('test not relevant for this perl configuration', 1) unless $Config{nvsize} == 8 
+                                                                  && $Config{ivsize} == 8;
+
+    my @in = (~0, ~0 - 1, 18446744073709551614.0, 18014398509481985, 1.8014398509481985e16);
+    my(@correct);
+
+    # On perl-5.6.2 (and perhaps other old versions), ~0 - 1 is assigned to an NV.
+    # This affects the outcome of the following test, so we need to first determine
+    # whether ~0 - 1 is an NV or a UV:
+
+    if("$in[1]" eq "1.84467440737096e+19") {
+
+      # It's an NV and $in[2] is a duplicate of $in[1]
+      @correct = (~0, ~0 - 1, 18014398509481985, 1.8014398509481985e16);
+    }
+    else {
+
+      # No duplicates in @in
+      @correct = @in;
+    }
+
+    is_deeply( [ uniqnum @in ],
+               [ @correct ],
+               'uniqnum correctly compares UV/IVs that overflow NVs' );
 }
 
 # Hard to know for sure what an Inf is going to be. Lets make one
