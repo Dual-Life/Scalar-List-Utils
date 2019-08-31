@@ -7,11 +7,30 @@ use File::Spec;
 use ExtUtils::MakeMaker;
 my $PERL_CORE = grep { $_ eq 'PERL_CORE=1' } @ARGV;
 
+
+my $defines = $ENV{PERL_CORE} ? q[-DPERL_EXT] : q[-DPERL_EXT -DUSE_PPPORT_H];
+
+# Determine the correct NV formatting required by uniq() in ListUtil.xs
+
+if($Config{nvsize} == 8)   {      # double or 8-byte long double
+ $defines .= " -DUNIQ_LOOP_END=8";
+ $defines .= " -DUNIQ_PREC_LOSS" if $Config{ivsize} >= 8; # precision loss is possible when
+                                                          # IV/UV is converted to NV
+}
+ 
+elsif(length(sqrt 2) > 25) {      # IEEE long double or __float128 or doubledouble
+  $defines .= " -DUNIQ_LOOP_END=16"
+}
+
+else {                            # extended precision long double (either 12-byte or 16-byte)
+  $defines .= " -DUNIQ_LOOP_END=10";  # ignore unused bytes
+}
+
 WriteMakefile(
   NAME         => q[List::Util],
   ABSTRACT     => q[Common Scalar and List utility subroutines],
   AUTHOR       => q[Graham Barr <gbarr@cpan.org>],
-  DEFINE       => ($ENV{PERL_CORE} ? q[-DPERL_EXT] : q[-DPERL_EXT -DUSE_PPPORT_H]),
+  DEFINE       => $defines,
   DISTNAME     => q[Scalar-List-Utils],
   VERSION_FROM => 'lib/List/Util.pm',
 
