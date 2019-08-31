@@ -2,8 +2,8 @@
 
 use strict;
 use warnings;
-
-use Test::More tests => 33;
+use Config; # to determine nvsize
+use Test::More tests => 35;
 use List::Util qw( uniqnum uniqstr uniq );
 
 use Tie::Array;
@@ -87,6 +87,100 @@ is_deeply( [ uniqnum qw( 1 1.1 1.2 1.3 ) ],
                'uniqnum distinguishes large floats (stringified)' );
 }
 
+my ($uniq_count1, $uniq_count2, $equiv, $expected_count);
+
+if($Config{nvsize} == 8) {
+  # NV is either 'double' or 8-byte 'long double'
+
+  # The 2 values should be unequal - but just in case perl is buggy:
+  $equiv = 1 if 1.4142135623730951 == 1.4142135623730954;
+
+  if($Config{ivsize} == 8) {
+    $uniq_count1 = List::Util::uniqnum (1.4142135623730951,
+                                        1.4142135623730954,
+                                        9223372036854775808,
+                                        9.2233720368547758e+18 );
+
+    $uniq_count2 = List::Util::uniqnum('1.4142135623730951',
+                                       '1.4142135623730954',
+                                       '9223372036854775808',
+                                       '9.2233720368547758e+18' );
+
+    $expected_count = 3;
+  }
+
+  else {
+    $uniq_count1 = List::Util::uniqnum (1.4142135623730951,
+                                        1.4142135623730954 );
+
+    $uniq_count2 = List::Util::uniqnum('1.4142135623730951',
+                                       '1.4142135623730954' );
+
+    $expected_count = 2;
+  }
+}
+
+elsif(length(sqrt(2)) > 25) {
+  # NV is either IEEE 'long double' or '__float128' or doubledouble
+
+  if(1 + (2 ** -1074) != 1) {
+    # NV is doubledouble
+
+    # The 2 values should be unequal - but just in case perl is buggy:
+    $equiv = 1 if 1 + (2 ** -1074) == 1 + (2 ** - 1073);
+
+    $uniq_count1 = List::Util::uniqnum (1 + (2 ** -1074),
+                                        1 + (2 ** -1073) );
+    # The 2 values should be unequal - but just in case perl is buggy:
+    $equiv = 1 if 4.0564819207303340847894502572035e31 == 4.0564819207303340847894502572034e31;
+
+    $uniq_count2 = List::Util::uniqnum('4.0564819207303340847894502572035e31',
+                                       '4.0564819207303340847894502572034e31' );
+
+    $expected_count = 2;
+  }
+
+  else {
+    # NV is either IEEE 'long double' or '__float128'
+
+    # The 2 values should be unequal - but just in case perl is buggy:
+    $equiv = 1 if 1.7320508075688772935274463415058722 == 1.73205080756887729352744634150587224;
+
+    $uniq_count1 = List::Util::uniqnum (1.7320508075688772935274463415058722,
+                                        1.73205080756887729352744634150587224 );
+
+    $uniq_count2 = List::Util::uniqnum('1.7320508075688772935274463415058722',
+                                       '1.73205080756887729352744634150587224' );
+
+    $expected_count = 2;
+  }
+}
+
+else {
+  # NV is extended precision 'long double'
+
+  # The 2 values should be unequal - but just in case perl is buggy:
+  $equiv = 1 if 2.2360679774997896963 == 2.23606797749978969634;
+
+  $uniq_count1 = List::Util::uniqnum (2.2360679774997896963,
+                                      2.23606797749978969634 );
+
+  $uniq_count2 = List::Util::uniqnum('2.2360679774997896963',
+                                     '2.23606797749978969634' );
+
+  $expected_count = 2;
+}
+
+if($equiv) {
+  is($uniq_count1, $expected_count - 1, 'uniqnum preserves uniqness of high precision floats');
+  is($uniq_count2, $expected_count - 1, 'uniqnum preserves uniqness of high precision floats (stringified)');
+}
+
+else {
+  is($uniq_count1, $expected_count, 'uniqnum preserves uniqness of high precision floats');
+  is($uniq_count2, $expected_count, 'uniqnum preserves uniqness of high precision floats (stringified)');
+}
+
 # Hard to know for sure what an Inf is going to be. Lets make one
 my $Inf = 0 + 1E1000;
 my $NaN;
@@ -109,8 +203,13 @@ SKIP: {
 
     my @strs = map "$_", @nums;
 
-    skip( "Perl $] doesn't stringify UV_MAX right ($maxuint)", 1 )
-        if $maxuint !~ /\A[0-9]+\z/;
+    if($maxuint !~ /\A[0-9]+\z/) {
+      skip( "Perl $] doesn't stringify UV_MAX right ($maxuint)", 1 );
+    }
+    elsif($] < 5.022 && $^O =~ /MSWin32/i) {
+      skip( "On MS Windows,perl $] stringifies infs and nans into something unusable", 1 );
+    }
+        
 
     is_deeply( [ uniqnum @strs, "1.0" ],
                [ @strs ],
