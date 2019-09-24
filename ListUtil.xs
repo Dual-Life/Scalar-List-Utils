@@ -1212,8 +1212,10 @@ CODE:
             if(!SvOK(arg) || SvUOK(arg)) {
                 nv_arg = (NV)SvUV(arg);
 #ifdef UNIQ_PREC_LOSS
+
                 int_arg = SvIV(arg); /* SvIV(arg) and SvuV(arg) have the same byte structure *
                                       * and it's only the byte structure that interests us   */
+
                 if(SvUV(arg) > 9007199254740992)  /* UV to NV conversion could lose precision */
                     potential_prec_loss = 1;
 #endif
@@ -1222,7 +1224,9 @@ CODE:
             else if(SvIOK(arg)) {
                 nv_arg = (NV)SvIV(arg);
 #ifdef UNIQ_PREC_LOSS
+
                 int_arg = SvIV(arg);
+
                 if(int_arg < -4503599627370496 
                     ||
                    int_arg > 9007199254740992)  /* IV to NV conversion could lose precision */
