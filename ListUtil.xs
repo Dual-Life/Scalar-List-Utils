@@ -1227,7 +1227,7 @@ CODE:
 
                 int_arg = SvIV(arg);
 
-                if(int_arg < -4503599627370496 
+                if(int_arg < -9007199254740992 
                     ||
                    int_arg > 9007199254740992)  /* IV to NV conversion could lose precision */
                     potential_prec_loss = 1;
@@ -1279,10 +1279,10 @@ CODE:
                 /* Take appropriate action if nv_arg holds an integer value    *  
                  * within the IV and UV range that can lose precision as an NV */
 
-                else if(ceil(nv_arg) == nv_arg
-                        && ((nv_arg  <  1.8446744073709552e+19 && nv_arg > 9007199254740992)
+                else if(trunc(nv_arg) == nv_arg
+                        && ((nv_arg  <  1.8446744073709552e+19 && nv_arg > 9007199254740992.0)
                              ||
-                            (nv_arg < -4503599627370496 && nv_arg  >= -9.2233720368547758e+18)) ) {
+                            (nv_arg < -9007199254740992.0 && nv_arg  >= -9.2233720368547758e+18)) ) {
 
                     int_arg = SvIV(arg);
 
