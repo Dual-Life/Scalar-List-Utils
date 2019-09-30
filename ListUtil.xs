@@ -1216,8 +1216,7 @@ CODE:
                 int_arg = SvIV(arg); /* SvIV(arg) and SvuV(arg) have the same byte structure *
                                       * and it's only the byte structure that interests us   */
 
-                if(SvUV(arg) > 9007199254740992)  /* UV to NV conversion could lose precision */
-                    potential_prec_loss = 1;
+                potential_prec_loss = 1; /* UV to NV conversion could lose precision as SvUV(arg) > 9007199254740992 */
 #endif
             }
 
@@ -1268,16 +1267,12 @@ CODE:
 #ifdef UNIQ_PREC_LOSS
                 if(potential_prec_loss) { 
 
-                    /* Read the bytes of iv_arg into the string buffer, in hex */
+                    /* Read the bytes of int_arg into buff, in hex */
 
                     sprintf(buff, "%016" UVxf, int_arg);
                     buff += 16;
                     offset = 16;
                 }
-
-
-                /* Take appropriate action if nv_arg holds an integer value    *  
-                 * within the IV and UV range that can lose precision as an NV */
 
                 else if(trunc(nv_arg) == nv_arg
                         && ((nv_arg  <  1.8446744073709552e+19 && nv_arg > 9007199254740992.0)
@@ -1286,7 +1281,7 @@ CODE:
 
                     int_arg = SvIV(arg);
 
-                    /* Read the bytes of int_arg into the string buffer, in hex */
+                    /* Read the bytes of int_arg into buff, in hex */
 
                     sprintf(buff, "%016" UVxf, int_arg);
                     buff += 16;
@@ -1294,6 +1289,8 @@ CODE:
                 }
 
                 potential_prec_loss = 0; /* clear */
+
+                /* Read the bytes of nv_arg into buff, in hex */
 
                 for(i = 0; i < 8; i++) {
                     sprintf(buff, "%02x", ((unsigned char*)p)[i]);
@@ -1303,6 +1300,8 @@ CODE:
                 buff -= 16 + offset; /* return pointer to original position */
                 offset = 0;
 #else
+                /* Read the bytes of nv_arg into buff, in hex */
+
                 for(i = 0; i < UNIQ_LOOP_END; i++) {
                     sprintf(buff, "%02x", ((unsigned char*)p)[i]);
                     buff += 2;
