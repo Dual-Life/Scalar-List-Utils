@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Config; # to determine nvsize
-use Test::More tests => 36;
+use Test::More tests => 37;
 use List::Util qw( uniqnum uniqstr uniq );
 
 use Tie::Array;
@@ -243,6 +243,10 @@ SKIP: {
                [ 0 ],
                'uniqnum on undef coerces to zero' );
 }
+
+is_deeply( [uniqnum 0, -0.0 ],
+           [0],
+           'uniqnum handles negative zero');
 
 is_deeply( [ uniq () ],
            [],
