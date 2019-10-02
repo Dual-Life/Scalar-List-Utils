@@ -245,7 +245,7 @@ SKIP: {
 }
 
 is_deeply( [uniqnum 0, -0.0 ],
-           [0],
+           [ 0 ],
            'uniqnum handles negative zero');
 
 is_deeply( [ uniq () ],
