@@ -72,6 +72,20 @@
 #define sv_catpvn_flags(b,n,l,f) sv_catpvn(b,n,l)
 #endif
 
+/* Next we define the appropriate value of UNIQ_NV_FORMAT *
+ * using the value of LU_NV_BITS that was defined by the  *
+ * Makefile.PL.                                           */
+
+#if   LU_NV_BITS == 64
+#define UNIQ_NV_FORMAT "%.19"
+#elif LU_NV_BITS == 80
+#define UNIQ_NV_FORMAT "%.21"
+#elif LU_NV_BITS == 128
+#define UNIQ_NV_FORMAT "%.36"
+#else
+#error "LU_NV_BITS not set"
+#endif
+
 /* Some platforms have strict exports. And before 5.7.3 cxinc (or Perl_cxinc)
    was not exported. Therefore platforms like win32, VMS etc have problems
    so we redefine it here -- GMB
@@ -1152,6 +1166,16 @@ CODE:
     int index;
     SV **args = &PL_stack_base[ax];
     HV *seen;
+#if LU_NV_BITS == 64 /* Work around a strange bug that affects Ubuntu, Debian */
+    char buff[32];
+#endif
+#ifdef NV_IS_DOUBLEDOUBLE /* Defined by Makefile.PL */
+    NV nv_arg;
+    void *p = &nv_arg;
+    char s[33];
+    char * buffer = s;
+    int i;
+#endif
 
     if(items == 0 || (items == 1 && !SvGAMAGIC(args[0]) && SvOK(args[0]))) {
         /* Optimise for the case of the empty list or a defined nonmagic
@@ -1184,13 +1208,59 @@ CODE:
                 SvNV(arg); /* SvIV() sets SVf_IOK even on floats on 5.6 */
 #endif
             }
+#ifdef NV_IS_DOUBLEDOUBLE /* Defined by Makefile.PL */
 
-            if(!SvOK(arg) || SvUOK(arg))
+            nv_arg = SvNV(arg);
+
+            /* Handle NaN, zeros and Infs */
+
+            if(nv_arg != nv_arg) {
+                sv_setpvf(keysv, "%s", "NaN");
+            }
+
+            else if(nv_arg == 0) {
+                sv_setpvf(keysv, "%s", "0");
+            }
+
+            else if(nv_arg/nv_arg != 1) {
+                if(nv_arg < 0) sv_setpvf(keysv, "%s", "-Inf");
+                else sv_setpvf(keysv, "%s", "Inf");
+            }
+
+            else {
+                for(i = 0; i < 16; i++) {
+                    sprintf(buffer, "%02x", ((unsigned char*)p)[i]);
+                    buffer += 2;
+                }
+                buffer -= 32;
+                sv_setpvf(keysv, "%s", buffer);
+            }
+#else
+            if(!SvOK(arg) || SvUOK(arg)) {
                 sv_setpvf(keysv, "%" UVuf, SvUV(arg));
-            else if(SvIOK(arg))
+            }
+            else if(SvIOK(arg)) {
                 sv_setpvf(keysv, "%" IVdf, SvIV(arg));
-            else
-                sv_setpvf(keysv, "%.15" NVgf, SvNV(arg));
+            }
+            else {
+                if(SvNV(arg) == 0) {   /* Cater for arg being -0.0 */
+                    sv_setpvf(keysv, "%s", "0"); 
+                }
+#if LU_NV_BITS == 64 /* On Debian and Ubuntu, if we simply do:      *
+                      * sv_setpvf(keysv, "%.19" NVgf, SvNV(arg));   *
+                      *    or even:                                 *
+                      * sv_setpvf(keysv, "%.19g", SvNV(arg));       *
+                      * we find that doesn't always do what we want */
+                else {
+                    sprintf(buff, "%.19g", SvNV(arg));
+                    sv_setpvf(keysv, "%s", buff);
+                }
+            }
+#else
+                else sv_setpvf(keysv, UNIQ_NV_FORMAT NVgf, SvNV(arg));
+            }
+#endif   /* End LU_NV_BITS == 64   */
+#endif   /* End NV_IS_DOUBLEDOUBLE */
 #ifdef HV_FETCH_EMPTY_HE
             he = (HE*) hv_common(seen, NULL, SvPVX(keysv), SvCUR(keysv), 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
             if (HeVAL(he))
