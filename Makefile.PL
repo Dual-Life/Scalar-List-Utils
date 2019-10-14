@@ -12,23 +12,67 @@ my $defines = $ENV{PERL_CORE} ? q[-DPERL_EXT] : q[-DPERL_EXT -DUSE_PPPORT_H];
 # Determine the correct NV formatting required by uniqnum() in ListUtil.xs
 # For this we need to determine which of the following 3 possible categories 
 # describes perl's NV:
-#  1) NV is either an 8-byte double or an 8-byte long double;
-#  2) NV is an extended precision (10-byte) long double;
+#  1) NV is either an 8-byte double or an 8-byte long double.
+#     In this case '"%.19" NVgf' formatting is required.
+#  2) NV is an extended precision (10-byte) long double.
+#     In this case '"%.21" NVgf' formatting is required.
 #  3) NV is something other than 1) or 2) ... which implies that it's either
-#     a 16-byte IEEE long double, a 16-byte __float 128, or a 16-byte DoubleDouble.
-# When we know that the case is 3) we also make the effort to single out the 
-# DoubleDouble kind for separate treatment as it makes better sense to examine the
-# byte structure of the value encapsulated in the DoubleDouble, rather than the
-# the actual value itself.
+#     a 16-byte IEEE long double, a 16-byte __float128, or a 16-byte DoubleDouble.
+#     In this category, '"%.36" NVgf' formatting is required, except for
+#     DoubleDouble - for which we take a different approach.
 #
-# With perl-5.22 and later this could all be done by examining $Config{longdblkind}
-# and $Config{nvtype} but we need to support earlier perl versions. We threfore
-# sort it out by doing as follows - which appears to be somewhat ad-hoc, but does
-# the job reliably:
+# With perl-5.22 and later, we could determine the category by examining
+# $Config{longdblkind} and $Config{nvtype} but we need to support earlier perl
+# versions. We therefore sort it all out by doing as below - which appears to be
+# somewhat ad-hoc, but does the job reliably.
+#
+# Ideally that would be all that's needed, but there are odd quirks and
+# configurations that prevent it from working universally.
+#
+# For category 1) && $Config{ivsize} == 8 we also check if
+#   $Config{d_Gconvert} =~ /sprintf/;
+# If it matches we do nothing, otherwise we define GCVT_WIDTH_LIMIT to signify
+# that the uniqnum() code needs to take a slightly different path.
+# To elaborate:
+# Failure to match indicates that
+# sv_setpvf(sv, "%.19" NVgf, SvNV(arg));
+# will be effectively modified to
+# sv_setpvf(sv, "%.17" NVgf, SvNV(arg));
+# And that will break uniqnum() for certain values - eg uniqnum(1 >> 60, 2 ** 60)
+# will deem that the 2 values are unequal.
+# Hence the need for the (inexpensive) workaround that GCVT_WIDTH_LIMIT initiates.
+#
+# For category 1) && $Config{ivsize} == 8 && the OS is MSWindows
+# then we need to check that (s)printf "%.19g" formatting works as expected at the
+# C level.
+# According to my testing, it doesn't work as expected if the perl version is less
+# than 5.26.0. And it also doesn't work as expected with 5.26.0 and later unless
+# perl was built with -D__USE_MINGW_ANSI_STDIO.
+# When it fails, we define FALLBACK_TO_BYTES, and have uniqnum() look at the byte
+# structures on the NVs, rather than the actual values.
+#
+# For category 3) we also make the effort to single out the DoubleDouble kind for
+# separate treatment( by defining NV_IS_DOUBLEDOUBLE) as it makes better sense
+# to examine the byte structure of the value encapsulated in the DoubleDouble,
+# rather than the the actual value itself.
+#
+# Sisyphus.
 
 my $nvbits;
 
-if($Config{nvsize} == 8)   { $nvbits =  64 } # double or 8-byte long double
+if($Config{nvsize} == 8)   {                 # double or 8-byte long double
+  $nvbits =  64;
+
+  if($Config{ivsize} == 8) {
+    unless($Config{d_Gconvert} =~ /sprintf/) {
+      $defines .= " -DGCVT_WIDTH_LIMIT";
+    }
+ 
+    if($^O =~ /MSWin/ && ($] < 5.026 || sprintf("%.0f", 2 ** 63) =~ /0$/)) {
+      $defines .= " -DFALLBACK_TO_BYTES";
+    }
+  }
+}
 
 elsif(length(sqrt 2) > 25) {                 # IEEE long double or __float128 or DoubleDouble
   $nvbits =  128;
@@ -40,6 +84,8 @@ elsif(length(sqrt 2) > 25) {                 # IEEE long double or __float128 or
 else                       { $nvbits =  80  } # extended precision long double
 
 $defines .= " -DLU_NV_BITS=$nvbits";
+
+print "FYI: Makefile.PL defines $defines\n";
 
 WriteMakefile(
   NAME         => q[List::Util],
