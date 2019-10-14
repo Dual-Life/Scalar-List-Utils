@@ -6,6 +6,11 @@ use Config; # to determine nvsize
 use Test::More tests => 38;
 use List::Util qw( uniqnum uniqstr uniq );
 
+# The following information could be useful in diagnosing failures.
+# (Print it to STDERR so that the info shows up in smoker reports.)
+
+warn "\nFYI:\n\$Config{d_Gconvert} is '$Config{d_Gconvert}'\n\n";
+
 use Tie::Array;
 
 is_deeply( [ uniqstr ],
