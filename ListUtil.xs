@@ -76,20 +76,13 @@
  * using the value of LU_NV_BITS that was defined by the  *
  * Makefile.PL.                                           */
 #if   LU_NV_BITS == 64
-#define UNIQ_NV_FORMAT "%.19"
+#define UNIQ_NV_FORMAT "%0.19"  /* some systems require that leading "0" */
 #elif LU_NV_BITS == 80
 #define UNIQ_NV_FORMAT "%.21"
 #elif LU_NV_BITS == 128
 #define UNIQ_NV_FORMAT "%.36"
 #else
 #error "LU_NV_BITS not set"
-#endif
-
-/* It's unlikely that both symbols will be *
- * defined by the Makefile.PL ... but we   *
- * do this for safety.                     */
-#ifdef FALLBACK_TO_BYTES
-#undef GCVT_WIDTH_LIMIT
 #endif
 
 /* Some platforms have strict exports. And before 5.7.3 cxinc (or Perl_cxinc)
@@ -1248,7 +1241,7 @@ CODE:
             }
 #elif defined(FALLBACK_TO_BYTES) /* Defined by Makefile.PL */
             if(!SvOK(arg) || SvUOK(arg)) {
-                nv_arg = (NV)SvUV(arg);
+                nv_arg = SvNV(arg);
                 int_arg = SvIV(arg); /* SvIV(arg) and SvuV(arg) have the same byte structure *
                                       * and it's only the byte structure that interests us   */
 
@@ -1256,7 +1249,7 @@ CODE:
             }
 
             else if(SvIOK(arg)) {
-                nv_arg = (NV)SvIV(arg);
+                nv_arg = SvNV(arg);
                 int_arg = SvIV(arg);
 
                 if(int_arg < -9007199254740992 
@@ -1343,24 +1336,10 @@ CODE:
                 if(SvNV(arg) == 0) {   /* Cater for arg being -0.0 */
                     sv_setpvf(keysv, "%s", "0"); 
                 }
-#ifdef GCVT_WIDTH_LIMIT   /* This symbol can be defined only if         *
-                           *   UNIQ_NV_FORMAT is "%.19"                 *
-                           * When this symbol is defined, we find that: *
-                           * sv_setpvf(keysv, "%.19" NVgf, SvNV(arg));  *
-                           *    or even:                                *
-                           * sv_setpvf(keysv, "%.19g", SvNV(arg));      *
-                           * resets the width from 19 to 17.            *
-                           * But the following keeps the width at 19:   */
-                else {
-                    sprintf(buff, "%.19g", SvNV(arg));
-                    sv_setpvf(keysv, "%s", buff);
-                }
-            }
-#else
+
                 else sv_setpvf(keysv, UNIQ_NV_FORMAT NVgf, SvNV(arg));
             }
-#endif   /* GCVT_WIDTH_LIMIT                         */
-#endif   /* End NV_IS_DOUBLEDOUBLE/FALLBACK_TO_BYTES */
+#endif
 #ifdef HV_FETCH_EMPTY_HE
             he = (HE*) hv_common(seen, NULL, SvPVX(keysv), SvCUR(keysv), 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
             if (HeVAL(he))
