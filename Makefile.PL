@@ -29,21 +29,8 @@ my $defines = $ENV{PERL_CORE} ? q[-DPERL_EXT] : q[-DPERL_EXT -DUSE_PPPORT_H];
 # Ideally that would be all that's needed, but there are odd quirks and
 # configurations that prevent it from working universally.
 #
-# For category 1) && $Config{ivsize} == 8 we also check if
-#   $Config{d_Gconvert} =~ /sprintf/;
-# If it matches we do nothing, otherwise we define GCVT_WIDTH_LIMIT to signify
-# that the uniqnum() code needs to take a slightly different path.
-# To elaborate:
-# Failure to match indicates that
-# sv_setpvf(sv, "%.19" NVgf, SvNV(arg));
-# will be effectively modified to
-# sv_setpvf(sv, "%.17" NVgf, SvNV(arg));
-# And that will break uniqnum() for certain values - eg uniqnum(1 >> 60, 2 ** 60)
-# will deem that the 2 values are unequal.
-# Hence the need for the (inexpensive) workaround that GCVT_WIDTH_LIMIT initiates.
-#
 # For category 1) && $Config{ivsize} == 8 && the OS is MSWindows
-# then we need to check that (s)printf "%.19g" formatting works as expected at the
+# we need to check that (s)printf "%.19g" formatting works as expected at the
 # C level.
 # According to my testing, it doesn't work as expected if the perl version is less
 # than 5.26.0. And it also doesn't work as expected with 5.26.0 and later unless
@@ -63,12 +50,9 @@ my $nvbits;
 if($Config{nvsize} == 8)   {                 # double or 8-byte long double
   $nvbits =  64;
 
-  if($Config{ivsize} == 8) {
-    unless($Config{d_Gconvert} =~ /sprintf/) {
-      $defines .= " -DGCVT_WIDTH_LIMIT";
-    }
+  if($Config{ivsize} == 8 && $^O =~ /MSWin/) {
  
-    if($^O =~ /MSWin/ && ($] < 5.026 || sprintf("%.0f", 2 ** 63) =~ /0$/)) {
+    if($] < 5.026 || sprintf("%.0f", 2 ** 64) =~ /0$/) {
       $defines .= " -DFALLBACK_TO_BYTES";
     }
   }
