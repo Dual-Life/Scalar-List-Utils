@@ -75,7 +75,6 @@
 /* Next we define the appropriate value of UNIQ_NV_FORMAT *
  * using the value of LU_NV_BITS that was defined by the  *
  * Makefile.PL.                                           */
-
 #if   LU_NV_BITS == 64
 #define UNIQ_NV_FORMAT "%.19"
 #elif LU_NV_BITS == 80
@@ -84,6 +83,13 @@
 #define UNIQ_NV_FORMAT "%.36"
 #else
 #error "LU_NV_BITS not set"
+#endif
+
+/* It's unlikely that both symbols will be *
+ * defined by the Makefile.PL ... but we   *
+ * do this for safety.                     */
+#ifdef FALLBACK_TO_BYTES
+#undef GCVT_WIDTH_LIMIT
 #endif
 
 /* Some platforms have strict exports. And before 5.7.3 cxinc (or Perl_cxinc)
@@ -1166,15 +1172,20 @@ CODE:
     int index;
     SV **args = &PL_stack_base[ax];
     HV *seen;
-#if LU_NV_BITS == 64 /* Work around a strange bug that affects Ubuntu, Debian */
+#ifdef  GCVT_WIDTH_LIMIT /* Work around a problem that exists when *
+                          * $Config{d_Gconvert} !~ /sprintf/       */
     char buff[32];
 #endif
-#ifdef NV_IS_DOUBLEDOUBLE /* Defined by Makefile.PL */
+#if defined(NV_IS_DOUBLEDOUBLE) || defined(FALLBACK_TO_BYTES) /* Defined by Makefile.PL */
     NV nv_arg;
     void *p = &nv_arg;
     char s[33];
     char * buffer = s;
     int i;
+#endif
+#ifdef FALLBACK_TO_BYTES /* Defined by Makefile.PL */
+    size_t potential_prec_loss = 0, offset = 0;
+    IV int_arg;
 #endif
 
     if(items == 0 || (items == 1 && !SvGAMAGIC(args[0]) && SvOK(args[0]))) {
@@ -1235,6 +1246,92 @@ CODE:
                 buffer -= 32;
                 sv_setpvf(keysv, "%s", buffer);
             }
+#elif defined(FALLBACK_TO_BYTES) /* Defined by Makefile.PL */
+            if(!SvOK(arg) || SvUOK(arg)) {
+                nv_arg = (NV)SvUV(arg);
+                int_arg = SvIV(arg); /* SvIV(arg) and SvuV(arg) have the same byte structure *
+                                      * and it's only the byte structure that interests us   */
+
+                potential_prec_loss = 1; /* UV to NV conversion could lose precision as SvUV(arg) > 9007199254740992 */
+            }
+
+            else if(SvIOK(arg)) {
+                nv_arg = (NV)SvIV(arg);
+                int_arg = SvIV(arg);
+
+                if(int_arg < -9007199254740992 
+                    ||
+                   int_arg > 9007199254740992)  /* IV to NV conversion could lose precision */
+                    potential_prec_loss = 1;
+            }
+
+            else {
+                nv_arg = SvNV(arg);
+            }
+
+            /* Handle NaN, zeros and Infs */
+            if(nv_arg != nv_arg) {
+                sv_setpvf(keysv, "%s", "NaN");
+                potential_prec_loss = 0; /* clear */
+            }
+
+            else if(nv_arg == 0) {
+                sv_setpvf(keysv, "%s", "0");
+                potential_prec_loss = 0; /* clear */
+            }
+
+            else if(nv_arg/nv_arg != 1) {
+                if(nv_arg < 0) sv_setpvf(keysv, "%s", "-Inf");
+                else sv_setpvf(keysv, "%s", "Inf");
+                potential_prec_loss = 0; /* clear */
+            }
+
+            /* Handle all values other than NaN, zeros and Infs */
+
+            else {
+
+                if(potential_prec_loss) { 
+
+                    /* Read the bytes of SvIV(arg) into buffer, in hex */
+
+                    sprintf(buffer, "%016" UVxf, int_arg);
+                    buffer += 16;
+                    offset = 16;
+                }
+
+                else if(trunc(nv_arg) == nv_arg
+                        && ((nv_arg  <  1.8446744073709552e+19 && nv_arg > 9007199254740992.0)
+                             ||
+                            (nv_arg < -9007199254740992.0 && nv_arg  >= -9.2233720368547758e+18)) ) {
+
+                    /* Read the bytes of SvIV(arg) into buffer, in hex */
+
+                    int_arg = SvIV(arg);
+
+                    /* Read the bytes of int_arg into buffer, in hex */
+
+                    sprintf(buffer, "%016" UVxf, int_arg);
+                    buffer += 16;
+                    offset = 16; /* the buffer pointer has been incremented by 16 */
+                }
+
+                potential_prec_loss = 0; /* clear */
+
+                /* Read the bytes of SvNV(arg) into buffer, in hex.    *
+                 * If buffer already contains the bytes of SvIV(arg)   *
+                 * then this action appends the hex bytes of SvNV(arg) *
+                 * to those existing hex bytes.                        */
+
+                for(i = 0; i < 8; i++) {
+                    sprintf(buffer, "%02x", ((unsigned char*)p)[i]);
+                    buffer += 2;
+                }
+
+                buffer -= 16 + offset; /* return pointer to original position */
+                offset = 0;
+
+                sv_setpvf(keysv, "%s", buffer);
+            }
 #else
             if(!SvOK(arg) || SvUOK(arg)) {
                 sv_setpvf(keysv, "%" UVuf, SvUV(arg));
@@ -1246,11 +1343,14 @@ CODE:
                 if(SvNV(arg) == 0) {   /* Cater for arg being -0.0 */
                     sv_setpvf(keysv, "%s", "0"); 
                 }
-#if LU_NV_BITS == 64 /* On Debian and Ubuntu, if we simply do:      *
-                      * sv_setpvf(keysv, "%.19" NVgf, SvNV(arg));   *
-                      *    or even:                                 *
-                      * sv_setpvf(keysv, "%.19g", SvNV(arg));       *
-                      * we find that doesn't always do what we want */
+#ifdef GCVT_WIDTH_LIMIT   /* This symbol can be defined only if         *
+                           *   UNIQ_NV_FORMAT is "%.19"                 *
+                           * When this symbol is defined, we find that: *
+                           * sv_setpvf(keysv, "%.19" NVgf, SvNV(arg));  *
+                           *    or even:                                *
+                           * sv_setpvf(keysv, "%.19g", SvNV(arg));      *
+                           * resets the width from 19 to 17.            *
+                           * But the following keeps the width at 19:   */
                 else {
                     sprintf(buff, "%.19g", SvNV(arg));
                     sv_setpvf(keysv, "%s", buff);
@@ -1259,8 +1359,8 @@ CODE:
 #else
                 else sv_setpvf(keysv, UNIQ_NV_FORMAT NVgf, SvNV(arg));
             }
-#endif   /* End LU_NV_BITS == 64   */
-#endif   /* End NV_IS_DOUBLEDOUBLE */
+#endif   /* GCVT_WIDTH_LIMIT                         */
+#endif   /* End NV_IS_DOUBLEDOUBLE/FALLBACK_TO_BYTES */
 #ifdef HV_FETCH_EMPTY_HE
             he = (HE*) hv_common(seen, NULL, SvPVX(keysv), SvCUR(keysv), 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
             if (HeVAL(he))
