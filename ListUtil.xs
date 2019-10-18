@@ -85,19 +85,12 @@
 #error "LU_NV_BITS not set"
 #endif
 
-#if defined(FALLBACK_TO_BYTES) || defined(NV_IS_DOUBLEDOUBLE)
-
-#define IF_NAN_ZEROS_INFS \
-            if(nv_arg != nv_arg) {				\
-                sv_setpvf(keysv, "%s", "NaN");			\
-            }							\
-            else if(nv_arg == 0) {				\
-                sv_setpvf(keysv, "%s", "0");			\
-            }							\
-            else if(nv_arg / nv_arg!=1) {			\
-                if(nv_arg < 0)sv_setpvf(keysv, "%s", "-Inf");	\
-                else sv_setpvf(keysv, "%s", "Inf");		\
-            }							
+#if defined(NV_IS_DOUBLEDOUBLE)
+#define UNIQ_LOOP 16
+#define UNIQ_BUFFER_RESET 32
+#elif defined(FALLBACK_TO_BYTES)
+#define UNIQ_LOOP 8
+#define UNIQ_BUFFER_RESET 16 + offset
 #endif
 
 /* Some platforms have strict exports. And before 5.7.3 cxinc (or Perl_cxinc)
@@ -1227,25 +1220,11 @@ CODE:
                 SvNV(arg); /* SvIV() sets SVf_IOK even on floats on 5.6 */
 #endif
             }
-#ifdef NV_IS_DOUBLEDOUBLE /* Defined by Makefile.PL */
-
+#if defined(NV_IS_DOUBLEDOUBLE) || defined(FALLBACK_TO_BYTES) /* Defined by Makefile.PL */
             nv_arg = SvNV(arg);
-
-            IF_NAN_ZEROS_INFS /* Handle Nan, Zero or Inf values */
-
-            else {            /* Handle values other NaN, Zeros, Infs */
-                for(i = 0; i < 16; i++) {
-                    sprintf(buffer, "%02x", ((unsigned char*)p)[i]);
-                    buffer += 2;
-                }
-                buffer -= 32;
-                sv_setpvf(keysv, "%s", buffer);
-            }
-#elif defined(FALLBACK_TO_BYTES) /* Defined by Makefile.PL */
+#if defined(FALLBACK_TO_BYTES)
             potential_prec_loss = 0; /* clear */
             offset = 0;              /* clear */
-            nv_arg = SvNV(arg);
-            
             if(!SvOK(arg) || SvUOK(arg)) {
                 int_arg = SvIV(arg); /* SvIV(arg) and SvuV(arg) have the same byte structure *
                                       * and it's only the byte structure that interests us   */
@@ -1261,11 +1240,15 @@ CODE:
                    int_arg > 9007199254740992)  /* IV to NV conversion could lose precision */
                     potential_prec_loss = 1;
             }
-
-            IF_NAN_ZEROS_INFS /* Handle NaN, Zero or Inf values */
-
-            else {            /* Handle values other NaN, Zeros, Infs */
-
+#endif
+            if(nv_arg != nv_arg) {
+                sv_setpvf(keysv, "%s", "NaN");
+            }
+            else if(nv_arg == 0) {
+                sv_setpvf(keysv, "%s", "0");
+            }
+            else {
+#if defined(FALLBACK_TO_BYTES)
                 if(potential_prec_loss) { 
 
                     /* Read the bytes of SvIV(arg) into buffer, in hex */
@@ -1282,29 +1265,19 @@ CODE:
 
                     /* Read the bytes of SvIV(arg) into buffer, in hex */
 
-                    int_arg = SvIV(arg);
-
-                    /* Read the bytes of int_arg into buffer, in hex */
-
-                    sprintf(buffer, "%016" UVxf, int_arg);
+                    sprintf(buffer, "%016" UVxf, SvIV(arg));
                     buffer += 16;
                     offset = 16; /* the buffer pointer has been incremented by 16 */
                 }
-
-                /* Read the bytes of SvNV(arg) into buffer, in hex.    *
-                 * If buffer already contains the bytes of SvIV(arg)   *
-                 * then this action appends the hex bytes of SvNV(arg) *
-                 * to those existing hex bytes.                        */
-
-                for(i = 0; i < 8; i++) {
+#endif
+                for(i = 0; i < UNIQ_LOOP; i++) {
                     sprintf(buffer, "%02x", ((unsigned char*)p)[i]);
                     buffer += 2;
                 }
-
-                buffer -= 16 + offset; /* return pointer to original position */
+                buffer -= UNIQ_BUFFER_RESET; /* reset pointer to the beginning of the string */
                 sv_setpvf(keysv, "%s", buffer);
             }
-#else
+#else       /* Neither NV_IS_DOUBLEDOUBLE nor FALLBACK_TO_BYTES is defined */
             if(!SvOK(arg) || SvUOK(arg)) {
                 sv_setpvf(keysv, "%" UVuf, SvUV(arg));
             }
