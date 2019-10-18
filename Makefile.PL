@@ -32,9 +32,9 @@ my $defines = $ENV{PERL_CORE} ? q[-DPERL_EXT] : q[-DPERL_EXT -DUSE_PPPORT_H];
 # For category 1) && $Config{ivsize} == 8 && the OS is MSWindows
 # we need to check that (s)printf "%.19g" formatting works as expected at the
 # C level.
-# According to my testing, it doesn't work as expected if the perl version is less
-# than 5.26.0. And it also doesn't work as expected with 5.26.0 and later unless
-# perl was built with -D__USE_MINGW_ANSI_STDIO.
+# According to my testing, it doesn't work as expected on Windows if the perl
+# version is less than 5.26.0. And it also doesn't work there with 5.26.0 and
+# later unless perl was built with -D__USE_MINGW_ANSI_STDIO.
 # When it fails, we define FALLBACK_TO_BYTES, and have uniqnum() look at the byte
 # structures on the NVs, rather than the actual values.
 #
@@ -42,6 +42,10 @@ my $defines = $ENV{PERL_CORE} ? q[-DPERL_EXT] : q[-DPERL_EXT -DUSE_PPPORT_H];
 # separate treatment( by defining NV_IS_DOUBLEDOUBLE) as it makes better sense
 # to examine the byte structure of the value encapsulated in the DoubleDouble,
 # rather than the the actual value itself.
+# We could use this same approach for all long double and __float128 builds,
+# though we would then need to cater for differing nvsizes (which could easily be
+# handled by C pre-processing). However, I don't know that doing so would
+# constitute an improvement. 
 #
 # Sisyphus.
 
