@@ -124,16 +124,19 @@ my_sv_copypv(pTHX_ SV *const dsv, SV *const ssv)
 #  define SvNV_nomg SvNV
 #endif
 
-#ifndef sv_sethek
-#  define sv_sethek(a, b)  Perl_sv_sethek(aTHX_ a, b)
-#endif
+#if PERL_VERSION_GE(5,16,0)
+#  define HAVE_UNICODE_PACKAGE_NAMES
 
-#ifndef sv_ref
-/* cargoculted from perl 5.22's sv.c */
-#define sv_ref(dst, sv, ob) my_sv_ref(aTHX_ dst, sv, ob)
+#  ifndef sv_sethek
+#    define sv_sethek(a, b)  Perl_sv_sethek(aTHX_ a, b)
+#  endif
+
+#  ifndef sv_ref
+#  define sv_ref(dst, sv, ob) my_sv_ref(aTHX_ dst, sv, ob)
 static SV *
 my_sv_ref(pTHX_ SV *dst, const SV *sv, int ob)
 {
+  /* cargoculted from perl 5.22's sv.c */
   if(!dst)
     dst = sv_newmortal();
 
@@ -150,7 +153,8 @@ my_sv_ref(pTHX_ SV *dst, const SV *sv, int ob)
 
   return dst;
 }
-#endif
+#  endif
+#endif /* HAVE_UNICODE_PACKAGE_NAMES */
 
 enum slu_accum {
     ACC_IV,
@@ -1348,8 +1352,12 @@ CODE:
 
     if(!(SvROK(sv) && SvOBJECT(SvRV(sv))))
         XSRETURN_UNDEF;
-
+#ifdef HAVE_UNICODE_PACKAGE_NAMES
     RETVAL = newSVsv(sv_ref(NULL, SvRV(sv), TRUE));
+#else
+    RETVAL = newSV(0);
+    sv_setpv(RETVAL, sv_reftype(SvRV(sv), TRUE));
+#endif
 }
 OUTPUT:
     RETVAL
