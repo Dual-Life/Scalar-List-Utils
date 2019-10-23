@@ -1310,7 +1310,7 @@ CODE:
     ST(0) = boolSV((SvPOK(sv) || SvPOKp(sv)) && (SvNIOK(sv) || SvNIOKp(sv)));
     XSRETURN(1);
 
-char *
+SV *
 blessed(sv)
     SV *sv
 PROTOTYPE: $
@@ -1321,7 +1321,7 @@ CODE:
     if(!(SvROK(sv) && SvOBJECT(SvRV(sv))))
         XSRETURN_UNDEF;
 
-    RETVAL = (char*)sv_reftype(SvRV(sv),TRUE);
+    RETVAL = newSVsv(sv_ref(NULL, SvRV(sv), TRUE));
 }
 OUTPUT:
     RETVAL
