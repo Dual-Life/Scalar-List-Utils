@@ -124,6 +124,34 @@ my_sv_copypv(pTHX_ SV *const dsv, SV *const ssv)
 #  define SvNV_nomg SvNV
 #endif
 
+#ifndef sv_sethek
+#  define sv_sethek(a, b)  Perl_sv_sethek(aTHX_ a, b)
+#endif
+
+#ifndef sv_ref
+/* cargoculted from perl 5.22's sv.c */
+#define sv_ref(dst, sv, ob) my_sv_ref(aTHX_ dst, sv, ob)
+static SV *
+my_sv_ref(pTHX_ SV *dst, const SV *sv, int ob)
+{
+  if(!dst)
+    dst = sv_newmortal();
+
+  if(ob && SvOBJECT(sv)) {
+    if(HvNAME_get(SvSTASH(sv)))
+      sv_sethek(dst, HvNAME_HEK(SvSTASH(sv)));
+    else
+      sv_setpvs(dst, "__ANON__");
+  }
+  else {
+    const char *reftype = sv_reftype(sv, 0);
+    sv_setpv(dst, reftype);
+  }
+
+  return dst;
+}
+#endif
+
 enum slu_accum {
     ACC_IV,
     ACC_NV,
