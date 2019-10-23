@@ -1,3 +1,7 @@
+1.52_001 2019-10-23
+	[BUGFIXES]
+	 * Handle Unicode package names in Scalar::Util::blessed (GH #81)
+
 1.52 -- 2019-08-17 19:08:18
 	[BUGFIXES]
 	 * Fix uniqnum() on large stringified integers on long- and 
