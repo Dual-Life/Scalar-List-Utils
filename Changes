@@ -1,4 +1,4 @@
-1.52_001 2019-10-23
+1.53 -- 2019-10-24 10:41:12
 	[BUGFIXES]
 	 * Handle Unicode package names in Scalar::Util::blessed (GH #81)
 
