@@ -14,8 +14,8 @@ our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw(
   blessed refaddr reftype weaken unweaken isweak
 
-  dualvar isdual isvstring looks_like_number openhandle readonly set_prototype
-  tainted
+  dualvar isdual isstring isnumeric isvstring looks_like_number
+  openhandle readonly set_prototype tainted
 );
 our $VERSION    = "1.53";
 $VERSION =~ tr/_//d;
@@ -254,6 +254,50 @@ You can capture its numeric and string content using:
 
     $err = dualvar $!, $!;
     $dual = isdual($err);               # true
+
+=head2 isstring
+
+	my $isstring = isstring( $var );
+
+I<Since version TODO.>
+
+If C<$var> is a scalar that has a value in the "string slot",
+the value is true.
+
+	$str = "abc";
+	$isstring = isstring($str);			# true
+
+	$num = 42;
+	$isstring = isstring($num);			# false
+	$foo = "$num";
+	$isstring = isstring($num);			# true
+
+	$fp = 3.1415926;
+	$isstring = isstring($fp);			# false
+	$foo = "$fp";
+	$isstring = isstring($fp);			# true
+
+=head2 isnumeric
+
+	my $isnumeric = isnumeric( $var );
+
+I<Since version TODO.>
+
+If C<$var> is a scalar that has a value in the "numeric slot",
+the result is true.
+
+	$int = 42;
+	$isnumeric = isnumeric($str);			# true
+
+	$intstr = "42";
+	$isnumeric = isnumeric($intstr);		# false
+	$foo = $intstr + 0;
+	$isnumeric = isnumeric($intstr);		# true
+
+	$fpstr = "3.1415926";
+	$isnumeric = isnumeric($fpstr);			# false
+	$foo = $fpstr + 0;
+	$isnumeric = isnumeric($fpstr);			# true
 
 =head2 isvstring
 

@@ -1342,6 +1342,28 @@ CODE:
     ST(0) = boolSV((SvPOK(sv) || SvPOKp(sv)) && (SvNIOK(sv) || SvNIOKp(sv)));
     XSRETURN(1);
 
+void
+isstring(sv)
+    SV *sv
+PROTOTYPE: $
+CODE:
+    if(SvMAGICAL(sv))
+        mg_get(sv);
+
+    ST(0) = boolSV(SvPOK(sv) || SvPOKp(sv));
+    XSRETURN(1);
+
+void
+isnumeric(sv)
+    SV *sv
+PROTOTYPE: $
+CODE:
+    if(SvMAGICAL(sv))
+        mg_get(sv);
+
+    ST(0) = boolSV(SvNIOK(sv) || SvNIOKp(sv));
+    XSRETURN(1);
+
 SV *
 blessed(sv)
     SV *sv
