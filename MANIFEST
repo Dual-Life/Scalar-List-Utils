@@ -23,6 +23,7 @@ t/max.t
 t/maxstr.t
 t/min.t
 t/minstr.t
+t/numstring.t
 t/openhan.t
 t/pair.t
 t/product.t
