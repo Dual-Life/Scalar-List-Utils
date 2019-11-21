@@ -72,6 +72,9 @@
 #define sv_catpvn_flags(b,n,l,f) sv_catpvn(b,n,l)
 #endif
 
+#define STRINGIZE_HELPER(x) #x
+#define STRINGIZE(x) STRINGIZE_HELPER(x)
+
 /* Some platforms have strict exports. And before 5.7.3 cxinc (or Perl_cxinc)
    was not exported. Therefore platforms like win32, VMS etc have problems
    so we redefine it here -- GMB
@@ -1201,6 +1204,7 @@ CODE:
 
         for(index = 0 ; index < items ; index++) {
             SV *arg = args[index];
+            NV nv_arg;
 #ifdef HV_FETCH_EMPTY_HE
             HE* he;
 #endif
@@ -1217,12 +1221,33 @@ CODE:
 #endif
             }
 
-            if(!SvOK(arg) || SvUOK(arg))
+            if(!SvOK(arg) || SvUOK(arg)) {
                 sv_setpvf(keysv, "%" UVuf, SvUV(arg));
-            else if(SvIOK(arg))
+            }
+            else if(SvIOK(arg)) {
                 sv_setpvf(keysv, "%" IVdf, SvIV(arg));
-            else
-                sv_setpvf(keysv, "%.15" NVgf, SvNV(arg));
+            }
+            else {
+                nv_arg = SvNV(arg);
+                /* use 0 for both 0 and -0.0 */
+                if(nv_arg == 0) {
+                    sv_setpvs(keysv, "0");
+                }
+                /* for NaN, use the platform's normal stringification */
+                else if (nv_arg != nv_arg) {
+                    sv_setpvf(keysv, "%" NVgf, nv_arg);
+                }
+                /* for numbers outside of the IV or UV range, we don't need to
+                 * use a comparable format, so just use the raw bytes */
+                else if (nv_arg < (NV)IV_MIN || nv_arg > (NV)UV_MAX) {
+                    sv_setpvn(keysv, (char *) &nv_arg, sizeof(NV));
+                }
+                /* smaller floats get formatted using %g and could be equal to
+                 * a UV or IV */
+                else {
+                    sv_setpvf(keysv, "%0." STRINGIZE(NV_MAX_PRECISION) NVgf, nv_arg);
+                }
+            }
 #ifdef HV_FETCH_EMPTY_HE
             he = (HE*) hv_common(seen, NULL, SvPVX(keysv), SvCUR(keysv), 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
             if (HeVAL(he))
