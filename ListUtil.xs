@@ -1313,13 +1313,13 @@ CODE:
         SvNOK_on(TARG);
     }
 #ifdef SVf_IVisUV
-    else if(SvUOK(num)) {
+    if(SvUOK(num)) {
         SvUV_set(TARG, SvUV(num));
         SvIOK_on(TARG);
         SvIsUV_on(TARG);
     }
 #endif
-    else {
+    if(SvIOK(num)) {
         SvIV_set(TARG, SvIV(num));
         SvIOK_on(TARG);
     }
