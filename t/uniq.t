@@ -95,11 +95,11 @@ if($Config{nvsize} == 8) {
   # The 2 values should be unequal - but just in case perl is buggy:
   $equiv = 1 if 1.4142135623730951 == 1.4142135623730954;
 
-  $uniq_count1 = List::Util::uniqnum (1.4142135623730951,
-                                        1.4142135623730954 );
+  $uniq_count1 = uniqnum (1.4142135623730951,
+                          1.4142135623730954 );
 
-  $uniq_count2 = List::Util::uniqnum('1.4142135623730951',
-                                       '1.4142135623730954' );
+  $uniq_count2 = uniqnum('1.4142135623730951',
+                         '1.4142135623730954' );
 }
 
 elsif(length(sqrt(2)) > 25) {
@@ -111,13 +111,13 @@ elsif(length(sqrt(2)) > 25) {
     # The 2 values should be unequal - but just in case perl is buggy:
     $equiv = 1 if 1 + (2 ** -1074) == 1 + (2 ** - 1073);
 
-    $uniq_count1 = List::Util::uniqnum (1 + (2 ** -1074),
-                                        1 + (2 ** -1073) );
+    $uniq_count1 = uniqnum (1 + (2 ** -1074),
+                            1 + (2 ** -1073) );
     # The 2 values should be unequal - but just in case perl is buggy:
     $equiv = 1 if 4.0564819207303340847894502572035e31 == 4.0564819207303340847894502572034e31;
 
-    $uniq_count2 = List::Util::uniqnum('4.0564819207303340847894502572035e31',
-                                       '4.0564819207303340847894502572034e31' );
+    $uniq_count2 = uniqnum('4.0564819207303340847894502572035e31',
+                           '4.0564819207303340847894502572034e31' );
   }
 
   else {
@@ -126,11 +126,11 @@ elsif(length(sqrt(2)) > 25) {
     # The 2 values should be unequal - but just in case perl is buggy:
     $equiv = 1 if 1.7320508075688772935274463415058722 == 1.73205080756887729352744634150587224;
 
-    $uniq_count1 = List::Util::uniqnum (1.7320508075688772935274463415058722,
-                                        1.73205080756887729352744634150587224 );
+    $uniq_count1 = uniqnum (1.7320508075688772935274463415058722,
+                            1.73205080756887729352744634150587224 );
 
-    $uniq_count2 = List::Util::uniqnum('1.7320508075688772935274463415058722',
-                                       '1.73205080756887729352744634150587224' );
+    $uniq_count2 = uniqnum('1.7320508075688772935274463415058722',
+                           '1.73205080756887729352744634150587224' );
   }
 }
 
@@ -140,11 +140,11 @@ else {
   # The 2 values should be unequal - but just in case perl is buggy:
   $equiv = 1 if 2.2360679774997896963 == 2.23606797749978969634;
 
-  $uniq_count1 = List::Util::uniqnum (2.2360679774997896963,
-                                      2.23606797749978969634 );
+  $uniq_count1 = uniqnum (2.2360679774997896963,
+                          2.23606797749978969634 );
 
-  $uniq_count2 = List::Util::uniqnum('2.2360679774997896963',
-                                     '2.23606797749978969634' );
+  $uniq_count2 = uniqnum('2.2360679774997896963',
+                         '2.23606797749978969634' );
 }
 
 if($equiv) {
