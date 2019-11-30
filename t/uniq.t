@@ -207,7 +207,22 @@ SKIP: {
     my $maxint = ~0 >> 1;
     my $minint = -(~0 >> 1) - 1;
 
-    my @nums = ($maxuint, $maxuint-1, -1, $Inf, $NaN, $maxint, $minint, 1 );
+    my @nums = ($maxuint, $maxuint-1, -1, $maxint, $minint, 1 );
+
+    {
+        use warnings FATAL => 'numeric';
+        if (eval {
+            "$Inf" + 0 == $Inf
+        }) {
+            push @nums, $Inf;
+        }
+        if (eval {
+            my $nanish = "$NaN" + 0;
+            $nanish != 0 && !$nanish != $NaN;
+        }) {
+            push @nums, $NaN;
+        }
+    }
 
     is_deeply( [ uniqnum @nums, 1.0 ],
                [ @nums ],
@@ -218,10 +233,6 @@ SKIP: {
     if($maxuint !~ /\A[0-9]+\z/) {
       skip( "Perl $] doesn't stringify UV_MAX right ($maxuint)", 1 );
     }
-    elsif($] < 5.022 && $^O =~ /MSWin32/i) {
-      skip( "On MS Windows,perl $] stringifies infs and nans into something unusable", 1 );
-    }
-
 
     is_deeply( [ uniqnum @strs, "1.0" ],
                [ @strs ],
