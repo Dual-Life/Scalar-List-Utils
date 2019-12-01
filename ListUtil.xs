@@ -72,9 +72,6 @@
 #define sv_catpvn_flags(b,n,l,f) sv_catpvn(b,n,l)
 #endif
 
-#define STRINGIZE_HELPER(x) #x
-#define STRINGIZE(x) STRINGIZE_HELPER(x)
-
 /* Some platforms have strict exports. And before 5.7.3 cxinc (or Perl_cxinc)
    was not exported. Therefore platforms like win32, VMS etc have problems
    so we redefine it here -- GMB
@@ -1245,7 +1242,7 @@ CODE:
                 /* smaller floats get formatted using %g and could be equal to
                  * a UV or IV */
                 else {
-                    sv_setpvf(keysv, "%0." STRINGIZE(NV_MAX_PRECISION) NVgf, nv_arg);
+                    sv_setpvf(keysv, "%0.*" NVgf, NV_MAX_PRECISION, nv_arg);
                 }
             }
 #ifdef HV_FETCH_EMPTY_HE
