@@ -1235,9 +1235,11 @@ CODE:
                     sv_setpvf(keysv, "%" NVgf, nv_arg);
                 }
                 /* for numbers outside of the IV or UV range, we don't need to
-                 * use a comparable format, so just use the raw bytes */
+                 * use a comparable format, so just use the raw bytes, adding
+                 * 'f' to ensure not matching a stringified number */
                 else if (nv_arg < (NV)IV_MIN || nv_arg > (NV)UV_MAX) {
                     sv_setpvn(keysv, (char *) &nv_arg, sizeof(NV));
+                    sv_catpvn(keysv, "f", 1);
                 }
                 /* smaller floats get formatted using %g and could be equal to
                  * a UV or IV */

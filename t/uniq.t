@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Config; # to determine nvsize
-use Test::More tests => 38;
+use Test::More tests => 39;
 use List::Util qw( uniqnum uniqstr uniq );
 
 use Tie::Array;
@@ -237,6 +237,13 @@ SKIP: {
     is_deeply( [ uniqnum @strs, "1.0" ],
                [ @strs ],
                'uniqnum preserves uniqueness of full integer range (stringified)' );
+}
+
+{
+    my @nums = (6.82132005170133e-38, 62345678);
+    is_deeply( [ uniqnum @nums ], [ @nums ],
+        'uniqnum keeps uniqueness of numbers that stringify to the same byte pattern as a float'
+    );
 }
 
 {
