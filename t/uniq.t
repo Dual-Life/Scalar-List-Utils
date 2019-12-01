@@ -148,13 +148,13 @@ else {
 }
 
 if($equiv) {
-  is($uniq_count1, 1, 'uniqnum preserves uniqness of high precision floats');
-  is($uniq_count2, 1, 'uniqnum preserves uniqness of high precision floats (stringified)');
+  is($uniq_count1, 1, 'uniqnum preserves uniqueness of high precision floats');
+  is($uniq_count2, 1, 'uniqnum preserves uniqueness of high precision floats (stringified)');
 }
 
 else {
-  is($uniq_count1, 2, 'uniqnum preserves uniqness of high precision floats');
-  is($uniq_count2, 2, 'uniqnum preserves uniqness of high precision floats (stringified)');
+  is($uniq_count1, 2, 'uniqnum preserves uniqueness of high precision floats');
+  is($uniq_count2, 2, 'uniqnum preserves uniqueness of high precision floats (stringified)');
 }
 
 SKIP: {
@@ -226,7 +226,7 @@ SKIP: {
 
     is_deeply( [ uniqnum @nums, 1.0 ],
                [ @nums ],
-               'uniqnum preserves uniqness of full integer range' );
+               'uniqnum preserves uniqueness of full integer range' );
 
     my @strs = map "$_", @nums;
 
@@ -236,7 +236,7 @@ SKIP: {
 
     is_deeply( [ uniqnum @strs, "1.0" ],
                [ @strs ],
-               'uniqnum preserves uniqness of full integer range (stringified)' );
+               'uniqnum preserves uniqueness of full integer range (stringified)' );
 }
 
 {
