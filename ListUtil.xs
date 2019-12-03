@@ -2,6 +2,11 @@
  * This program is free software; you can redistribute it and/or
  * modify it under the same terms as Perl itself.
  */
+#ifdef _WIN32
+#ifndef __USE_MINGW_ANSIO_STDIO
+#define __USE_MINGW_ANSI_STDIO 1
+#endif
+#endif
 #define PERL_NO_GET_CONTEXT /* we want efficiency */
 #include <EXTERN.h>
 #include <perl.h>
@@ -1205,8 +1210,8 @@ CODE:
 #ifdef HV_FETCH_EMPTY_HE
             HE* he;
 #endif
-#ifdef FALLBACK_TO_BYTES
-            int potential_prec_loss;
+#ifdef WIN32_NO_ANSI
+            char buffer[32];
 #endif
 
             if(SvGAMAGIC(arg))
@@ -1220,57 +1225,19 @@ CODE:
                 SvNV(arg); /* SvIV() sets SVf_IOK even on floats on 5.6 */
 #endif
             }
-#if defined(FALLBACK_TO_BYTES)
-            potential_prec_loss = 0; /* clear */
-            nv_arg = SvNV(arg);
-            
-            if(!SvOK(arg) || SvUOK(arg)) {
-                potential_prec_loss = 1; /* UV to NV conversion could lose precision  *
-                                          * as SvUV(arg) > 9007199254740992           */
-            }
-
-            else if(SvIOK(arg)) {
-
-                if(SvIV(arg) < -9007199254740992 
-                    ||
-                   SvIV(arg) > 9007199254740992)  /* IV to NV conversion could lose precision */
-                    potential_prec_loss = 1;
-            }
-
-            if(nv_arg == 0) {
-                sv_setpvs(keysv, "0");
-            }
-            else if (nv_arg != nv_arg) {
-                sv_setpvf(keysv, "%" NVgf, nv_arg);
-            }
-
-            else if ( potential_prec_loss
-                        ||                   
-                    (trunc(nv_arg) == nv_arg
-                         &&
-                    ((nv_arg  <  1.8446744073709552e+19 && nv_arg > 9007199254740992.0)
-                        ||
-                    (nv_arg < -9007199254740992.0 && nv_arg  >= -9.2233720368547758e+18)))
-
-                   ) { 
-
-                sv_setpvf(keysv, "%016" UVxf, SvIV(arg));
-                sv_catpvn(keysv, (char *) &nv_arg, 8);
-            }
-
-            else {
-                sv_setpvn(keysv, (char *) &nv_arg, 8);
-            }
-#elif defined(NV_IS_DOUBLEDOUBLE)
+#if defined(NV_IS_DOUBLEDOUBLE)
             nv_arg = SvNV(arg);
 
             if(nv_arg == 0) {
+                /* use 0 for both 0 and -0.0 */
                 sv_setpvs(keysv, "0");
             }
             else if (nv_arg != nv_arg) {
+                /* for NaN, use the platform's normal stringification */
                 sv_setpvf(keysv, "%" NVgf, nv_arg);
             }
             else {
+                /* use the byte structure of the NV */
                 sv_setpvn(keysv, (char *) &nv_arg, USED_NV_BYTES);
             }
 #else
@@ -1300,7 +1267,12 @@ CODE:
                 /* smaller floats get formatted using %g and could be equal to
                  * a UV or IV */
                 else {
+#ifdef WIN32_NO_ANSI
+                    sprintf(buffer, "%0.*" NVgf, NV_MAX_PRECISION, nv_arg);
+                    sv_setpvf(keysv, "%s", buffer);                    
+#else
                     sv_setpvf(keysv, "%0.*" NVgf, NV_MAX_PRECISION, nv_arg);
+#endif
                 }
             }
 #endif
