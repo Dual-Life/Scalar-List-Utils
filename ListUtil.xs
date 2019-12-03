@@ -1205,6 +1205,9 @@ CODE:
 #ifdef HV_FETCH_EMPTY_HE
             HE* he;
 #endif
+#ifdef FALLBACK_TO_BYTES
+            int potential_prec_loss;
+#endif
 
             if(SvGAMAGIC(arg))
                 /* clone the value so we don't invoke magic again */
@@ -1217,7 +1220,60 @@ CODE:
                 SvNV(arg); /* SvIV() sets SVf_IOK even on floats on 5.6 */
 #endif
             }
+#if defined(FALLBACK_TO_BYTES)
+            potential_prec_loss = 0; /* clear */
+            nv_arg = SvNV(arg);
+            
+            if(!SvOK(arg) || SvUOK(arg)) {
+                potential_prec_loss = 1; /* UV to NV conversion could lose precision  *
+                                          * as SvUV(arg) > 9007199254740992           */
+            }
 
+            else if(SvIOK(arg)) {
+
+                if(SvIV(arg) < -9007199254740992 
+                    ||
+                   SvIV(arg) > 9007199254740992)  /* IV to NV conversion could lose precision */
+                    potential_prec_loss = 1;
+            }
+
+            if(nv_arg == 0) {
+                sv_setpvs(keysv, "0");
+            }
+            else if (nv_arg != nv_arg) {
+                sv_setpvf(keysv, "%" NVgf, nv_arg);
+            }
+
+            else if ( potential_prec_loss
+                        ||                   
+                    (trunc(nv_arg) == nv_arg
+                         &&
+                    ((nv_arg  <  1.8446744073709552e+19 && nv_arg > 9007199254740992.0)
+                        ||
+                    (nv_arg < -9007199254740992.0 && nv_arg  >= -9.2233720368547758e+18)))
+
+                   ) { 
+
+                sv_setpvf(keysv, "%016" UVxf, SvIV(arg));
+                sv_catpvn(keysv, (char *) &nv_arg, 8);
+            }
+
+            else {
+                sv_setpvn(keysv, (char *) &nv_arg, 8);
+            }
+#elif defined(NV_IS_DOUBLEDOUBLE)
+            nv_arg = SvNV(arg);
+
+            if(nv_arg == 0) {
+                sv_setpvs(keysv, "0");
+            }
+            else if (nv_arg != nv_arg) {
+                sv_setpvf(keysv, "%" NVgf, nv_arg);
+            }
+            else {
+                sv_setpvn(keysv, (char *) &nv_arg, USED_NV_BYTES);
+            }
+#else
             if(!SvOK(arg) || SvUOK(arg)) {
                 sv_setpvf(keysv, "%" UVuf, SvUV(arg));
             }
@@ -1238,7 +1294,7 @@ CODE:
                  * use a comparable format, so just use the raw bytes, adding
                  * 'f' to ensure not matching a stringified number */
                 else if (nv_arg < (NV)IV_MIN || nv_arg > (NV)UV_MAX) {
-                    sv_setpvn(keysv, (char *) &nv_arg, sizeof(NV));
+                    sv_setpvn(keysv, (char *) &nv_arg, USED_NV_BYTES);
                     sv_catpvn(keysv, "f", 1);
                 }
                 /* smaller floats get formatted using %g and could be equal to
@@ -1247,6 +1303,7 @@ CODE:
                     sv_setpvf(keysv, "%0.*" NVgf, NV_MAX_PRECISION, nv_arg);
                 }
             }
+#endif
 #ifdef HV_FETCH_EMPTY_HE
             he = (HE*) hv_common(seen, NULL, SvPVX(keysv), SvCUR(keysv), 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
             if (HeVAL(he))
