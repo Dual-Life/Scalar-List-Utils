@@ -19,24 +19,17 @@ my %used_bytes = ('19'     => 8,  '21'          => 10, '36'         => 16);
 
 my $nv_digits = $digits{$Config{nvtype}}; # might be altered below if nvtype is 'long double'.
 
-# Identify Windows builds of perl that require special handling.
-
-if( $^O =~ /MSWin/ && $Config{ivsize} == $Config{nvsize} ) { # ie ivsize == 8 && nvsize == 8
-  if( $] < 5.026 || sprintf("%.0f", 2 ** 64) =~ /0$/ ) {
-    $defines .= " -DWIN32_NO_ANSI";
-  }
-}
-
 # If nvtype is 'long double, determine what kind of 'long double' it is,
 # and modify the value of $nv_digits if appropriate.
 
 if($Config{nvtype} eq 'long double') {
   if (1.0 + (2 ** -1000) != 1.0)  {
     $defines .= " -DNV_IS_DOUBLEDOUBLE";
-    $nv_digits = 36; # Not used for the doubledouble, except to identify the correct key-value in %used_bytes 
+    $nv_digits = $digits{__float128}; # Not used for the doubledouble, except to
+                                      # identify the correct value in %used_bytes 
  }
   elsif ($Config{nvsize} == 8)      { $nv_digits = $digits{double}      }
-  elsif (length(sqrt(2.0)) > 30)    { $nv_digits = $digits{__float128}  }
+  elsif (length(sqrt(2.0)) > 30)    { $nv_digits = $digits{__float128}  } #IEEE 754 long double
 }
 
 $defines .= " -DNV_MAX_PRECISION=$nv_digits -DUSED_NV_BYTES=$used_bytes{$nv_digits}";
