@@ -2,11 +2,21 @@
  * This program is free software; you can redistribute it and/or
  * modify it under the same terms as Perl itself.
  */
+
 #ifdef _WIN32
-#ifndef __USE_MINGW_ANSIO_STDIO
-#define __USE_MINGW_ANSI_STDIO 1
+#  ifndef __USE_MINGW_ANSIO_STDIO
+
+     /* Satisfy uniqnum() formatting requirements *
+      * when using mingw ports of gcc             */
+#     define __USE_MINGW_ANSI_STDIO 1
+
+     /* Identify that perl's ccflags have  *
+      * not defined __USE_MINGW_STDIO_ANSI */
+#     define WIN32_PERL_NO_ANSI 1
+
+#  endif
 #endif
-#endif
+
 #define PERL_NO_GET_CONTEXT /* we want efficiency */
 #include <EXTERN.h>
 #include <perl.h>
@@ -1210,7 +1220,7 @@ CODE:
 #ifdef HV_FETCH_EMPTY_HE
             HE* he;
 #endif
-#ifdef WIN32_NO_ANSI
+#ifdef WIN32_PERL_NO_ANSI
             char buffer[32];
 #endif
 
@@ -1267,7 +1277,7 @@ CODE:
                 /* smaller floats get formatted using %g and could be equal to
                  * a UV or IV */
                 else {
-#ifdef WIN32_NO_ANSI
+#ifdef WIN32_PERL_NO_ANSI
                     sprintf(buffer, "%0.*" NVgf, NV_MAX_PRECISION, nv_arg);
                     sv_setpvf(keysv, "%s", buffer);                    
 #else
