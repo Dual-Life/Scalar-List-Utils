@@ -11,13 +11,19 @@ my $defines = $ENV{PERL_CORE} ? q[-DPERL_EXT] : q[-DPERL_EXT -DUSE_PPPORT_H];
 # Firstly, assign to $nv_digits the no. of decimal digits that the formatting
 # of perl's type of NV requires. Then define that value to NV_MAX_PRECISION.
 # The value of $nv_digits is also used to identify the correct key in %used_bytes.
-# The value of that key is the byte size (in actual bytes used) of perl's NV type.
+# The value of $used_bytes{$nv_digits} is the byte size (in actual bytes used)
+# of perl's NV type.
 # That value is then defined to USED_NV_BYTES.
+  
+my %digits     = ('double' => 17,          'long double' => 21, '__float128' => 36);
+my %used_bytes = (17       => 8,  20 => 8, 21            => 10, 36           => 16);
 
-my %digits     = ('double' => 19, 'long double' => 21, '__float128' => 36);
-my %used_bytes = ('19'     => 8,  '21'          => 10, '36'         => 16);
+my $nv_digits = $digits{$Config{nvtype}}; # might be altered below.
 
-my $nv_digits = $digits{$Config{nvtype}}; # might be altered below if nvtype is 'long double'.
+# $nv_digits needs to be >= the no. of decimal digits in the largest integer value (~0).
+# Hence:
+
+$nv_digits = 20 if $Config{nvsize} == 8 && $Config{ivsize} == 8;
 
 # If nvtype is 'long double, determine what kind of 'long double' it is,
 # and modify the value of $nv_digits if appropriate.
