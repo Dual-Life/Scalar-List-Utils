@@ -184,13 +184,31 @@ SKIP: {
                'uniqnum correctly compares UV/IVs that overflow NVs' );
 }
 
-my $ls = 31;
-if($Config{ivsize} == 8) { $ls = 63 }
+my $ls = 31;      # maximum left shift for 32-bit unity
 
-is_deeply( [ uniqnum ( 1 << $ls, 2 ** $ls,
-                       1 << ($ls - 3), 2 ** ($ls - 3),
-                       5 << ($ls - 3), 5 * (2 ** ($ls - 3))) ],
-           [ 1 << $ls, 1 << ($ls - 3), 5 << ($ls -3) ],
+if( $Config{ivsize} == 8 ) {
+  $ls       = 63; # maximum left shift for 64-bit unity
+}
+
+my @in = (1 << $ls, 2 ** $ls,
+          1 << ($ls - 3), 2 ** ($ls - 3),
+          5 << ($ls - 3), 5 * (2 ** ($ls - 3)));
+
+my @correct = (1 << $ls, 1 << ($ls - 3), 5 << ($ls -3));
+
+if( $Config{ivsize} == 8 && $Config{nvsize} == 8 ) {
+    my $p_53 = (1 << 53) - 1; # 9007199254740991
+
+    # To obtain an NV, we need to first divide $p_53 by 2
+    push @in, ($p_53 * 1024, $p_53/ 2 * 2048.0,
+               $p_53 * 2048, $p_53 / 2 * 4096.0,
+               ($p_53 -200) * 2048, ($p_53 - 200) / 2 * 4096.0);
+
+    push @correct, ($p_53 * 1024, $p_53 * 2048, ($p_53 - 200) * 2048);
+}
+
+is_deeply( [ uniqnum @in],
+           [ @correct],
            'uniqnum correctly compares UV/IVs that don\'t overflow NVs' );
 
 # Hard to know for sure what an Inf is going to be. Lets make one
