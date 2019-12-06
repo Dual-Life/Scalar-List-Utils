@@ -1235,22 +1235,7 @@ CODE:
                 SvNV(arg); /* SvIV() sets SVf_IOK even on floats on 5.6 */
 #endif
             }
-#if defined(NV_IS_DOUBLEDOUBLE)
-            nv_arg = SvNV(arg);
-
-            if(nv_arg == 0) {
-                /* use 0 for both 0 and -0.0 */
-                sv_setpvs(keysv, "0");
-            }
-            else if (nv_arg != nv_arg) {
-                /* for NaN, use the platform's normal stringification */
-                sv_setpvf(keysv, "%" NVgf, nv_arg);
-            }
-            else {
-                /* use the byte structure of the NV */
-                sv_setpvn(keysv, (char *) &nv_arg, USED_NV_BYTES);
-            }
-#else
+#ifdef NVSIZE_EQUAL_IVSIZE      /* Defined by Makefile.PL if $Config{nvsize} == $Config{ivsize} */
             if(!SvOK(arg) || SvUOK(arg)) {
                 sv_setpvf(keysv, "%" UVuf, SvUV(arg));
             }
@@ -1271,19 +1256,44 @@ CODE:
                  * use a comparable format, so just use the raw bytes, adding
                  * 'f' to ensure not matching a stringified number */
                 else if (nv_arg < (NV)IV_MIN || nv_arg > (NV)UV_MAX) {
-                    sv_setpvn(keysv, (char *) &nv_arg, USED_NV_BYTES);
+                    sv_setpvn(keysv, (char *) &nv_arg, 8);  /* sizeof(NV) == 8 */
                     sv_catpvn(keysv, "f", 1);
                 }
                 /* smaller floats get formatted using %g and could be equal to
                  * a UV or IV */
                 else {
 #ifdef WIN32_PERL_NO_ANSI
-                    sprintf(buffer, "%0.*" NVgf, NV_MAX_PRECISION, nv_arg);
+
+                   /* Because perl was not built with ansi compliance, doing: *
+                    * sv_setpvf(keysv, "%0.20" NVgf, nv_arg)                  *
+                    * will not always work as intended.                       *
+                    * But the following workaround does what we want.         */
+
+                    sprintf(buffer, "%0.20" NVgf, nv_arg);
                     sv_setpvf(keysv, "%s", buffer);                    
 #else
-                    sv_setpvf(keysv, "%0.*" NVgf, NV_MAX_PRECISION, nv_arg);
+                    sv_setpvf(keysv, "%0.20" NVgf, nv_arg);
 #endif
                 }
+            }
+#else                          /* $Config{nvsize} > $Config{ivsize} */
+            nv_arg = SvNV(arg);
+
+            if(nv_arg == 0) {
+                /* use 0 for both 0 and -0.0 */
+                sv_setpvs(keysv, "0");
+            }
+            else if (nv_arg != nv_arg) {
+                /* for NaN, use the platform's normal stringification */
+                sv_setpvf(keysv, "%" NVgf, nv_arg);
+            }
+            else {
+                /* Use the byte structure of the NV.                               *
+                 * USED_NV_BYTES == sizeof(NV) minus the number of bytes           *
+                 * that are allocated but never used. (It is only the 10-byte      *
+                 * extended precision long double that allocates bytes that are    *
+                 * never used. For all other NV types USED_NV_BYTES == sizeof(NV). */
+                sv_setpvn(keysv, (char *) &nv_arg, USED_NV_BYTES);  
             }
 #endif
 #ifdef HV_FETCH_EMPTY_HE
