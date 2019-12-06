@@ -8,37 +8,36 @@ use ExtUtils::MakeMaker;
 my $PERL_CORE = grep { $_ eq 'PERL_CORE=1' } @ARGV;
 my $defines = $ENV{PERL_CORE} ? q[-DPERL_EXT] : q[-DPERL_EXT -DUSE_PPPORT_H];
 
-# Firstly, assign to $nv_digits the no. of decimal digits that the formatting
-# of perl's type of NV requires. Then define that value to NV_MAX_PRECISION.
-# The value of $nv_digits is also used to identify the correct key in %used_bytes.
-# The value of $used_bytes{$nv_digits} is the byte size (in actual bytes used)
-# of perl's NV type.
-# That value is then defined to USED_NV_BYTES.
-  
-my %digits     = ('double' => 17,          'long double' => 21, '__float128' => 36);
-my %used_bytes = (17       => 8,  20 => 8, 21            => 10, 36           => 16);
-
-my $nv_digits = $digits{$Config{nvtype}}; # might be altered below.
-
-# $nv_digits needs to be >= the no. of decimal digits in the largest integer value (~0).
+# For uniqnum() we distinguish between those builds for which
+# $Config{nvsize} == $Config{ivsize} and those builds for which
+# $Config{nvsize} != $Config{ivsize}
 # Hence:
 
-$nv_digits = 20 if $Config{nvsize} == 8 && $Config{ivsize} == 8;
+$defines .= " -DNVSIZE_EQUAL_IVSIZE"
+  if $Config{nvsize} == $Config{ivsize};
 
-# If nvtype is 'long double, determine what kind of 'long double' it is,
-# and modify the value of $nv_digits if appropriate.
+# For uniqnum(), set $nvsize to be the size of the NV in bytes,
+# excluding allocated but unused bytes.
+# This will be the same as $Config{nvsize}, except for the 10-byte
+# extended precision long double (for which $Config{nvsize} will report
+# either 12 or 16):
 
-if($Config{nvtype} eq 'long double') {
-  if (1.0 + (2 ** -1000) != 1.0)  {
-    $defines .= " -DNV_IS_DOUBLEDOUBLE";
-    $nv_digits = $digits{__float128}; # Not used for the doubledouble, except to
-                                      # identify the correct value in %used_bytes 
- }
-  elsif ($Config{nvsize} == 8)      { $nv_digits = $digits{double}      }
-  elsif (length(sqrt(2.0)) > 30)    { $nv_digits = $digits{__float128}  } #IEEE 754 long double
+my $nvsize = $Config{nvsize};
+
+# Keep in mind that 8-byte long doubles exist - for which
+# $nvsize should remain at 8:
+
+if($nvsize > 8 && $Config{nvtype} eq 'long double') {
+  # Examine the length of sqrt 2.0 to determine whether we
+  # have the extended precision 10-byte long double.
+  # If so, amend $nvsize to 10.
+  $nvsize = 10 if length sqrt 2.0 < 30;
 }
 
-$defines .= " -DNV_MAX_PRECISION=$nv_digits -DUSED_NV_BYTES=$used_bytes{$nv_digits}";
+# Now define USED_NV_BYTES (which is used by uniqnum) to the
+# value of $nvsize
+
+$defines .= " -DUSED_NV_BYTES=$nvsize";
 
 print "DEFINES: $defines\n";
 
