@@ -12,7 +12,8 @@ require Exporter;
 
 our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw(
-  all any first min max minstr maxstr none notall product reduce sum sum0 shuffle uniq uniqnum uniqstr
+  all any first min max minstr maxstr none notall product reduce sum sum0
+  sample shuffle uniq uniqnum uniqstr
   head tail pairs unpairs pairkeys pairvalues pairmap pairgrep pairfirst
 );
 our $VERSION    = "1.53";
@@ -483,6 +484,37 @@ See L</KNOWN BUGS> for a known-bug with C<pairmap>, and a workaround.
 =head1 OTHER FUNCTIONS
 
 =cut
+
+=head2 sample
+
+    my @items = sample $count, @values
+
+I<Since version 1.54.>
+
+Randomly select the given number of elements from the input list. Any given
+position in the input list will be selected at most once.
+
+If there are fewer than C<$count> items in the list then the result will be
+truncated; effectively the function becomes identical to L</shuffle>.
+
+=cut
+
+sub sample
+{
+  my $count = shift;
+
+  my @ret;
+  while( @_ and $count-- ) {
+    my $i = int rand @_;
+    push @ret, $_[$i];
+
+    # delete it from the list
+    $_[$i] = $_[-1] if $i < $#_; # No point doing this if $i is the final item
+    pop;
+  }
+
+  return @ret;
+}
 
 =head2 shuffle
 
