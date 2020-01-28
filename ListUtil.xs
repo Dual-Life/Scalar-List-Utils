@@ -201,6 +201,28 @@ static void MY_initrand(pTHX)
 #endif
 }
 
+static double MY_callrand(pTHX_ CV *randcv)
+{
+    dSP;
+    double ret;
+
+    ENTER;
+    PUSHMARK(SP);
+    PUTBACK;
+
+    call_sv((SV *)randcv, G_SCALAR);
+
+    SPAGAIN;
+
+    ret = POPn;
+    ret -= trunc(ret);      /* bound to < 1 */
+    if(ret < 0) ret += 1.0; /* bound to 0 <= ret < 1 */
+
+    LEAVE;
+
+    return ret;
+}
+
 MODULE=List::Util       PACKAGE=List::Util
 
 void
@@ -1163,11 +1185,17 @@ PROTOTYPE: @
 CODE:
 {
     int index;
+    SV *randsv = get_sv("List::Util::RAND", 0);
+    CV *randcv = randsv && SvROK(randsv) && SvTYPE(SvRV(randsv)) == SVt_PVCV ?
+        (CV *)SvRV(randsv) : NULL;
 
-    MY_initrand(aTHX);
+    if(!randcv)
+        MY_initrand(aTHX);
 
     for (index = items ; index > 1 ; ) {
-        int swap = (int)(Drand01() * (double)(index--));
+        int swap = (int)(
+            (randcv ? MY_callrand(aTHX_ randcv) : Drand01()) * (double)(index--)
+        );
         SV *tmp = ST(swap);
         ST(swap) = ST(index);
         ST(index) = tmp;
