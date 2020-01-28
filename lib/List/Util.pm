@@ -598,6 +598,8 @@ all but the first C<$size> elements from C<@list>.
 
     local $List::Util::RAND = sub { ... };
 
+I<Since version 1.54.>
+
 This package variable is used by code which needs to generate random numbers
 (such as the L</shuffle> function). If set to a CODE reference it provides an
 alternative to perl's builtin C<rand()> function. When a new random number is
