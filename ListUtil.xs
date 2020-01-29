@@ -1186,7 +1186,7 @@ CODE:
 {
     int index;
     SV *randsv = get_sv("List::Util::RAND", 0);
-    CV *randcv = randsv && SvROK(randsv) && SvTYPE(SvRV(randsv)) == SVt_PVCV ?
+    CV * const randcv = randsv && SvROK(randsv) && SvTYPE(SvRV(randsv)) == SVt_PVCV ?
         (CV *)SvRV(randsv) : NULL;
 
     if(!randcv)
