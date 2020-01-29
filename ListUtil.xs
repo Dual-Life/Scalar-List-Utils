@@ -175,6 +175,54 @@ static enum slu_accum accum_type(SV *sv) {
 /* Magic for set_subname */
 static MGVTBL subname_vtbl;
 
+static void MY_initrand(pTHX)
+{
+#if (PERL_VERSION < 9)
+    struct op dmy_op;
+    struct op *old_op = PL_op;
+
+    /* We call pp_rand here so that Drand01 get initialized if rand()
+       or srand() has not already been called
+    */
+    memzero((char*)(&dmy_op), sizeof(struct op));
+    /* we let pp_rand() borrow the TARG allocated for this XS sub */
+    dmy_op.op_targ = PL_op->op_targ;
+    PL_op = &dmy_op;
+    (void)*(PL_ppaddr[OP_RAND])(aTHX);
+    PL_op = old_op;
+#else
+    /* Initialize Drand01 if rand() or srand() has
+       not already been called
+    */
+    if(!PL_srand_called) {
+        (void)seedDrand01((Rand_seed_t)Perl_seed(aTHX));
+        PL_srand_called = TRUE;
+    }
+#endif
+}
+
+static double MY_callrand(pTHX_ CV *randcv)
+{
+    dSP;
+    double ret;
+
+    ENTER;
+    PUSHMARK(SP);
+    PUTBACK;
+
+    call_sv((SV *)randcv, G_SCALAR);
+
+    SPAGAIN;
+
+    ret = POPn;
+    ret -= trunc(ret);      /* bound to < 1 */
+    if(ret < 0) ret += 1.0; /* bound to 0 <= ret < 1 */
+
+    LEAVE;
+
+    return ret;
+}
+
 MODULE=List::Util       PACKAGE=List::Util
 
 void
@@ -1137,31 +1185,17 @@ PROTOTYPE: @
 CODE:
 {
     int index;
-#if (PERL_VERSION < 9)
-    struct op dmy_op;
-    struct op *old_op = PL_op;
+    SV *randsv = get_sv("List::Util::RAND", 0);
+    CV * const randcv = randsv && SvROK(randsv) && SvTYPE(SvRV(randsv)) == SVt_PVCV ?
+        (CV *)SvRV(randsv) : NULL;
 
-    /* We call pp_rand here so that Drand01 get initialized if rand()
-       or srand() has not already been called
-    */
-    memzero((char*)(&dmy_op), sizeof(struct op));
-    /* we let pp_rand() borrow the TARG allocated for this XS sub */
-    dmy_op.op_targ = PL_op->op_targ;
-    PL_op = &dmy_op;
-    (void)*(PL_ppaddr[OP_RAND])(aTHX);
-    PL_op = old_op;
-#else
-    /* Initialize Drand01 if rand() or srand() has
-       not already been called
-    */
-    if(!PL_srand_called) {
-        (void)seedDrand01((Rand_seed_t)Perl_seed(aTHX));
-        PL_srand_called = TRUE;
-    }
-#endif
+    if(!randcv)
+        MY_initrand(aTHX);
 
     for (index = items ; index > 1 ; ) {
-        int swap = (int)(Drand01() * (double)(index--));
+        int swap = (int)(
+            (randcv ? MY_callrand(aTHX_ randcv) : Drand01()) * (double)(index--)
+        );
         SV *tmp = ST(swap);
         ST(swap) = ST(index);
         ST(index) = tmp;

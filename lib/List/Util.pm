@@ -22,6 +22,9 @@ $VERSION =~ tr/_//d;
 require XSLoader;
 XSLoader::load('List::Util', $XS_VERSION);
 
+# Used by shuffle()
+our $RAND;
+
 sub import
 {
   my $pkg = caller;
@@ -489,6 +492,8 @@ Returns the values of the input in a random order
 
     @cards = shuffle 0..51      # 0..51 in a random order
 
+This function is affected by the C<$RAND> variable.
+
 =head2 uniq
 
     my @subset = uniq @values
@@ -586,6 +591,20 @@ all but the first C<$size> elements from C<@list>.
 
     @result = tail -2, qw( foo bar baz );
     # baz
+
+=head1 CONFIGURATION VARIABLES
+
+=head2 $RAND
+
+    local $List::Util::RAND = sub { ... };
+
+I<Since version 1.54.>
+
+This package variable is used by code which needs to generate random numbers
+(such as the L</shuffle> function). If set to a CODE reference it provides an
+alternative to perl's builtin C<rand()> function. When a new random number is
+needed this function will be invoked with no arguments and is expected to
+return a floating-point value, of which only the fractional part will be used.
 
 =head1 KNOWN BUGS
 
