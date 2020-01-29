@@ -506,8 +506,9 @@ I<Since version 1.54.>
 Randomly select the given number of elements from the input list. Any given
 position in the input list will be selected at most once.
 
-If there are fewer than C<$count> items in the list then the result will be
-truncated; effectively the function becomes identical to L</shuffle>.
+If there are fewer than C<$count> items in the list then the function will
+return once all of them have been randomly selected; effectively the function
+behaves similarly to L</shuffle>.
 
 This function is affected by the C<$RAND> variable.
 
