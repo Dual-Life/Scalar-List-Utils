@@ -1206,7 +1206,7 @@ CODE:
 
 void
 sample(...)
-PROTOTYPE: @
+PROTOTYPE: $@
 CODE:
 {
     UV count = items ? SvUV(ST(0)) : 0;
