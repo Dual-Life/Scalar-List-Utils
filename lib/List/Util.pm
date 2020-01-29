@@ -485,6 +485,18 @@ See L</KNOWN BUGS> for a known-bug with C<pairmap>, and a workaround.
 
 =cut
 
+=head2 shuffle
+
+    my @values = shuffle @values;
+
+Returns the values of the input in a random order
+
+    @cards = shuffle 0..51      # 0..51 in a random order
+
+This function is affected by the C<$RAND> variable.
+
+=cut
+
 =head2 sample
 
     my @items = sample $count, @values
@@ -527,16 +539,6 @@ sub sample
 
   return @ret;
 }
-
-=head2 shuffle
-
-    my @values = shuffle @values;
-
-Returns the values of the input in a random order
-
-    @cards = shuffle 0..51      # 0..51 in a random order
-
-This function is affected by the C<$RAND> variable.
 
 =head2 uniq
 
