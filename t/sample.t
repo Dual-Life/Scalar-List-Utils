@@ -41,7 +41,7 @@ use List::Util qw(sample);
 }
 
 {
-  $List::Util::RAND = sub { 4/10 };
+  local $List::Util::RAND = sub { 4/10 };
 
   is( join( "", sample 5, 'A'..'Z' ), 'KZJXI',
     'rigged rand() yields predictable output'
