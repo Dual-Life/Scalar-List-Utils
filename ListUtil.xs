@@ -1204,6 +1204,52 @@ CODE:
     XSRETURN(items);
 }
 
+void
+sample(...)
+PROTOTYPE: @
+CODE:
+{
+    UV count = items ? SvUV(ST(0)) : 0;
+    int reti = 0;
+    SV *randsv = get_sv("List::Util::RAND", 0);
+    CV * const randcv = randsv && SvROK(randsv) && SvTYPE(SvRV(randsv)) == SVt_PVCV ?
+        (CV *)SvRV(randsv) : NULL;
+
+    if(!count)
+        XSRETURN(0);
+
+    /* Now we've extracted count from ST(0) the rest of this logic will be a
+     * lot neater if we move the topmost item into ST(0) so we can just work
+     * within 0..items-1 */
+    ST(0) = POPs;
+    items--;
+
+    if(count > items)
+        count = items;
+
+    if(!randcv)
+        MY_initrand(aTHX);
+
+    /* Partition the stack into ST(0)..ST(reti-1) containing the sampled results
+     * and ST(reti)..ST(items-1) containing the remaining pending candidates
+     */
+    while(reti < count) {
+        int index = (int)(
+            (randcv ? MY_callrand(aTHX_ randcv) : Drand01()) * (double)(items - reti)
+        );
+
+        SV *selected = ST(reti + index);
+        /* preserve the element we're about to stomp on by putting it back into
+         * the pending partition */
+        ST(reti + index) = ST(reti);
+
+        ST(reti) = selected;
+        reti++;
+    }
+
+    XSRETURN(reti);
+}
+
 
 void
 uniq(...)

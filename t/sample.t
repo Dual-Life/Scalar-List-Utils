@@ -41,9 +41,18 @@ use List::Util qw(sample);
 }
 
 {
+  my @nums = ( 1..5 );
+  sample 5, @nums;
+
+  is_deeply( \@nums, [ 1..5 ],
+    'sample does not mutate passed array'
+  );
+}
+
+{
   local $List::Util::RAND = sub { 4/10 };
 
-  is( join( "", sample 5, 'A'..'Z' ), 'KZJXI',
+  is( join( "", sample 5, 'A'..'Z' ), 'JKALC',
     'rigged rand() yields predictable output'
   );
 }

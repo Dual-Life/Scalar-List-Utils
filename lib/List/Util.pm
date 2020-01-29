@@ -511,35 +511,6 @@ truncated; effectively the function becomes identical to L</shuffle>.
 
 This function is affected by the C<$RAND> variable.
 
-=cut
-
-sub _ffrac
-{
-  my $n = shift;
-  $n -= int $n;
-  $n++ if $n < 0;
-  $n;
-}
-
-sub sample
-{
-  my $count = shift;
-
-  my @ret;
-  while( @_ and $count-- ) {
-    my $i = $List::Util::RAND ?
-      int( _ffrac( $List::Util::RAND->() ) * @_ ) :
-      int rand @_;
-    push @ret, $_[$i];
-
-    # delete it from the list
-    $_[$i] = $_[-1] if $i < $#_; # No point doing this if $i is the final item
-    pop;
-  }
-
-  return @ret;
-}
-
 =head2 uniq
 
     my @subset = uniq @values
