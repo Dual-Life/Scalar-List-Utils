@@ -50,6 +50,19 @@ use List::Util qw(sample);
 }
 
 {
+  my $destroyed_count;
+  sub Guardian::DESTROY { $destroyed_count++ }
+
+  my @ret = sample 3, map { bless [], "Guardian" } 1 .. 10;
+
+  is( $destroyed_count, 7, 'the 7 unselected items were destroyed' );
+
+  @ret = ();
+
+  is( $destroyed_count, 10, 'all the items were destroyed' );
+}
+
+{
   local $List::Util::RAND = sub { 4/10 };
 
   is( join( "", sample 5, 'A'..'Z' ), 'JKALC',
