@@ -497,7 +497,17 @@ position in the input list will be selected at most once.
 If there are fewer than C<$count> items in the list then the result will be
 truncated; effectively the function becomes identical to L</shuffle>.
 
+This function is affected by the C<$RAND> variable.
+
 =cut
+
+sub _ffrac
+{
+  my $n = shift;
+  $n -= int $n;
+  $n++ if $n < 0;
+  $n;
+}
 
 sub sample
 {
@@ -505,7 +515,9 @@ sub sample
 
   my @ret;
   while( @_ and $count-- ) {
-    my $i = int rand @_;
+    my $i = $List::Util::RAND ?
+      int( _ffrac( $List::Util::RAND->() ) * @_ ) :
+      int rand @_;
     push @ret, $_[$i];
 
     # delete it from the list
@@ -633,10 +645,11 @@ all but the first C<$size> elements from C<@list>.
 I<Since version 1.54.>
 
 This package variable is used by code which needs to generate random numbers
-(such as the L</shuffle> function). If set to a CODE reference it provides an
-alternative to perl's builtin C<rand()> function. When a new random number is
-needed this function will be invoked with no arguments and is expected to
-return a floating-point value, of which only the fractional part will be used.
+(such as the L</shuffle> and L</sample> functions). If set to a CODE reference
+it provides an alternative to perl's builtin C<rand()> function. When a new
+random number is needed this function will be invoked with no arguments and is
+expected to return a floating-point value, of which only the fractional part
+will be used.
 
 =head1 KNOWN BUGS
 

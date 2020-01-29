@@ -36,6 +36,16 @@ use List::Util qw(sample);
   my $y = join "", sample 3, 'a'..'z';
 
   isnt( $x, $y, 'returns different result on different random seed' );
+
+  srand;
+}
+
+{
+  $List::Util::RAND = sub { 4/10 };
+
+  is( join( "", sample 5, 'A'..'Z' ), 'KZJXI',
+    'rigged rand() yields predictable output'
+  );
 }
 
 done_testing;
