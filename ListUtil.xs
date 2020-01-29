@@ -1220,10 +1220,6 @@ CODE:
 #ifdef HV_FETCH_EMPTY_HE
             HE* he;
 #endif
-#ifdef WIN32_PERL_NO_ANSI
-            char buffer[32];
-#endif
-
             if(SvGAMAGIC(arg))
                 /* clone the value so we don't invoke magic again */
                 arg = sv_mortalcopy(arg);
@@ -1269,6 +1265,7 @@ CODE:
                     * will not always work as intended.                       *
                     * But the following workaround does what we want.         */
 
+                    char buffer[32];
                     sprintf(buffer, "%0.20" NVgf, nv_arg);
                     sv_setpvf(keysv, "%s", buffer);                    
 #else
