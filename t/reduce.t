@@ -144,6 +144,8 @@ if (!$::PERL_ONLY) { SKIP: {
 
 } }
 
+# TODO: test that reduce in list context only yields final answer
+
 # XSUB callback
 use constant XSUBC => 42;
 

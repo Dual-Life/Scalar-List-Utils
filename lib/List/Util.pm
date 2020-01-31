@@ -12,7 +12,7 @@ require Exporter;
 
 our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw(
-  all any first min max minstr maxstr none notall product reduce sum sum0
+  all any first min max minstr maxstr none notall product reduce reductions sum sum0
   sample shuffle uniq uniqnum uniqstr
   head tail pairs unpairs pairkeys pairvalues pairmap pairgrep pairfirst
 );

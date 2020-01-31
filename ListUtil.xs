@@ -499,10 +499,14 @@ void
 reduce(block,...)
     SV *block
 PROTOTYPE: &@
+ALIAS:
+    reduce     = 0
+    reductions = 1
 CODE:
 {
     SV *ret = sv_newmortal();
     int index;
+    SV **origstack = &ST(0); /* because ST() isn't valid inside the MULTICALL loop */
     GV *agv,*bgv,*gv;
     HV *stash;
     SV **args = &PL_stack_base[ax];
@@ -512,7 +516,10 @@ CODE:
         croak("Not a subroutine reference");
 
     if(items <= 1)
-        XSRETURN_UNDEF;
+        if(ix)
+            XSRETURN(0);
+        else
+            XSRETURN_UNDEF;
 
     agv = gv_fetchpv("a", GV_ADD, SVt_PV);
     bgv = gv_fetchpv("b", GV_ADD, SVt_PV);
@@ -520,6 +527,9 @@ CODE:
     SAVESPTR(GvSV(bgv));
     GvSV(agv) = ret;
     SvSetMagicSV(ret, args[1]);
+
+    if(ix)
+        *(origstack++) = newSVsv(ret);
 #ifdef dMULTICALL
     assert(cv);
     if(!CvISXSUB(cv)) {
@@ -532,6 +542,8 @@ CODE:
             GvSV(bgv) = args[index];
             MULTICALL;
             SvSetMagicSV(ret, *PL_stack_sp);
+            if(ix)
+                *(origstack++) = newSVsv(ret);
         }
 #  ifdef PERL_HAS_BAD_MULTICALL_REFCOUNT
         if(CvDEPTH(multicall_cv) > 1)
@@ -550,11 +562,23 @@ CODE:
             call_sv((SV*)cv, G_SCALAR);
 
             SvSetMagicSV(ret, *PL_stack_sp);
+            if(ix)
+                *(origstack++) = newSVsv(ret);
         }
     }
 
-    ST(0) = ret;
-    XSRETURN(1);
+    if(ix) {
+        int i;
+        /* Only now can we mortalise the return items; any earlier would have
+         * broken inside MULTICALL */
+        for(i = 0; i < items-1; i++)
+            sv_2mortal(ST(i));
+        XSRETURN(items-1);
+    }
+    else {
+        ST(0) = ret;
+        XSRETURN(1);
+    }
 }
 
 void
