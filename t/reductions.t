@@ -17,6 +17,12 @@ is_deeply(
   'sum 1..5'
 );
 
+# We don't guarantee what this will return but it definitely shouldn't crash
+{
+  my $ret = reductions { $a + $b } 1 .. 3;
+  pass( 'reductions in scalar context does not crash' );
+}
+
 {
   my $destroyed_count;
   sub Guardian::DESTROY { $destroyed_count++ }
