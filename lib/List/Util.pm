@@ -12,7 +12,8 @@ require Exporter;
 
 our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw(
-  all any first min max minstr maxstr none notall product reduce sum sum0 shuffle uniq uniqnum uniqstr
+  all any first min max minstr maxstr none notall product reduce sum sum0
+  sample shuffle uniq uniqnum uniqstr
   head tail pairs unpairs pairkeys pairvalues pairmap pairgrep pairfirst
 );
 our $VERSION    = "1.53";
@@ -494,6 +495,23 @@ Returns the values of the input in a random order
 
 This function is affected by the C<$RAND> variable.
 
+=cut
+
+=head2 sample
+
+    my @items = sample $count, @values
+
+I<Since version 1.54.>
+
+Randomly select the given number of elements from the input list. Any given
+position in the input list will be selected at most once.
+
+If there are fewer than C<$count> items in the list then the function will
+return once all of them have been randomly selected; effectively the function
+behaves similarly to L</shuffle>.
+
+This function is affected by the C<$RAND> variable.
+
 =head2 uniq
 
     my @subset = uniq @values
@@ -601,10 +619,11 @@ all but the first C<$size> elements from C<@list>.
 I<Since version 1.54.>
 
 This package variable is used by code which needs to generate random numbers
-(such as the L</shuffle> function). If set to a CODE reference it provides an
-alternative to perl's builtin C<rand()> function. When a new random number is
-needed this function will be invoked with no arguments and is expected to
-return a floating-point value, of which only the fractional part will be used.
+(such as the L</shuffle> and L</sample> functions). If set to a CODE reference
+it provides an alternative to perl's builtin C<rand()> function. When a new
+random number is needed this function will be invoked with no arguments and is
+expected to return a floating-point value, of which only the fractional part
+will be used.
 
 =head1 KNOWN BUGS
 
