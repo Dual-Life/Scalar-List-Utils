@@ -153,6 +153,9 @@ each return value from the block in order. The final value of the result will
 be identical to what the C<reduce> function would have returned given the same
 block and list.
 
+    reduce     { "$a-$b" }  "a".."d"    # "a-b-c-d"
+    reductions { "$a-$b" }  "a".."d"    # "a", "a-b", "a-b-c", "a-b-c-d"
+
 =head2 any
 
     my $bool = any { BLOCK } @list;
