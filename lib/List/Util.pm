@@ -51,7 +51,7 @@ List::Util - A selection of general-utility list subroutines
 =head1 SYNOPSIS
 
     use List::Util qw(
-      reduce any all none notall first
+      reduce any all none notall first reductions
 
       max maxstr min minstr product sum sum0
 
@@ -133,8 +133,25 @@ block that accumulates lengths by writing this instead as:
 
     $total = reduce { $a + length $b } 0, @strings
 
-The remaining list-reduction functions are all specialisations of this generic
-idea.
+The other scalar-returning list reduction functions are all specialisations of
+this generic idea.
+
+=head2 reductions
+
+    @results = reductions { BLOCK } @list
+
+I<Since version 1.54.>
+
+Similar to C<reduce> except that it also returns the intermediate values along
+with the final result. As before, C<$a> is set to the first element of the
+given list, and the C<BLOCK> is then called once for remaining item in the
+list set into C<$b>, with the result being captured for return as well as
+becoming the new value for C<$a>.
+
+The returned list will begin with the initial value for C<$a>, followed by
+each return value from the block in order. The final value of the result will
+be identical to what the C<reduce> function would have returned given the same
+block and list.
 
 =head2 any
 
