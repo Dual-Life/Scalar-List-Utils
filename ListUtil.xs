@@ -506,7 +506,7 @@ CODE:
 {
     SV *ret = sv_newmortal();
     int index;
-    SV **origstack = &ST(0); /* because ST() isn't valid inside the MULTICALL loop */
+    AV *retvals;
     GV *agv,*bgv,*gv;
     HV *stash;
     SV **args = &PL_stack_base[ax];
@@ -528,8 +528,16 @@ CODE:
     GvSV(agv) = ret;
     SvSetMagicSV(ret, args[1]);
 
-    if(ix)
-        *(origstack++) = newSVsv(ret);
+    if(ix) {
+        /* Precreate an AV for return values; -1 for cv, -1 for top index */
+        retvals = newAV();
+        av_extend(retvals, items-1-1);
+
+        /* so if throw an exception they can be reclaimed */
+        SAVEFREESV(retvals);
+
+        av_push(retvals, newSVsv(ret));
+    }
 #ifdef dMULTICALL
     assert(cv);
     if(!CvISXSUB(cv)) {
@@ -543,7 +551,7 @@ CODE:
             MULTICALL;
             SvSetMagicSV(ret, *PL_stack_sp);
             if(ix)
-                *(origstack++) = newSVsv(ret);
+                av_push(retvals, newSVsv(ret));
         }
 #  ifdef PERL_HAS_BAD_MULTICALL_REFCOUNT
         if(CvDEPTH(multicall_cv) > 1)
@@ -563,16 +571,19 @@ CODE:
 
             SvSetMagicSV(ret, *PL_stack_sp);
             if(ix)
-                *(origstack++) = newSVsv(ret);
+                av_push(retvals, newSVsv(ret));
         }
     }
 
     if(ix) {
         int i;
-        /* Only now can we mortalise the return items; any earlier would have
-         * broken inside MULTICALL */
-        for(i = 0; i < items-1; i++)
-            sv_2mortal(ST(i));
+        SV **svs = AvARRAY(retvals);
+        /* steal the SVs from retvals */
+        for(i = 0; i < items-1; i++) {
+            ST(i) = sv_2mortal(svs[i]);
+            svs[i] = NULL;
+        }
+
         XSRETURN(items-1);
     }
     else {

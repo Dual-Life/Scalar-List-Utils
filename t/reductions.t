@@ -23,9 +23,11 @@ is_deeply(
   pass( 'reductions in scalar context does not crash' );
 }
 
+my $destroyed_count;
+sub Guardian::DESTROY { $destroyed_count++ }
+
 {
-  my $destroyed_count;
-  sub Guardian::DESTROY { $destroyed_count++ }
+  undef $destroyed_count;
 
   my @ret = reductions { $b } map { bless [], "Guardian" } 1 .. 5;
 
@@ -34,6 +36,18 @@ is_deeply(
   @ret = ();
 
   is( $destroyed_count, 5, 'all the items were destroyed' );
+}
+
+{
+  undef $destroyed_count;
+
+  ok( !defined eval {
+      reductions { die "stop" if $b == 4; bless [], "Guardian" } 1 .. 4;
+      1
+    }, 'die in BLOCK is propagated'
+  );
+
+  is( $destroyed_count, 2, 'intermediate temporaries are destroyed after exception' );
 }
 
 done_testing;
