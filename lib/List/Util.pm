@@ -73,7 +73,8 @@ By default C<List::Util> does not export any subroutines.
 
 =head1 LIST-REDUCTION FUNCTIONS
 
-The following set of functions all reduce a list down to a single value.
+The following set of functions all apply a given block of code to a list of
+values.
 
 =cut
 
