@@ -515,11 +515,12 @@ CODE:
     if(cv == Nullcv)
         croak("Not a subroutine reference");
 
-    if(items <= 1)
+    if(items <= 1) {
         if(ix)
             XSRETURN(0);
         else
             XSRETURN_UNDEF;
+    }
 
     agv = gv_fetchpv("a", GV_ADD, SVt_PV);
     bgv = gv_fetchpv("b", GV_ADD, SVt_PV);
