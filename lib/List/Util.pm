@@ -16,7 +16,7 @@ our @EXPORT_OK  = qw(
   sample shuffle uniq uniqnum uniqstr
   head tail pairs unpairs pairkeys pairvalues pairmap pairgrep pairfirst
 );
-our $VERSION    = "1.53";
+our $VERSION    = "1.54";
 our $XS_VERSION = $VERSION;
 $VERSION =~ tr/_//d;
 
