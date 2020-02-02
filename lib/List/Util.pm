@@ -12,7 +12,7 @@ require Exporter;
 
 our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw(
-  all any first min max minstr maxstr none notall product reduce sum sum0
+  all any first min max minstr maxstr none notall product reduce reductions sum sum0
   sample shuffle uniq uniqnum uniqstr
   head tail pairs unpairs pairkeys pairvalues pairmap pairgrep pairfirst
 );
@@ -51,7 +51,7 @@ List::Util - A selection of general-utility list subroutines
 =head1 SYNOPSIS
 
     use List::Util qw(
-      reduce any all none notall first
+      reduce any all none notall first reductions
 
       max maxstr min minstr product sum sum0
 
@@ -73,7 +73,8 @@ By default C<List::Util> does not export any subroutines.
 
 =head1 LIST-REDUCTION FUNCTIONS
 
-The following set of functions all reduce a list down to a single value.
+The following set of functions all apply a given block of code to a list of
+values.
 
 =cut
 
@@ -133,8 +134,28 @@ block that accumulates lengths by writing this instead as:
 
     $total = reduce { $a + length $b } 0, @strings
 
-The remaining list-reduction functions are all specialisations of this generic
-idea.
+The other scalar-returning list reduction functions are all specialisations of
+this generic idea.
+
+=head2 reductions
+
+    @results = reductions { BLOCK } @list
+
+I<Since version 1.54.>
+
+Similar to C<reduce> except that it also returns the intermediate values along
+with the final result. As before, C<$a> is set to the first element of the
+given list, and the C<BLOCK> is then called once for remaining item in the
+list set into C<$b>, with the result being captured for return as well as
+becoming the new value for C<$a>.
+
+The returned list will begin with the initial value for C<$a>, followed by
+each return value from the block in order. The final value of the result will
+be identical to what the C<reduce> function would have returned given the same
+block and list.
+
+    reduce     { "$a-$b" }  "a".."d"    # "a-b-c-d"
+    reductions { "$a-$b" }  "a".."d"    # "a", "a-b", "a-b-c", "a-b-c-d"
 
 =head2 any
 

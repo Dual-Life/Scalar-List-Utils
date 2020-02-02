@@ -499,10 +499,14 @@ void
 reduce(block,...)
     SV *block
 PROTOTYPE: &@
+ALIAS:
+    reduce     = 0
+    reductions = 1
 CODE:
 {
     SV *ret = sv_newmortal();
     int index;
+    AV *retvals;
     GV *agv,*bgv,*gv;
     HV *stash;
     SV **args = &PL_stack_base[ax];
@@ -511,8 +515,12 @@ CODE:
     if(cv == Nullcv)
         croak("Not a subroutine reference");
 
-    if(items <= 1)
-        XSRETURN_UNDEF;
+    if(items <= 1) {
+        if(ix)
+            XSRETURN(0);
+        else
+            XSRETURN_UNDEF;
+    }
 
     agv = gv_fetchpv("a", GV_ADD, SVt_PV);
     bgv = gv_fetchpv("b", GV_ADD, SVt_PV);
@@ -520,6 +528,17 @@ CODE:
     SAVESPTR(GvSV(bgv));
     GvSV(agv) = ret;
     SvSetMagicSV(ret, args[1]);
+
+    if(ix) {
+        /* Precreate an AV for return values; -1 for cv, -1 for top index */
+        retvals = newAV();
+        av_extend(retvals, items-1-1);
+
+        /* so if throw an exception they can be reclaimed */
+        SAVEFREESV(retvals);
+
+        av_push(retvals, newSVsv(ret));
+    }
 #ifdef dMULTICALL
     assert(cv);
     if(!CvISXSUB(cv)) {
@@ -532,6 +551,8 @@ CODE:
             GvSV(bgv) = args[index];
             MULTICALL;
             SvSetMagicSV(ret, *PL_stack_sp);
+            if(ix)
+                av_push(retvals, newSVsv(ret));
         }
 #  ifdef PERL_HAS_BAD_MULTICALL_REFCOUNT
         if(CvDEPTH(multicall_cv) > 1)
@@ -550,11 +571,26 @@ CODE:
             call_sv((SV*)cv, G_SCALAR);
 
             SvSetMagicSV(ret, *PL_stack_sp);
+            if(ix)
+                av_push(retvals, newSVsv(ret));
         }
     }
 
-    ST(0) = ret;
-    XSRETURN(1);
+    if(ix) {
+        int i;
+        SV **svs = AvARRAY(retvals);
+        /* steal the SVs from retvals */
+        for(i = 0; i < items-1; i++) {
+            ST(i) = sv_2mortal(svs[i]);
+            svs[i] = NULL;
+        }
+
+        XSRETURN(items-1);
+    }
+    else {
+        ST(0) = ret;
+        XSRETURN(1);
+    }
 }
 
 void
