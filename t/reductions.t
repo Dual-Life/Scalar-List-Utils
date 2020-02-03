@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More;
+use Test::More tests => 7;
 
 use List::Util qw( reductions );
 
@@ -49,5 +49,3 @@ sub Guardian::DESTROY { $destroyed_count++ }
 
   is( $destroyed_count, 2, 'intermediate temporaries are destroyed after exception' );
 }
-
-done_testing;
