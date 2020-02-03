@@ -29,8 +29,9 @@ is( "@in", "@s", 'values');
   local $List::Util::RAND = sub { 4/10 }; # chosen by a fair die
 
   @r = shuffle(1..10);
-  # This random function happens to always generate the same result
-  is_deeply( \@r, [ 10, 1, 8, 2, 6, 7, 3, 9, 4, 5 ],
+  is_deeply(
+    [ shuffle(1..10) ],
+    [ shuffle(1..10) ],
     'rigged rand() yields predictable output'
   );
 }
