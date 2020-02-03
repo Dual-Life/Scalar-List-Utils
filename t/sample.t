@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More;
+use Test::More tests => 9;
 
 use List::Util qw(sample);
 
@@ -69,5 +69,3 @@ use List::Util qw(sample);
     'rigged rand() yields predictable output'
   );
 }
-
-done_testing;
