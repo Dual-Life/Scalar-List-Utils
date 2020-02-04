@@ -35,6 +35,9 @@ else {
   }
 }
 
+# $nv_digits is too low (by 1) if $Config{nvsize} > 8
+$nv_digits++ if $Config{nvsize} > 8;
+
 $defines .= " -DNV_MAX_PRECISION=$nv_digits";
 
 WriteMakefile(
