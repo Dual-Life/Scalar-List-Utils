@@ -10,33 +10,22 @@ my $defines = $ENV{PERL_CORE} ? q[-DPERL_EXT] : q[-DPERL_EXT -DUSE_PPPORT_H];
 
 my $nv_digits;
 
-my $ivsize = $Config{ivsize} * 8;
-my $uv_digits = 1 + int(log(2) / log(10) * $ivsize);
+# Generally NV_MAX_PRECISION needs to be set to ceil(1 + (log 2 / log(10) * prec))
+# where prec is the bit-precision of the NV's mantissa, including any implied bits.
+# However, if nvsize <= ivsize NV_MAX_PRECISION needs to be set to the length
+# of UV_MAX (where UV_MAX is the UV with the greatest magnitude).
 
-my $nvsize = $Config{nvsize} * 8;
-# we want NV and UV numbers in the same range to format the same, so make sure
-# NVs are given at least as many digits as UVs.  If IV/UVs have equal or
-# greater bits, there's no reason to check NV size since it won't be able to
-# have as much mantissa.
-if ($ivsize >= $nvsize) {
-  $nv_digits = $uv_digits;
-}
-else {
-  # maximum possible digits that could fit in something NV size
-  my $max_digits = 1 + int(log(2) / log(10) * $nvsize);
+if( $Config{nvsize} <=
+    $Config{ivsize} )         { $nv_digits = 20 } # length(~0) 
+elsif( $Config{nvsize} == 8 ) { $nv_digits = 17 } # POSIX::ceil(1 + (log(2) / log(10) *  53))
+elsif( length(sqrt 2) < 30 )  { $nv_digits = 21 } # POSIX::ceil(1 + (log(2) / log(10) *  64))
+else                          { $nv_digits = 36 } # POSIX::ceil(1 + (log(2) / log(10) * 113))
 
-  my $float = sprintf '%0.'.$max_digits.'g', 1/9;
-  my ($accurate_digits) = $float =~ /(1+)/;
-  # additional digit provides 'partial' accuracy
-  $nv_digits = 1 + length $accurate_digits;
-
-  if ($nv_digits < $uv_digits) {
-    $nv_digits = $uv_digits;
-  }
-}
-
-# $nv_digits is too low (by 1) if $Config{nvsize} > 8
-$nv_digits++ if $Config{nvsize} > 8;
+print "\nDIGITS: $nv_digits\n";
+die "WRONG" if $nv_digits == 20 && $Config{nvsize} != $Config{ivsize};
+die "WRONG" if $nv_digits == 17 && $Config{nvsize} != 8;
+die "WRONG" if $nv_digits == 21 && $Config{nvtype} ne 'long double';
+die "WRONG" if $nv_digits == 36 && $Config{nvtype} ne '__float128';
 
 $defines .= " -DNV_MAX_PRECISION=$nv_digits";
 
