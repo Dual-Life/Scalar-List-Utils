@@ -5,7 +5,7 @@ use warnings;
 
 use List::Util qw(first);
 use Test::More;
-plan tests => 22 + ($::PERL_ONLY ? 0 : 2);
+plan tests => 24;
 my $v;
 
 ok(defined &first, 'defined');
@@ -89,11 +89,9 @@ SKIP: {
     is(&Internals::SvREFCNT(\&huge), $refcnt, "Refcount unchanged");
 }
 
-# The remainder of the tests are only relevant for the XS
-# implementation. The Perl-only implementation behaves differently
-# (and more flexibly) in a way that we can't emulate from XS.
-if (!$::PERL_ONLY) { SKIP: {
-
+# These tests are only relevant for the real multicall implementation. The
+# psuedo-multicall implementation behaves differently.
+SKIP: {
     $List::Util::REAL_MULTICALL ||= 0; # Avoid use only once
     skip("Poor man's MULTICALL can't cope", 2)
       if !$List::Util::REAL_MULTICALL;
@@ -105,8 +103,7 @@ if (!$::PERL_ONLY) { SKIP: {
     # Can we goto a subroutine?
     eval {()=first{goto sub{}} 1,2;};
     like($@, qr/^Can't goto subroutine from a sort sub/, "goto sub");
-
-} }
+}
 
 use constant XSUBC_TRUE  => 1;
 use constant XSUBC_FALSE => 0;
