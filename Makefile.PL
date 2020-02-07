@@ -21,12 +21,6 @@ elsif( $Config{nvsize} == 8 ) { $nv_digits = 17 } # POSIX::ceil(1 + (log(2) / lo
 elsif( length(sqrt 2) < 30 )  { $nv_digits = 21 } # POSIX::ceil(1 + (log(2) / log(10) *  64))
 else                          { $nv_digits = 36 } # POSIX::ceil(1 + (log(2) / log(10) * 113))
 
-print "\nDIGITS: $nv_digits\n";
-die "WRONG" if $nv_digits == 20 && $Config{nvsize} != $Config{ivsize};
-die "WRONG" if $nv_digits == 17 && $Config{nvsize} != 8;
-die "WRONG" if $nv_digits == 21 && $Config{nvtype} ne 'long double';
-die "WRONG" if $nv_digits == 36 && $Config{nvtype} ne '__float128';
-
 $defines .= " -DNV_MAX_PRECISION=$nv_digits";
 
 WriteMakefile(
