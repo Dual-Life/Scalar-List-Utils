@@ -23,7 +23,7 @@ else                          { $nv_digits = 36 } # POSIX::ceil(1 + (log(2) / lo
 
 $defines .= " -DNV_MAX_PRECISION=$nv_digits";
 
-WriteMakefile(
+my %params = (
   NAME         => q[List::Util],
   ABSTRACT     => q[Common Scalar and List utility subroutines],
   AUTHOR       => q[Graham Barr <gbarr@cpan.org>],
@@ -45,7 +45,9 @@ WriteMakefile(
     ? ()
     : (
       INSTALLDIRS      => ($] < 5.011 ? q[perl] : q[site]),
-      PREREQ_PM        => {'Test::More' => 0,},
+      TEST_REQUIRES => {
+        'Test::More' => 0,
+      },
       (eval { ExtUtils::MakeMaker->VERSION(6.31) } ? (LICENSE => 'perl') : ()),
       (eval { ExtUtils::MakeMaker->VERSION(6.48) } ? (MIN_PERL_VERSION => '5.006') : ()),
       ( eval { ExtUtils::MakeMaker->VERSION(6.46) } ? (
@@ -70,3 +72,18 @@ WriteMakefile(
     )
   ),
 );
+
+if ($params{TEST_REQUIRES} and !eval { ExtUtils::MakeMaker->VERSION(6.64) }) {
+    $params{BUILD_REQUIRES} = {
+        %{$params{BUILD_REQUIRES} || {}},
+        %{delete $params{TEST_REQUIRES}},
+    };
+}
+if ($params{BUILD_REQUIRES} and !eval { ExtUtils::MakeMaker->VERSION(6.5503) }) {
+    $params{PREREQ_PM} = {
+        %{$params{PREREQ_PM} || {}},
+        %{delete $params{BUILD_REQUIRES}},
+    };
+}
+
+WriteMakefile(%params);
