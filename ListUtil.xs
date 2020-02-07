@@ -2,6 +2,22 @@
  * This program is free software; you can redistribute it and/or
  * modify it under the same terms as Perl itself.
  */
+
+/* For MinGW-built perls, define __USE_MINGW_ANSI_STDIO unless  *
+ * perl was built with that symbol defined. We need this for    *
+ * "%.20g" formatting - and it must be done done prior to the   *
+ * inclusion of all headers.                                    */
+
+#if defined(__MINGW32__) && !defined(__USE_MINGW_ANSIO_STDIO)
+
+#  define __USE_MINGW_ANSI_STDIO 1
+
+   /* Identify that perl itself was built  *
+    * without -D__USE_MINGW_STDIO_ANSI     */
+#  define MINGW_PERL_NO_ANSI 1
+
+#endif
+
 #define PERL_NO_GET_CONTEXT /* we want efficiency */
 #include <EXTERN.h>
 #include <perl.h>
@@ -1360,7 +1376,18 @@ CODE:
                 /* smaller floats get formatted using %g and could be equal to
                  * a UV or IV */
                 else {
+#if defined(MINGW_PERL_NO_ANSI) && NV_MAX_PRECISION == 20
+
+                   /* Because perl was not built with ansi compliance, doing: *
+                    * sv_setpvf(keysv, "%0.20" NVgf, nv_arg)                  *
+                    * will not always work as intended.                       *
+                    * But the following workaround does what we want.         */
+                    char buffer[32];
+                    sprintf(buffer, "%0.20" NVgf, nv_arg);
+                    sv_setpvf(keysv, "%s", buffer);
+#else
                     sv_setpvf(keysv, "%0.*" NVgf, NV_MAX_PRECISION, nv_arg);
+#endif
                 }
             }
 #ifdef HV_FETCH_EMPTY_HE
