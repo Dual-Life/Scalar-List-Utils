@@ -1349,7 +1349,11 @@ CODE:
                 SvNV(arg); /* SvIV() sets SVf_IOK even on floats on 5.6 */
 #endif
             }
-#if IVSIZE != NVSIZE  /* open nvsize!=ivsize block */
+#if NVSIZE > IVSIZE  /* open nvsize>ivsize block */
+
+        /* We can detect duplicates by looking *
+         * solely at the value of SvNV(arg)    */
+              
         nv_arg = SvNV(arg);
 
         if(nv_arg == 0) {
@@ -1364,7 +1368,11 @@ CODE:
             /* Use the byte structure of the NV. */
             sv_setpvn(keysv, (char *) &nv_arg, sizeof(NV));  
         }
-#else                 /* close ivsize!=nvsize block, open ivsize==nvsize block */
+#else                 /* close nvsize>ivsize block, open ivsize==nvsize block */
+
+            /* Because IVSIZE == NVSIZE we cannot rely *
+             * solely on the value of SvNV(arg)        */
+
             if(!SvOK(arg) || SvUOK(arg)) {
                 sv_setpvf(keysv, "%" UVuf, SvUV(arg));
             }
