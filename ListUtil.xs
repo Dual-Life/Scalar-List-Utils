@@ -1349,7 +1349,22 @@ CODE:
                 SvNV(arg); /* SvIV() sets SVf_IOK even on floats on 5.6 */
 #endif
             }
+#if IVSIZE != NVSIZE  /* open nvsize!=ivsize block */
+        nv_arg = SvNV(arg);
 
+        if(nv_arg == 0) {
+            /* use 0 for both 0 and -0.0 */
+            sv_setpvs(keysv, "0");
+        }
+        else if (nv_arg != nv_arg) {
+            /* for NaN, use the platform's normal stringification */
+            sv_setpvf(keysv, "%" NVgf, nv_arg);
+        }
+        else {
+            /* Use the byte structure of the NV. */
+            sv_setpvn(keysv, (char *) &nv_arg, sizeof(NV));  
+        }
+#else                 /* close ivsize!=nvsize block, open ivsize==nvsize block */
             if(!SvOK(arg) || SvUOK(arg)) {
                 sv_setpvf(keysv, "%" UVuf, SvUV(arg));
             }
@@ -1376,7 +1391,7 @@ CODE:
                 /* smaller floats get formatted using %g and could be equal to
                  * a UV or IV */
                 else {
-#if defined(MINGW_PERL_NO_ANSI) && NV_MAX_PRECISION == 20
+#if defined(MINGW_PERL_NO_ANSI)
 
                    /* Because perl was not built with ansi compliance, doing: *
                     * sv_setpvf(keysv, "%0.20" NVgf, nv_arg)                  *
@@ -1386,10 +1401,11 @@ CODE:
                     sprintf(buffer, "%0.20" NVgf, nv_arg);
                     sv_setpvf(keysv, "%s", buffer);
 #else
-                    sv_setpvf(keysv, "%0.*" NVgf, NV_MAX_PRECISION, nv_arg);
+                    sv_setpvf(keysv, "%0.20" NVgf, nv_arg);
 #endif
                 }
             }
+#endif             /* close ivsize==nvsize block */
 #ifdef HV_FETCH_EMPTY_HE
             he = (HE*) hv_common(seen, NULL, SvPVX(keysv), SvCUR(keysv), 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
             if (HeVAL(he))
