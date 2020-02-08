@@ -8,21 +8,6 @@ use ExtUtils::MakeMaker;
 my $PERL_CORE = grep { $_ eq 'PERL_CORE=1' } @ARGV;
 my $defines = $ENV{PERL_CORE} ? q[-DPERL_EXT] : q[-DPERL_EXT -DUSE_PPPORT_H];
 
-my $nv_digits;
-
-# Generally NV_MAX_PRECISION needs to be set to ceil(1 + (log 2 / log(10) * prec))
-# where prec is the bit-precision of the NV's mantissa, including any implied bits.
-# However, if nvsize <= ivsize NV_MAX_PRECISION needs to be set to the length
-# of UV_MAX (where UV_MAX is the UV with the greatest magnitude).
-
-if( $Config{nvsize} <=
-    $Config{ivsize} )         { $nv_digits = 20 } # length(~0) 
-elsif( $Config{nvsize} == 8 ) { $nv_digits = 17 } # POSIX::ceil(1 + (log(2) / log(10) *  53))
-elsif( length(sqrt 2) < 30 )  { $nv_digits = 21 } # POSIX::ceil(1 + (log(2) / log(10) *  64))
-else                          { $nv_digits = 36 } # POSIX::ceil(1 + (log(2) / log(10) * 113))
-
-$defines .= " -DNV_MAX_PRECISION=$nv_digits";
-
 my %params = (
   NAME         => q[List::Util],
   ABSTRACT     => q[Common Scalar and List utility subroutines],
