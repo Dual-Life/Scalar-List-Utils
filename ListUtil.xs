@@ -220,7 +220,7 @@ static void MY_initrand(pTHX)
 static double MY_callrand(pTHX_ CV *randcv)
 {
     dSP;
-    double ret;
+    double ret, dummy;
 
     ENTER;
     PUSHMARK(SP);
@@ -230,8 +230,7 @@ static double MY_callrand(pTHX_ CV *randcv)
 
     SPAGAIN;
 
-    ret = POPn;
-    ret -= trunc(ret);      /* bound to < 1 */
+    ret = modf(POPn, &dummy);      /* bound to < 1 */
     if(ret < 0) ret += 1.0; /* bound to 0 <= ret < 1 */
 
     LEAVE;
