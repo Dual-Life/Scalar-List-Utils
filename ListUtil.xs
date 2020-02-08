@@ -1260,8 +1260,8 @@ sample(...)
 PROTOTYPE: $@
 CODE:
 {
-    UV count = items ? SvUV(ST(0)) : 0;
-    int reti = 0;
+    IV count = items ? SvUV(ST(0)) : 0;
+    IV reti = 0;
     SV *randsv = get_sv("List::Util::RAND", 0);
     CV * const randcv = randsv && SvROK(randsv) && SvTYPE(SvRV(randsv)) == SVt_PVCV ?
         (CV *)SvRV(randsv) : NULL;
