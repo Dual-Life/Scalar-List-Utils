@@ -22,7 +22,6 @@
 #include <EXTERN.h>
 #include <perl.h>
 #include <XSUB.h>
-#include <math.h>
 
 #ifdef USE_PPPORT_H
 #  define NEED_sv_2pv_flags 1
