@@ -30,6 +30,15 @@
 #  include "ppport.h"
 #endif
 
+/* For uniqnum, define ACTUAL_NVSIZE to be the number *
+ * of bytes that are actually used to store the NV    */
+
+#if defined(USE_LONG_DOUBLE) && LDBL_MANT_DIG == 64
+#define ACTUAL_NVSIZE 10
+#else
+#define ACTUAL_NVSIZE NVSIZE
+#endif
+
 #ifndef PERL_VERSION_DECIMAL
 #  define PERL_VERSION_DECIMAL(r,v,s) (r*1000000 + v*1000 + s)
 #endif
@@ -1364,8 +1373,12 @@ CODE:
             sv_setpvf(keysv, "%" NVgf, nv_arg);
         }
         else {
-            /* Use the byte structure of the NV. */
-            sv_setpvn(keysv, (char *) &nv_arg, sizeof(NV));  
+            /* Use the byte structure of the NV.            *
+             * ACTUAL_NVSIZE is 10 if NV type is the        *
+             * 10-byte extended precision long double.      *
+             * Else ACTUAL_NVSIZE is the same as sizeof(NV) */
+
+            sv_setpvn(keysv, (char *) &nv_arg, ACTUAL_NVSIZE);  
         }
 #else                 /* close nvsize>ivsize block, open ivsize==nvsize block */
 
@@ -1392,7 +1405,7 @@ CODE:
                  * use a comparable format, so just use the raw bytes, adding
                  * 'f' to ensure not matching a stringified number */
                 else if (nv_arg < (NV)IV_MIN || nv_arg > (NV)UV_MAX) {
-                    sv_setpvn(keysv, (char *) &nv_arg, sizeof(NV));
+                    sv_setpvn(keysv, (char *) &nv_arg, 8);
                     sv_catpvn(keysv, "f", 1);
                 }
                 /* smaller floats get formatted using %g and could be equal to
