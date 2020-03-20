@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Config; # to determine nvsize
-use Test::More tests => 39;
+use Test::More tests => 43;
 use List::Util qw( uniqnum uniqstr uniq );
 
 use Tie::Array;
@@ -184,13 +184,68 @@ SKIP: {
                'uniqnum correctly compares UV/IVs that overflow NVs' );
 }
 
-my $ls = 31;
-if($Config{ivsize} == 8) { $ls = 63 }
+my $ls = 31;      # maximum left shift for 32-bit unity
 
-is_deeply( [ uniqnum ( 1 << $ls, 2 ** $ls,
-                       1 << ($ls - 3), 2 ** ($ls - 3),
-                       5 << ($ls - 3), 5 * (2 ** ($ls - 3))) ],
-           [ 1 << $ls, 1 << ($ls - 3), 5 << ($ls -3) ],
+if( $Config{ivsize} == 8 ) {
+  $ls       = 63; # maximum left shift for 64-bit unity
+}
+
+# Populate @in with UV-NV pairs of equivalent values.
+# Each of these values is exactly representable as 
+# either a UV or an NV.
+
+my @in = (1 << $ls, 2 ** $ls,
+          1 << ($ls - 3), 2 ** ($ls - 3),
+          5 << ($ls - 3), 5 * (2 ** ($ls - 3)));
+
+my @correct = (1 << $ls, 1 << ($ls - 3), 5 << ($ls -3));
+
+if( $Config{ivsize} == 8 && $Config{nvsize} == 8 ) {
+
+     # Add some more UV-NV pairs of equivalent values.
+     # Each of these values is exactly representable
+     # as either a UV or an NV.
+
+     push @in, ( 9007199254740991,     9.007199254740991e+15,
+                 9007199254740992,     9.007199254740992e+15,
+                 9223372036854774784,  9.223372036854774784e+18,
+                 18446744073709549568, 1.8446744073709549568e+19,
+                 18446744073709139968, 1.8446744073709139968e+19,
+                 100000000000262144,   1.00000000000262144e+17,
+                 100000000001310720,   1.0000000000131072e+17,
+                 144115188075593728,   1.44115188075593728e+17,
+                 -9007199254740991,     -9.007199254740991e+15,
+                 -9007199254740992,     -9.007199254740992e+15,
+                 -9223372036854774784,  -9.223372036854774784e+18,
+                 -18446744073709549568, -1.8446744073709549568e+19,
+                 -18446744073709139968, -1.8446744073709139968e+19,
+                 -100000000000262144,   -1.00000000000262144e+17,
+                 -100000000001310720,   -1.0000000000131072e+17,
+                 -144115188075593728,   -1.44115188075593728e+17 );
+
+     push @correct, ( 9007199254740991,
+                      9007199254740992,
+                      9223372036854774784,
+                      18446744073709549568,
+                      18446744073709139968,
+                      100000000000262144,
+                      100000000001310720,
+                      144115188075593728,
+                      -9007199254740991,
+                      -9007199254740992,
+                      -9223372036854774784,
+                      -18446744073709549568,
+                      -18446744073709139968,
+                      -100000000000262144,
+                      -100000000001310720,
+                      -144115188075593728 );
+}
+
+# uniqnum should discard each of the NVs as being a
+# duplicate of the preceding UV. 
+
+is_deeply( [ uniqnum @in],
+           [ @correct],
            'uniqnum correctly compares UV/IVs that don\'t overflow NVs' );
 
 # Hard to know for sure what an Inf is going to be. Lets make one
@@ -268,6 +323,37 @@ is_deeply( [uniqnum 0, -0.0 ],
 is_deeply( [ uniq () ],
            [],
            'uniq of empty list' );
+
+SKIP: {
+    skip ('test not relevant for this perl configuration', 4) unless $Config{ivsize} == 8;
+
+  # 1e17 is the number beyond which "%.20g" formatting fails on some
+  # 64-bit int perls.
+  # The following 2 tests check that the nearest values (both above
+  # and below that tipping point) are being handled correctly.
+
+  # 99999999999999984 is the largest 64-bit integer less than 1e17
+  # that can be expressed exactly as a double
+
+  is_deeply( [ uniqnum (99999999999999984, 99999999999999984.0) ],
+             [ (99999999999999984) ],
+             'uniqnum recognizes 99999999999999984 and 99999999999999984.0 as the same' );
+
+  is_deeply( [ uniqnum (-99999999999999984, -99999999999999984.0) ],
+             [ (-99999999999999984) ],
+             'uniqnum recognizes -99999999999999984 and -99999999999999984.0 as the same' );
+
+  # 100000000000000016 is the smallest positive 64-bit integer greater than 1e17
+  # that can be expressed exactly as a double
+
+  is_deeply( [ uniqnum (100000000000000016, 100000000000000016.0) ],
+             [ (100000000000000016) ],
+             'uniqnum recognizes 100000000000000016 and 100000000000000016.0 as the same' );
+
+  is_deeply( [ uniqnum (-100000000000000016, -100000000000000016.0) ],
+             [ (-100000000000000016) ],
+             'uniqnum recognizes -100000000000000016 and -100000000000000016.0 as the same' );
+}
 
 {
     my $warnings = "";
