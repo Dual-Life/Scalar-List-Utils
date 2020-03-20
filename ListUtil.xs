@@ -3,21 +3,6 @@
  * modify it under the same terms as Perl itself.
  */
 
-/* For MinGW-built perls, define __USE_MINGW_ANSI_STDIO unless  *
- * perl was built with that symbol defined. We need this for    *
- * "%.20g" formatting - and it must be done done prior to the   *
- * inclusion of all headers.                                    */
-
-#if defined(__MINGW32__) && !defined(__USE_MINGW_ANSIO_STDIO)
-
-#  define __USE_MINGW_ANSI_STDIO 1
-
-   /* Identify that perl itself was built  *
-    * without -D__USE_MINGW_STDIO_ANSI     */
-#  define MINGW_PERL_NO_ANSI 1
-
-#endif
-
 #define PERL_NO_GET_CONTEXT /* we want efficiency */
 #include <EXTERN.h>
 #include <perl.h>
@@ -34,10 +19,16 @@
  * of bytes that are actually used to store the NV    */
 
 #if defined(USE_LONG_DOUBLE) && LDBL_MANT_DIG == 64
-#define ACTUAL_NVSIZE 10
+#  define ACTUAL_NVSIZE 10
 #else
-#define ACTUAL_NVSIZE NVSIZE
+#  define ACTUAL_NVSIZE NVSIZE
 #endif
+
+/* Detect "DoubleDouble" nvtype */
+
+#if defined(USE_LONG_DOUBLE) && LDBL_MANT_DIG == 106
+#  define NV_IS_DOUBLEDOUBLE
+#endif  
 
 #ifndef PERL_VERSION_DECIMAL
 #  define PERL_VERSION_DECIMAL(r,v,s) (r*1000000 + v*1000 + s)
@@ -1357,75 +1348,94 @@ CODE:
                 SvNV(arg); /* SvIV() sets SVf_IOK even on floats on 5.6 */
 #endif
             }
-#if NVSIZE > IVSIZE  /* open nvsize>ivsize block */
-
-        /* We can detect duplicates by looking *
-         * solely at the value of SvNV(arg)    */
-              
+#if NVSIZE > IVSIZE                          /* $Config{nvsize} > $Config{ivsize} */
         nv_arg = SvNV(arg);
 
-        if(nv_arg == 0) {
-            /* use 0 for both 0 and -0.0 */
-            sv_setpvs(keysv, "0");
-        }
-        else if (nv_arg != nv_arg) {
-            /* for NaN, use the platform's normal stringification */
-            sv_setpvf(keysv, "%" NVgf, nv_arg);
-        }
-        else {
-            /* Use the byte structure of the NV.            *
-             * ACTUAL_NVSIZE is 10 if NV type is the        *
-             * 10-byte extended precision long double.      *
-             * Else ACTUAL_NVSIZE is the same as sizeof(NV) */
+        /* use 0 for all zeros */
+        if(nv_arg == 0) sv_setpvs(keysv, "0");
 
+        /* for NaN, use the platform's normal stringification */
+        else if (nv_arg != nv_arg) sv_setpvf(keysv, "%" NVgf, nv_arg);
+#ifdef NV_IS_DOUBLEDOUBLE
+        /* If the least significant double is zero, it could be either 0.0     *
+         * or -0.0. We therefore ignore the least significant double and       *
+         * assign to keysv the bytes of the most significant double only.      */
+        else if(nv_arg == (double)nv_arg) {
+            double double_arg = (double)nv_arg;
+            sv_setpvn(keysv, (char *) &double_arg, 8);
+        }
+#endif
+        else {
+            /* Use the byte structure of the NV.                               *
+             * ACTUAL_NVSIZE == sizeof(NV) minus the number of bytes           *
+             * that are allocated but never used. (It is only the 10-byte      *
+             * extended precision long double that allocates bytes that are    *
+             * never used. For all other NV types ACTUAL_NVSIZE == sizeof(NV). */
             sv_setpvn(keysv, (char *) &nv_arg, ACTUAL_NVSIZE);  
         }
-#else                 /* close nvsize>ivsize block, open ivsize==nvsize block */
+#else                                    /* $Config{nvsize} == $Config{ivsize} == 8 */ 
+        if( SvIOK(arg) || !SvOK(arg) ) {
 
-            /* Because IVSIZE == NVSIZE we cannot rely *
-             * solely on the value of SvNV(arg)        */
+           /* It doesn't matter if SvUOK(arg) is TRUE */
+            IV iv = SvIV(arg);
 
-            if(!SvOK(arg) || SvUOK(arg)) {
-                sv_setpvf(keysv, "%" UVuf, SvUV(arg));
-            }
-            else if(SvIOK(arg)) {
-                sv_setpvf(keysv, "%" IVdf, SvIV(arg));
-            }
+           /* use "0" for all zeros */
+            if(iv == 0) sv_setpvs(keysv, "0");
+
             else {
-                nv_arg = SvNV(arg);
-                /* use 0 for both 0 and -0.0 */
-                if(nv_arg == 0) {
-                    sv_setpvs(keysv, "0");
-                }
-                /* for NaN, use the platform's normal stringification */
-                else if (nv_arg != nv_arg) {
-                    sv_setpvf(keysv, "%" NVgf, nv_arg);
-                }
-                /* for numbers outside of the IV or UV range, we don't need to
-                 * use a comparable format, so just use the raw bytes, adding
-                 * 'f' to ensure not matching a stringified number */
-                else if (nv_arg < (NV)IV_MIN || nv_arg > (NV)UV_MAX) {
-                    sv_setpvn(keysv, (char *) &nv_arg, 8);
-                    sv_catpvn(keysv, "f", 1);
-                }
-                /* smaller floats get formatted using %g and could be equal to
-                 * a UV or IV */
-                else {
-#if defined(MINGW_PERL_NO_ANSI)
+                int uok = SvUOK(arg);
+                int sign = ( iv > 0 || uok ) ? 1 : -1;
 
-                   /* Because perl was not built with ansi compliance, doing: *
-                    * sv_setpvf(keysv, "%0.20" NVgf, nv_arg)                  *
-                    * will not always work as intended.                       *
-                    * But the following workaround does what we want.         */
-                    char buffer[32];
-                    sprintf(buffer, "%0.20" NVgf, nv_arg);
-                    sv_setpvf(keysv, "%s", buffer);
-#else
-                    sv_setpvf(keysv, "%0.20" NVgf, nv_arg);
-#endif
+                /* Set keysv to the bytes of SvNV(arg) if and only if the integer value  *
+                 * held by arg can be represented exactly as a double - ie if there are  *
+                 * no more than 51 bits between its least significant set bit and its    *
+                 * most significant set bit.                                             *
+                 * The neatest approach I could find was provided by roboticus at:       *
+                 *     https://www.perlmonks.org/?node_id=11113490                       *
+                 * First, identify the lowest set bit and assign its value to an IV.     *
+                 * Note that this value will always be > 0, and always a power of 2.     */
+                IV lowest_set = iv & -iv;
+
+                /* Second, shift it left 53 bits to get location of the first bit        *
+                 * beyond arg's highest "allowed" set bit.                                                    *
+                 * NOTE: If lowest set bit is initially far enough left, then this left  *
+                 * shift operation will result in a value of 0, which is fine.           *
+                 * Then subtract 1 so that all of the ("allowed") bits below the set bit *
+                 * are 1 && all other ("disallowed") bits are set to 0.                  *
+                 * (If the value prior to subtraction was 0, then subtracting 1 will set *
+                 * all bits - which is also fine.)                                       */ 
+                UV valid_bits = (lowest_set << 53) - 1;
+
+                /* The value of arg can be exactly represented by a double unless one    *
+                 * or more of its "disallowed" bits are set - ie if iv & (~valid_bits)   *
+                 * is untrue. However, if (iv < 0 && !SvUOK(arg)) we need to multiply iv *
+                 * by -1 prior to performing that '&' operation - so multiply iv by sign.*/
+                if( !((iv * sign) & (~valid_bits)) ) {
+                    nv_arg = SvNV(arg);
+                    sv_setpvn(keysv, (char *) &nv_arg, 8);
+                }          
+                else {
+                    /* Read in the bytes, rather than the numeric value of the IV/UV as  *
+                     * this is more efficient, despite having to sv_catpvn an extra byte.*/
+                    sv_setpvn(keysv, (char *) &iv, 8);
+                    /* We add an extra byte to distinguish between an IV/UV and an NV.   *
+                     * We also use that byte to distinguish between a -ve IV and a UV.   */
+                    if(uok) sv_catpvn(keysv, "U", 1);
+                    else    sv_catpvn(keysv, "I", 1);
                 }
             }
-#endif             /* close ivsize==nvsize block */
+        }
+        else {
+            nv_arg = SvNV(arg);
+
+            /* for NaN, use the platform's normal stringification */
+            if (nv_arg != nv_arg) sv_setpvf(keysv, "%" NVgf, nv_arg);
+
+            /* use "0" for all zeros */
+            else if(nv_arg == 0) sv_setpvs(keysv, "0");
+            else sv_setpvn(keysv, (char *) &nv_arg, 8);
+        }
+#endif
 #ifdef HV_FETCH_EMPTY_HE
             he = (HE*) hv_common(seen, NULL, SvPVX(keysv), SvCUR(keysv), 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
             if (HeVAL(he))
