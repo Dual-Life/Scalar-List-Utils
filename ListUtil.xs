@@ -1349,7 +1349,10 @@ CODE:
 #endif
             }
 #if NVSIZE > IVSIZE                          /* $Config{nvsize} > $Config{ivsize} */
-        nv_arg = SvNV(arg);
+        /* Avoid altering arg's flags */ 
+        if(SvUOK(arg))      nv_arg = (NV)SvUV(arg);
+        else if(SvIOK(arg)) nv_arg = (NV)SvIV(arg);
+        else                nv_arg = SvNV(arg);
 
         /* use 0 for all zeros */
         if(nv_arg == 0) sv_setpvs(keysv, "0");
@@ -1411,7 +1414,8 @@ CODE:
                  * is untrue. However, if (iv < 0 && !SvUOK(arg)) we need to multiply iv *
                  * by -1 prior to performing that '&' operation - so multiply iv by sign.*/
                 if( !((iv * sign) & (~valid_bits)) ) {
-                    nv_arg = SvNV(arg);
+                    /* Avoid altering arg's flags */
+                    nv_arg = uok ? (NV)SvUV(arg) : (NV)SvIV(arg); 
                     sv_setpvn(keysv, (char *) &nv_arg, 8);
                 }          
                 else {
