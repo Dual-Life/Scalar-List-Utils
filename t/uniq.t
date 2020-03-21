@@ -198,10 +198,6 @@ my @in = (1 << $ls, 2 ** $ls,
           1 << ($ls - 3), 2 ** ($ls - 3),
           5 << ($ls - 3), 5 * (2 ** ($ls - 3)));
 
-use Devel::Peek;
-Dump $in[0];
-Dump $in[1];
-
 my @correct = (1 << $ls, 1 << ($ls - 3), 5 << ($ls -3));
 
 if( $Config{ivsize} == 8 && $Config{nvsize} == 8 ) {
@@ -339,11 +335,6 @@ SKIP: {
   # 99999999999999984 is the largest 64-bit integer less than 1e17
   # that can be expressed exactly as a double
 
-  my $t1 = 99999999999999984;
-  Dump $t1;
-  my $t2 = 99999999999999984.0;
-  Dump $t2;
-
   is_deeply( [ uniqnum (99999999999999984, 99999999999999984.0) ],
              [ (99999999999999984) ],
              'uniqnum recognizes 99999999999999984 and 99999999999999984.0 as the same' );
@@ -354,11 +345,6 @@ SKIP: {
 
   # 100000000000000016 is the smallest positive 64-bit integer greater than 1e17
   # that can be expressed exactly as a double
-
-  my $t3 = 100000000000000016;
-  Dump $t3;
-  my $t4 = 100000000000000016.0;
-  Dump $t4;
 
   is_deeply( [ uniqnum (100000000000000016, 100000000000000016.0) ],
              [ (100000000000000016) ],
