@@ -1379,10 +1379,10 @@ CODE:
 #else                                    /* $Config{nvsize} == $Config{ivsize} == 8 */ 
         if( SvIOK(arg) || !SvOK(arg) ) {
 
-           /* It doesn't matter if SvUOK(arg) is TRUE */
+            /* It doesn't matter if SvUOK(arg) is TRUE */
             IV iv = SvIV(arg);
 
-           /* use "0" for all zeros */
+            /* use "0" for all zeros */
             if(iv == 0) sv_setpvs(keysv, "0");
 
             else {
