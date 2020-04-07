@@ -292,11 +292,11 @@ SKIP: {
 
 # uniqnum not confused by IV'ified floats
 {
-  my @nums = ( 2.1, 2.2, 2.3 );
-  my $dummy = sprintf "%d", $_ for @nums;
+    my @nums = ( 2.1, 2.2, 2.3 );
+    my $dummy = sprintf "%d", $_ for @nums;
 
-  # All @nums now have both NOK and IOK but IV=2 in each case
-  is( scalar( uniqnum @nums ), 3, 'uniqnum not confused by dual IV+NV' );
+    # All @nums now have both NOK and IOK but IV=2 in each case
+    is( scalar( uniqnum @nums ), 3, 'uniqnum not confused by dual IV+NV' );
 }
 
 {
