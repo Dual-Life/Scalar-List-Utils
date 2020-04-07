@@ -1306,7 +1306,6 @@ void
 uniq(...)
 PROTOTYPE: @
 ALIAS:
-    uniqnum = 0
     uniqstr = 1
     uniq    = 2
 CODE:
@@ -1315,6 +1314,7 @@ CODE:
     int index;
     SV **args = &PL_stack_base[ax];
     HV *seen;
+    int seen_undef = 0;
 
     if(items == 0 || (items == 1 && !SvGAMAGIC(args[0]) && SvOK(args[0]))) {
         /* Optimise for the case of the empty list or a defined nonmagic
@@ -1325,29 +1325,92 @@ CODE:
 
     sv_2mortal((SV *)(seen = newHV()));
 
-    if(ix == 0) {
-        /* uniqnum */
-        /* A temporary buffer for number stringification */
-        SV *keysv = sv_newmortal();
-
-        for(index = 0 ; index < items ; index++) {
-            SV *arg = args[index];
-            NV nv_arg;
+    for(index = 0 ; index < items ; index++) {
+        SV *arg = args[index];
 #ifdef HV_FETCH_EMPTY_HE
-            HE* he;
+        HE *he;
 #endif
 
-            if(SvGAMAGIC(arg))
-                /* clone the value so we don't invoke magic again */
-                arg = sv_mortalcopy(arg);
+        if(SvGAMAGIC(arg))
+            /* clone the value so we don't invoke magic again */
+            arg = sv_mortalcopy(arg);
 
-            if(SvOK(arg) && !(SvUOK(arg) || SvIOK(arg) || SvNOK(arg))) {
-#if PERL_VERSION >= 8
-                SvIV(arg); /* sets SVf_IOK/SVf_IsUV if it's an integer */
+        if(ix == 2 && !SvOK(arg)) {
+            /* special handling of undef for uniq() */
+            if(seen_undef)
+                continue;
+
+            seen_undef++;
+
+            if(GIMME_V == G_ARRAY)
+                ST(retcount) = arg;
+            retcount++;
+            continue;
+        }
+#ifdef HV_FETCH_EMPTY_HE
+        he = (HE*) hv_common(seen, arg, NULL, 0, 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
+        if (HeVAL(he))
+            continue;
+
+        HeVAL(he) = &PL_sv_undef;
 #else
-                SvNV(arg); /* SvIV() sets SVf_IOK even on floats on 5.6 */
+        if (hv_exists_ent(seen, arg, 0))
+            continue;
+
+        hv_store_ent(seen, arg, &PL_sv_yes, 0);
 #endif
-            }
+
+        if(GIMME_V == G_ARRAY)
+            ST(retcount) = SvOK(arg) ? arg : sv_2mortal(newSVpvn("", 0));
+        retcount++;
+    }
+
+  finish:
+    if(GIMME_V == G_ARRAY)
+        XSRETURN(retcount);
+    else
+        ST(0) = sv_2mortal(newSViv(retcount));
+}
+
+void
+uniqnum(...)
+PROTOTYPE: @
+CODE:
+{
+    int retcount = 0;
+    int index;
+    SV **args = &PL_stack_base[ax];
+    HV *seen;
+    /* A temporary buffer for number stringification */
+    SV *keysv = sv_newmortal();
+
+    if(items == 0 || (items == 1 && !SvGAMAGIC(args[0]) && SvOK(args[0]))) {
+        /* Optimise for the case of the empty list or a defined nonmagic
+         * singleton. Leave a singleton magical||undef for the regular case */
+        retcount = items;
+        goto finish;
+    }
+
+    sv_2mortal((SV *)(seen = newHV()));
+
+    for(index = 0 ; index < items ; index++) {
+        SV *arg = args[index];
+        NV nv_arg;
+#ifdef HV_FETCH_EMPTY_HE
+        HE* he;
+#endif
+
+        if(SvGAMAGIC(arg))
+            /* clone the value so we don't invoke magic again */
+            arg = sv_mortalcopy(arg);
+
+        if(SvOK(arg) && !(SvUOK(arg) || SvIOK(arg) || SvNOK(arg))) {
+#if PERL_VERSION >= 8
+            SvIV(arg); /* sets SVf_IOK/SVf_IsUV if it's an integer */
+#else
+            SvNV(arg); /* SvIV() sets SVf_IOK even on floats on 5.6 */
+#endif
+        }
 #if NVSIZE > IVSIZE                          /* $Config{nvsize} > $Config{ivsize} */
         /* Avoid altering arg's flags */ 
         if(SvUOK(arg))      nv_arg = (NV)SvUV(arg);
@@ -1441,66 +1504,21 @@ CODE:
         }
 #endif
 #ifdef HV_FETCH_EMPTY_HE
-            he = (HE*) hv_common(seen, NULL, SvPVX(keysv), SvCUR(keysv), 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
-            if (HeVAL(he))
-                continue;
+        he = (HE*) hv_common(seen, NULL, SvPVX(keysv), SvCUR(keysv), 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
+        if (HeVAL(he))
+            continue;
 
-            HeVAL(he) = &PL_sv_undef;
+        HeVAL(he) = &PL_sv_undef;
 #else
-            if(hv_exists(seen, SvPVX(keysv), SvCUR(keysv)))
-                continue;
+        if(hv_exists(seen, SvPVX(keysv), SvCUR(keysv)))
+            continue;
 
-            hv_store(seen, SvPVX(keysv), SvCUR(keysv), &PL_sv_yes, 0);
+        hv_store(seen, SvPVX(keysv), SvCUR(keysv), &PL_sv_yes, 0);
 #endif
 
-            if(GIMME_V == G_ARRAY)
-                ST(retcount) = SvOK(arg) ? arg : sv_2mortal(newSViv(0));
-            retcount++;
-        }
-    }
-    else {
-        /* uniqstr or uniq */
-        int seen_undef = 0;
-
-        for(index = 0 ; index < items ; index++) {
-            SV *arg = args[index];
-#ifdef HV_FETCH_EMPTY_HE
-            HE *he;
-#endif
-
-            if(SvGAMAGIC(arg))
-                /* clone the value so we don't invoke magic again */
-                arg = sv_mortalcopy(arg);
-
-            if(ix == 2 && !SvOK(arg)) {
-                /* special handling of undef for uniq() */
-                if(seen_undef)
-                    continue;
-
-                seen_undef++;
-
-                if(GIMME_V == G_ARRAY)
-                    ST(retcount) = arg;
-                retcount++;
-                continue;
-            }
-#ifdef HV_FETCH_EMPTY_HE
-            he = (HE*) hv_common(seen, arg, NULL, 0, 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
-            if (HeVAL(he))
-                continue;
-
-            HeVAL(he) = &PL_sv_undef;
-#else
-            if (hv_exists_ent(seen, arg, 0))
-                continue;
-
-            hv_store_ent(seen, arg, &PL_sv_yes, 0);
-#endif
-
-            if(GIMME_V == G_ARRAY)
-                ST(retcount) = SvOK(arg) ? arg : sv_2mortal(newSVpvn("", 0));
-            retcount++;
-        }
+        if(GIMME_V == G_ARRAY)
+            ST(retcount) = SvOK(arg) ? arg : sv_2mortal(newSViv(0));
+        retcount++;
     }
 
   finish:
