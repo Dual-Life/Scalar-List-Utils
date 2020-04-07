@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Config; # to determine nvsize
-use Test::More tests => 43;
+use Test::More tests => 44;
 use List::Util qw( uniqnum uniqstr uniq );
 
 use Tie::Array;
@@ -353,6 +353,15 @@ SKIP: {
   is_deeply( [ uniqnum (-100000000000000016, -100000000000000016.0) ],
              [ (-100000000000000016) ],
              'uniqnum recognizes -100000000000000016 and -100000000000000016.0 as the same' );
+}
+
+# uniqnum not confused by IV'ified floats
+{
+  my @nums = ( 2.1, 2.2, 2.3 );
+  my $dummy = sprintf "%d", $_ for @nums;
+
+  # All @nums now have both NOK and IOK but IV=2 in each case
+  is( scalar( uniqnum @nums ), 3, 'uniqnum not confused by dual IV+NV' );
 }
 
 {
