@@ -89,7 +89,7 @@ is_deeply( [ uniqint 6.1, 6.2, 6.3 ],
 
     is_deeply( [ uniqint 0, undef ],
                [ 0 ],
-               'uniqint considers undef and zer0 equivalent' );
+               'uniqint considers undef and zero equivalent' );
 
     ok( length $warnings, 'uniqint on undef yields a warning' );
 
