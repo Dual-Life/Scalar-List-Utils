@@ -1351,8 +1351,9 @@ CODE:
         if(ix == 0) {
             /* uniqint */
             /* coerce to integer */
-            arg = sv_2mortal(SvUOK(arg) ? newSVuv(SvUV(arg)) :
-                                          newSViv(SvIV(arg)));
+            if(!SvAMAGIC(arg) || !(arg = AMG_CALLun(arg, int)))
+                arg = sv_2mortal(SvUOK(arg) ? newSVuv(SvUV(arg)) :
+                                              newSViv(SvIV(arg)));
         }
 #ifdef HV_FETCH_EMPTY_HE
         he = (HE*) hv_common(seen, arg, NULL, 0, 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);

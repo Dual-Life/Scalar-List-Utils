@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Config; # to determine ivsize
-use Test::More tests => 29;
+use Test::More tests => 30;
 use List::Util qw( uniqstr uniqint uniq );
 
 use Tie::Array;
@@ -141,6 +141,21 @@ is( scalar( uniqstr qw( a b c d a b e ) ), 5, 'uniqstr() in scalar context' );
     is_deeply( [ map "$_", uniqstr @strs ],
                [ map "$_", $strs[0], $strs[2] ],
                'uniqstr respects stringify overload' );
+}
+
+{
+    package Googol;
+
+    use overload '""' => sub { "1" . ( "0"x100 ) },
+                 'int' => sub { $_[0] };
+
+    sub new { bless {}, $_[0] }
+
+    package main;
+
+    is_deeply( [ uniqint( Googol->new, Googol->new ) ],
+               [ "1" . ( "0"x100 ) ],
+               'uniqint respects int overload' );
 }
 
 {
