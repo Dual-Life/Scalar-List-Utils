@@ -100,7 +100,7 @@ is_deeply( [ uniqint 6.1, 6.2, 6.3 ],
 
 {
     # An integer guaranteed to be a UV
-    my $uv = 1 << ( $Config{ivsize}*8 - 1 );
+    my $uv = int( 1 << ( $Config{ivsize}*8 - 1 ) );
     is_deeply( [ uniqint $uv, $uv + 1 ],
                [ $uv, $uv + 1 ],
                'uniqint copes with UVs' );
