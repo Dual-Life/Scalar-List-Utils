@@ -1730,7 +1730,7 @@ PROTOTYPE: $
 CODE:
     SV *tempsv;
     SvGETMAGIC(sv);
-    if(SvAMAGIC(sv) && (tempsv = AMG_CALLun(sv, numer))) {
+    if(SvAMAGIC(sv) && (tempsv = AMG_CALLunary(sv, numer_amg))) {
         sv = tempsv;
     }
 #if !PERL_VERSION_GE(5,8,5)
