@@ -98,9 +98,11 @@ is_deeply( [ uniqint 6.1, 6.2, 6.3 ],
                'uniqint on undef coerces to zero' );
 }
 
-{
+SKIP: {
+    skip('UVs are not reliable on this perl version', 1) unless $] ge "5.008000";
+
     # An integer guaranteed to be a UV
-    my $uv = int( 1 << ( $Config{ivsize}*8 - 1 ) );
+    my $uv = 1 << ( $Config{ivsize}*8 - 1 );
     is_deeply( [ uniqint $uv, $uv + 1 ],
                [ $uv, $uv + 1 ],
                'uniqint copes with UVs' );
