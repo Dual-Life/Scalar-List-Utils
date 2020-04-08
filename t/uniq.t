@@ -143,7 +143,9 @@ is( scalar( uniqstr qw( a b c d a b e ) ), 5, 'uniqstr() in scalar context' );
                'uniqstr respects stringify overload' );
 }
 
-{
+SKIP: {
+    skip('int overload requires perl version 5.8.0', 1) unless $] ge "5.008000";
+
     package Googol;
 
     use overload '""' => sub { "1" . ( "0"x100 ) },

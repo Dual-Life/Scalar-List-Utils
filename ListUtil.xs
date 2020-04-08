@@ -1351,7 +1351,10 @@ CODE:
         if(ix == 0) {
             /* uniqint */
             /* coerce to integer */
+#if PERL_VERSION >= 8
+            /* int_amg only appeared in perl 5.8.0 */
             if(!SvAMAGIC(arg) || !(arg = AMG_CALLun(arg, int)))
+#endif
                 arg = sv_2mortal(SvUOK(arg) ? newSVuv(SvUV(arg)) :
                                               newSViv(SvIV(arg)));
         }
