@@ -88,6 +88,12 @@
 #define sv_catpvn_flags(b,n,l,f) sv_catpvn(b,n,l)
 #endif
 
+#if !PERL_VERSION_GE(5,8,0)
+static NV Perl_ceil(NV nv) {
+    return -Perl_floor(-nv);
+}
+#endif
+
 /* Some platforms have strict exports. And before 5.7.3 cxinc (or Perl_cxinc)
    was not exported. Therefore platforms like win32, VMS etc have problems
    so we redefine it here -- GMB
