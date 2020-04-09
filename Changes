@@ -1,3 +1,10 @@
+1.55 -- 2020-04-09
+	[CHANGES]
+	 * Added List::Util::uniqint
+	 * Improvements to List::Util::uniqnum handling of floating-point
+	   values on odd platform configurations (thanks sisyphus)
+	 * Improvements to $RAND-based unit tests
+
 1.54 -- 2020-02-02 15:47
 	[CHANGES]
 	 * Added List::Util::reductions (RT128237)
