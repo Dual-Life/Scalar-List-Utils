@@ -1353,10 +1353,30 @@ CODE:
             /* coerce to integer */
 #if PERL_VERSION >= 8
             /* int_amg only appeared in perl 5.8.0 */
-            if(!SvAMAGIC(arg) || !(arg = AMG_CALLun(arg, int)))
+            if(SvAMAGIC(arg) && (arg = AMG_CALLun(arg, int)))
+                ; /* nothing to do */
+            else
 #endif
-                arg = sv_2mortal(SvUOK(arg) ? newSVuv(SvUV(arg)) :
-                                              newSViv(SvIV(arg)));
+            if(!SvOK(arg) || SvNOK(arg) || SvPOK(arg))
+            {
+                /* Convert undef, NVs and PVs into a well-behaved int */
+                NV nv = SvNV(arg);
+
+                if(nv > (NV)UV_MAX)
+                    /* Too positive for UV - use NV */
+                    arg = newSVnv(Perl_floor(nv));
+                else if(nv < (NV)IV_MIN)
+                    /* Too negative for IV - use NV */
+                    arg = newSVnv(Perl_ceil(nv));
+                else if(nv > 0 && (UV)nv > (UV)IV_MAX)
+                    /* Too positive for IV - use UV */
+                    arg = newSVuv(nv);
+                else
+                    /* Must now fit into IV */
+                    arg = newSViv(nv);
+
+                sv_2mortal(arg);
+            }
         }
 #ifdef HV_FETCH_EMPTY_HE
         he = (HE*) hv_common(seen, arg, NULL, 0, 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);

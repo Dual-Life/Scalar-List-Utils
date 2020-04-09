@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Config; # to determine ivsize
-use Test::More tests => 30;
+use Test::More tests => 31;
 use List::Util qw( uniqstr uniqint uniq );
 
 use Tie::Array;
@@ -99,13 +99,20 @@ is_deeply( [ uniqint 6.1, 6.2, 6.3 ],
 }
 
 SKIP: {
-    skip('UVs are not reliable on this perl version', 1) unless $] ge "5.008000";
+    skip('UVs are not reliable on this perl version', 2) unless $] ge "5.008000";
+
+    my $maxbits = $Config{ivsize} * 8 - 1;
 
     # An integer guaranteed to be a UV
-    my $uv = 1 << ( $Config{ivsize}*8 - 1 );
+    my $uv = 1 << $maxbits;
     is_deeply( [ uniqint $uv, $uv + 1 ],
                [ $uv, $uv + 1 ],
                'uniqint copes with UVs' );
+
+    my $nvuv = 2 ** $maxbits;
+    is_deeply( [ uniqint $nvuv, 0 ],
+               [ int($nvuv), 0 ],
+               'uniqint copes with NVUV dualvars' );
 }
 
 is_deeply( [ uniq () ],
