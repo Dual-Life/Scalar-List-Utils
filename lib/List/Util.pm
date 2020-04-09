@@ -13,7 +13,7 @@ require Exporter;
 our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw(
   all any first min max minstr maxstr none notall product reduce reductions sum sum0
-  sample shuffle uniq uniqnum uniqstr
+  sample shuffle uniq uniqint uniqnum uniqstr
   head tail pairs unpairs pairkeys pairvalues pairmap pairgrep pairfirst
 );
 our $VERSION    = "1.54";
@@ -57,7 +57,7 @@ List::Util - A selection of general-utility list subroutines
 
       pairs unpairs pairkeys pairvalues pairfirst pairgrep pairmap
 
-      shuffle uniq uniqnum uniqstr
+      shuffle uniq uniqint uniqnum uniqstr
     );
 
 =head1 DESCRIPTION
@@ -552,6 +552,28 @@ The C<undef> value is treated by this function as distinct from the empty
 string, and no warning will be produced. It is left as-is in the returned
 list. Subsequent C<undef> values are still considered identical to the first,
 and will be removed.
+
+=head2 uniqint
+
+    my @subset = uniqint @values
+
+I<Since version 1.55.>
+
+Filters a list of values to remove subsequent duplicates, as judged by an
+integer numerical equality test. Preserves the order of unique elements, and
+retains the first value of any duplicate set. Values in the returned list will
+be coerced into integers.
+
+    my $count = uniqint @values
+
+In scalar context, returns the number of elements that would have been
+returned as a list.
+
+Note that C<undef> is treated much as other numerical operations treat it; it
+compares equal to zero but additionally produces a warning if such warnings
+are enabled (C<use warnings 'uninitialized';>). In addition, an C<undef> in
+the returned list is coerced into a numerical zero, so that the entire list of
+values returned by C<uniqint> are well-behaved as integers.
 
 =head2 uniqnum
 

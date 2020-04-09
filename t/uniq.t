@@ -2,9 +2,9 @@
 
 use strict;
 use warnings;
-use Config; # to determine nvsize
-use Test::More tests => 21;
-use List::Util qw( uniqstr uniq );
+use Config; # to determine ivsize
+use Test::More tests => 30;
+use List::Util qw( uniqstr uniqint uniq );
 
 use Tie::Array;
 
@@ -67,6 +67,47 @@ SKIP: {
     is( $warnings, "", 'No warnings are printed when handling Unicode strings' );
 }
 
+is_deeply( [ uniqint ],
+           [],
+           'uniqint of empty list' );
+
+is_deeply( [ uniqint 5, 5 ],
+           [ 5 ],
+           'uniqint of repeated-element list' );
+
+is_deeply( [ uniqint 1, 2, 1, 3 ],
+           [ 1, 2, 3 ],
+           'uniqint removes subsequent duplicates' );
+
+is_deeply( [ uniqint 6.1, 6.2, 6.3 ],
+           [ 6 ],
+           'uniqint compares as and returns integers' );
+
+{
+    my $warnings = "";
+    local $SIG{__WARN__} = sub { $warnings .= join "", @_ };
+
+    is_deeply( [ uniqint 0, undef ],
+               [ 0 ],
+               'uniqint considers undef and zero equivalent' );
+
+    ok( length $warnings, 'uniqint on undef yields a warning' );
+
+    is_deeply( [ uniqint undef ],
+               [ 0 ],
+               'uniqint on undef coerces to zero' );
+}
+
+SKIP: {
+    skip('UVs are not reliable on this perl version', 1) unless $] ge "5.008000";
+
+    # An integer guaranteed to be a UV
+    my $uv = 1 << ( $Config{ivsize}*8 - 1 );
+    is_deeply( [ uniqint $uv, $uv + 1 ],
+               [ $uv, $uv + 1 ],
+               'uniqint copes with UVs' );
+}
+
 is_deeply( [ uniq () ],
            [],
            'uniq of empty list' );
@@ -102,6 +143,23 @@ is( scalar( uniqstr qw( a b c d a b e ) ), 5, 'uniqstr() in scalar context' );
     is_deeply( [ map "$_", uniqstr @strs ],
                [ map "$_", $strs[0], $strs[2] ],
                'uniqstr respects stringify overload' );
+}
+
+SKIP: {
+    skip('int overload requires perl version 5.8.0', 1) unless $] ge "5.008000";
+
+    package Googol;
+
+    use overload '""' => sub { "1" . ( "0"x100 ) },
+                 'int' => sub { $_[0] };
+
+    sub new { bless {}, $_[0] }
+
+    package main;
+
+    is_deeply( [ uniqint( Googol->new, Googol->new ) ],
+               [ "1" . ( "0"x100 ) ],
+               'uniqint respects int overload' );
 }
 
 {

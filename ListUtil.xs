@@ -1306,6 +1306,7 @@ void
 uniq(...)
 PROTOTYPE: @
 ALIAS:
+    uniqint = 0
     uniqstr = 1
     uniq    = 2
 CODE:
@@ -1346,6 +1347,16 @@ CODE:
                 ST(retcount) = arg;
             retcount++;
             continue;
+        }
+        if(ix == 0) {
+            /* uniqint */
+            /* coerce to integer */
+#if PERL_VERSION >= 8
+            /* int_amg only appeared in perl 5.8.0 */
+            if(!SvAMAGIC(arg) || !(arg = AMG_CALLun(arg, int)))
+#endif
+                arg = sv_2mortal(SvUOK(arg) ? newSVuv(SvUV(arg)) :
+                                              newSViv(SvIV(arg)));
         }
 #ifdef HV_FETCH_EMPTY_HE
         he = (HE*) hv_common(seen, arg, NULL, 0, 0, HV_FETCH_LVALUE | HV_FETCH_EMPTY_HE, NULL, 0);
