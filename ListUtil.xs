@@ -1365,13 +1365,14 @@ CODE:
 #endif
             if(!SvOK(arg) || SvNOK(arg) || SvPOK(arg))
             {
-                /* Convert undef, NVs and PVs into a well-behaved int */
+                /* Convert undef, NVs and PVs to an integral value *
+                 * Leave all NaN values as NaNs                    */
                 NV nv = SvNV(arg);
 
-                if(nv > (NV)UV_MAX)
+                if(nv >= (NV)UV_MAX || nv != nv)
                     /* Too positive for UV - use NV */
                     arg = newSVnv(Perl_floor(nv));
-                else if(nv < (NV)IV_MIN)
+                else if(nv <= (NV)IV_MIN)
                     /* Too negative for IV - use NV */
                     arg = newSVnv(Perl_ceil(nv));
                 else if(nv > 0 && (UV)nv > (UV)IV_MAX)
