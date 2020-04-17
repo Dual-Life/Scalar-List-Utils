@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Config; # to determine ivsize
-use Test::More tests => 31;
+use Test::More tests => 34;
 use List::Util qw( uniqstr uniqint uniq );
 
 use Tie::Array;
@@ -82,6 +82,85 @@ is_deeply( [ uniqint 1, 2, 1, 3 ],
 is_deeply( [ uniqint 6.1, 6.2, 6.3 ],
            [ 6 ],
            'uniqint compares as and returns integers' );
+
+my $ls = 31;      # maximum left shift for 32-bit unity
+
+if( $Config{ivsize} == 8 ) {
+  $ls       = 63; # maximum left shift for 64-bit unity
+}
+
+# Populate @in with UV-NV pairs of equivalent values.
+# Each of these values is exactly representable as 
+# either a UV or an NV.
+
+my @in = (1 << $ls, 2 ** $ls,
+          1 << ($ls - 3), 2 ** ($ls - 3),
+          5 << ($ls - 3), 5 * (2 ** ($ls - 3)));
+
+my @correct = (1 << $ls, 1 << ($ls - 3), 5 << ($ls -3));
+
+if( $Config{ivsize} == 8 && $Config{nvsize} == 8 ) {
+
+     # Add some more UV-NV pairs of equivalent values.
+     # Each of these values is exactly representable
+     # as either a UV or an NV.
+
+     push @in, ( 9007199254740991,     9.007199254740991e+15,
+                 9007199254740992,     9.007199254740992e+15,
+                 9223372036854774784,  9.223372036854774784e+18,
+                 18446744073709549568, 1.8446744073709549568e+19,
+                 18446744073709139968, 1.8446744073709139968e+19,
+                 100000000000262144,   1.00000000000262144e+17,
+                 100000000001310720,   1.0000000000131072e+17,
+                 144115188075593728,   1.44115188075593728e+17,
+                 -9007199254740991,     -9.007199254740991e+15,
+                 -9007199254740992,     -9.007199254740992e+15,
+                 -9223372036854774784,  -9.223372036854774784e+18,
+                 -18446744073709549568, -1.8446744073709549568e+19,
+                 -18446744073709139968, -1.8446744073709139968e+19,
+                 -100000000000262144,   -1.00000000000262144e+17,
+                 -100000000001310720,   -1.0000000000131072e+17,
+                 -144115188075593728,   -1.44115188075593728e+17 );
+
+     push @correct, ( 9007199254740991,
+                      9007199254740992,
+                      9223372036854774784,
+                      18446744073709549568,
+                      18446744073709139968,
+                      100000000000262144,
+                      100000000001310720,
+                      144115188075593728,
+                      -9007199254740991,
+                      -9007199254740992,
+                      -9223372036854774784,
+                      -18446744073709549568,
+                      -18446744073709139968,
+                      -100000000000262144,
+                      -100000000001310720,
+                      -144115188075593728 );
+}
+
+# uniqint should discard each of the NVs as being a
+# duplicate of the preceding UV. 
+
+is_deeply( [ uniqint @in],
+           [ @correct],
+           'uniqint correctly compares UV/IVs that don\'t overflow NVs' );
+
+# Hard to know for sure what an Inf is going to be. Lets make one
+my $Inf = 0 + 1E1000;
+my $NaN;
+$Inf **= 1000 while ( $NaN = $Inf - $Inf ) == $NaN;
+
+is_deeply( [ uniqint 1 << $ls, -(1 << $ls), 0, 1, 12345, $Inf, -$Inf, $NaN, 0, $Inf, $NaN, -$Inf ],
+           [ 1 << $ls, -(1 << $ls), 0, 1, 12345, $Inf, -$Inf, $NaN ],
+           'uniqint handles the special values of +-Inf and Nan' );
+
+$ls++;
+
+is_deeply( [ uniqint 1, 2 ** $ls ],
+           [ 1, 2 ** $ls ],
+           "uniqint handles 2 ** $ls correctly" );
 
 {
     my $warnings = "";
