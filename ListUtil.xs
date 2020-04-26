@@ -88,7 +88,7 @@
 #define sv_catpvn_flags(b,n,l,f) sv_catpvn(b,n,l)
 #endif
 
-#if !PERL_VERSION_GE(5,8,0)
+#if !PERL_VERSION_GE(5,8,3)
 static NV Perl_ceil(NV nv) {
     return -Perl_floor(-nv);
 }
