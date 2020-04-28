@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Config; # to determine ivsize
-use Test::More tests => 34;
+use Test::More tests => 35;
 use List::Util qw( uniqstr uniqint uniq );
 
 use Tie::Array;
@@ -113,16 +113,12 @@ if( $Config{ivsize} == 8 && $Config{nvsize} == 8 ) {
      push @in, ( 9007199254740991,     9.007199254740991e+15,       #   9007199254740991 << 0
                  9007199254740992,     9.007199254740992e+15,       #   1                << 53
                  9223372036854774784,  9.223372036854774784e+18,    #   9007199254740991 << 10
-                 18446744073709549568, 1.8446744073709549568e+19,   #   9007199254740991 << 11
-                 18446744073709139968, 1.8446744073709139968e+19,   #   9007199254740791 << 11
                  100000000000262144,   1.00000000000262144e+17,     #   762939453127     << 17
                  100000000001310720,   1.0000000000131072e+17,      #   762939453135     << 17
                  144115188075593728,   1.44115188075593728e+17,     #   549755813887     << 18
                  -9007199254740991,     -9.007199254740991e+15,     # -(9007199254740991 << 0 )
                  -9007199254740992,     -9.007199254740992e+15,     # -(1                << 53)
                  -9223372036854774784,  -9.223372036854774784e+18,  # -(9007199254740991 << 10)
-                 -18446744073709549568, -1.8446744073709549568e+19, # -(9007199254740991 << 11)
-                 -18446744073709139968, -1.8446744073709139968e+19, # -(9007199254740791 << 11)
                  -100000000000262144,   -1.00000000000262144e+17,   # -(762939453127     << 17)
                  -100000000001310720,   -1.0000000000131072e+17,    # -(762939453135     << 17)
                  -144115188075593728,   -1.44115188075593728e+17 ); # -(549755813887     << 18)
@@ -130,27 +126,30 @@ if( $Config{ivsize} == 8 && $Config{nvsize} == 8 ) {
      push @correct, ( 9007199254740991,
                       9007199254740992,
                       9223372036854774784,
-                      18446744073709549568,
-                      18446744073709139968,
                       100000000000262144,
                       100000000001310720,
                       144115188075593728,
                       -9007199254740991,
                       -9007199254740992,
                       -9223372036854774784,
-                      -18446744073709549568,
-                      -18446744073709139968,
                       -100000000000262144,
                       -100000000001310720,
                       -144115188075593728 );
 }
 
 # uniqint should discard each of the NVs as being a
-# duplicate of the preceding integer value. 
+# duplicate of the preceding IV. 
 
 is_deeply( [ uniqint @in],
            [ @correct],
-           'uniqint correctly compares UV/IVs that don\'t overflow NVs' );
+           'uniqint correctly compares IVs that don\'t overflow NVs' );
+
+# This test did not always pass.
+is_deeply( [ uniqint ((2 ** $ls) + (2 ** ($ls - 1)),
+                      (2 ** $ls) + (2 ** ($ls - 2))) ],
+           [ (1 << $ls) + (1 << ($ls - 1)),
+             (1 << $ls) + (1 << ($ls - 2)) ],
+            'uniqint correctly compares UVs that don\'t overflow NVs' );
 
 # Hard to know for sure what an Inf is going to be. Lets make one
 my $Inf = 0 + 1E1000;
@@ -161,8 +160,9 @@ is_deeply( [ uniqint 1 << $ls, -(1 << $ls), 0, 1, 12345, $Inf, -$Inf, $NaN, 0, $
            [ 1 << $ls, -(1 << $ls), 0, 1, 12345, $Inf, -$Inf, $NaN ],
            'uniqint handles the special values of +-Inf and Nan' );
 
+# This test did not always pass.
+# Increment $ls to one greater than maximum allowed left shift 
 $ls++;
-
 is_deeply( [ uniqint 1, 2 ** $ls ],
            [ 1, 2 ** $ls ],
            "uniqint handles 2 ** $ls correctly" );
