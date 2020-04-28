@@ -145,10 +145,11 @@ is_deeply( [ uniqint @in],
            'uniqint correctly compares IVs that don\'t overflow NVs' );
 
 # This test did not always pass.
+# The 2 input values are NVs of distinct values.
+# the 2 expected values are UVs with (respectively) the same values as the NVs.
 is_deeply( [ uniqint ((2 ** $ls) + (2 ** ($ls - 1)),
                       (2 ** $ls) + (2 ** ($ls - 2))) ],
-           [ (1 << $ls) + (1 << ($ls - 1)),
-             (1 << $ls) + (1 << ($ls - 2)) ],
+           [ (3 << ($ls - 1), 5 << ($ls - 2)) ],
             'uniqint correctly compares UVs that don\'t overflow NVs' );
 
 # Hard to know for sure what an Inf is going to be. Lets make one
