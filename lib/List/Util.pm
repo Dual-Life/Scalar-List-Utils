@@ -575,6 +575,11 @@ are enabled (C<use warnings 'uninitialized';>). In addition, an C<undef> in
 the returned list is coerced into a numerical zero, so that the entire list of
 values returned by C<uniqint> are well-behaved as integers.
 
+Note also that, for perls whose NV is the IBM DoubleDouble, NVs whose absolute
+values are greater than 2**106 might not be handled correctly by uniqint.
+They will be handled correctly by uniqnum (see below) but of course, unlike
+uniqint, uniqnum does not truncate fractional values to integers.
+
 =head2 uniqnum
 
     my @subset = uniqnum @values
