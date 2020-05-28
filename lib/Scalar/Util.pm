@@ -241,24 +241,24 @@ true.
     $dual = isdual($foo);               # true
 
 Note that a scalar can be made to have both string and numeric content through
-numeric operations:
+standard operations:
 
     $foo = "10";
     $dual = isdual($foo);               # false
     $bar = $foo + 0;
     $dual = isdual($foo);               # true
 
-Note that although C<$!> appears to be a dual-valued variable, it is
-actually implemented as a magical variable inside the interpreter:
+The C<$!> variable is commonly dual-valued, though it is also magical in other
+ways:
 
     $! = 1;
+    $dual = isdual($!);                 # true
     print("$!\n");                      # "Operation not permitted"
-    $dual = isdual($!);                 # false
 
-You can capture its numeric and string content using:
-
-    $err = dualvar $!, $!;
-    $dual = isdual($err);               # true
+B<CAUTION>: This function is not as useful as it may seem. Dualvars are not a
+distinct concept in Perl, but a standard internal construct of all scalar
+values. Almost any value could be considered as a dualvar by this function
+through the course of normal operations.
 
 =head2 isvstring
 
