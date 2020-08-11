@@ -21,7 +21,7 @@ $VERSION =~ tr/_//d;
 require List::Util; # as it has the XS
 List::Util->VERSION( $VERSION ); # Ensure we got the right XS version (RT#100863)
 
-use constant CAN_SUB => $^V >= 5.016;
+use constant CAN_SUB => $] >= 5.016;
 
 use if CAN_SUB, feature => 'current_sub';
 
