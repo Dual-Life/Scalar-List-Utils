@@ -11,6 +11,8 @@
 #else
 #undef REAL_MULTICALL
 
+#include "ppport.h"
+
 /* In versions of perl where MULTICALL is not defined (i.e. prior
  * to 5.9.4), Perl_pad_push is not exported either. It also has
  * an extra argument in older versions; certainly in the 5.8 series.
@@ -93,12 +95,7 @@ multicall_pad_push(pTHX_ AV *padlist, int depth)
 
 /* Between 5.9.1 and 5.9.2 the retstack was removed, and the
    return op is now stored on the cxstack. */
-#define HAS_RETSTACK (\
-  PERL_REVISION < 5 || \
-  (PERL_REVISION == 5 && PERL_VERSION < 9) || \
-  (PERL_REVISION == 5 && PERL_VERSION == 9 && PERL_SUBVERSION < 2) \
-)
-
+#define HAS_RETSTACK PERL_VERSION_LT(5,9,2)
 
 /* PUSHSUB is defined so differently on different versions of perl
  * that it's easier to define our own version than code for all the
