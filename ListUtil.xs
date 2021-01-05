@@ -240,6 +240,22 @@ static double MY_callrand(pTHX_ CV *randcv)
     return ret;
 }
 
+#define sv_to_cv(sv, subname) MY_sv_to_cv(aTHX_ sv, subname);
+static CV* MY_sv_to_cv(pTHX_ SV* sv, const char * const subname)
+{
+    GV *gv;
+    HV *stash;
+    CV *cv = sv_2cv(sv, &stash, &gv, 0);
+
+    if(cv == Nullcv)
+        croak("Not a subroutine reference");
+
+    if(!CvROOT(cv) && !CvXSUB(cv))
+        croak("Undefined subroutine in %s", subname);
+
+    return cv;
+}
+
 enum {
     ZIP_SHORTEST = 1,
     ZIP_LONGEST  = 2,
@@ -533,13 +549,9 @@ CODE:
     SV *ret = sv_newmortal();
     int index;
     AV *retvals;
-    GV *agv,*bgv,*gv;
-    HV *stash;
+    GV *agv,*bgv;
     SV **args = &PL_stack_base[ax];
-    CV *cv    = sv_2cv(block, &stash, &gv, 0);
-
-    if(cv == Nullcv)
-        croak("Not a subroutine reference");
+    CV *cv    = sv_to_cv(block, ix ? "reductions" : "reduce");
 
     if(items <= 1) {
         if(ix)
@@ -626,13 +638,8 @@ PROTOTYPE: &@
 CODE:
 {
     int index;
-    GV *gv;
-    HV *stash;
     SV **args = &PL_stack_base[ax];
-    CV *cv    = sv_2cv(block, &stash, &gv, 0);
-
-    if(cv == Nullcv)
-        croak("Not a subroutine reference");
+    CV *cv    = sv_to_cv(block, "first");
 
     if(items <= 1)
         XSRETURN_UNDEF;
@@ -701,13 +708,13 @@ PPCODE:
 {
     int ret_true = !(ix & 2); /* return true at end of loop for none/all; false for any/notall */
     int invert   =  (ix & 1); /* invert block test for all/notall */
-    GV *gv;
-    HV *stash;
     SV **args = &PL_stack_base[ax];
-    CV *cv    = sv_2cv(block, &stash, &gv, 0);
-
-    if(cv == Nullcv)
-        croak("Not a subroutine reference");
+    CV *cv    = sv_to_cv(block,
+                         ix == 0 ? "none" :
+                         ix == 1 ? "all" :
+                         ix == 2 ? "any" :
+                         ix == 3 ? "notall" :
+                         "unknown 'any' alias");
 
     SAVESPTR(GvSV(PL_defgv));
 #ifdef dMULTICALL
@@ -930,9 +937,8 @@ pairfirst(block,...)
 PROTOTYPE: &@
 PPCODE:
 {
-    GV *agv,*bgv,*gv;
-    HV *stash;
-    CV *cv    = sv_2cv(block, &stash, &gv, 0);
+    GV *agv,*bgv;
+    CV *cv = sv_to_cv(block, "pairfirst");
     I32 ret_gimme = GIMME_V;
     int argi = 1; /* "shift" the block */
 
@@ -1010,9 +1016,8 @@ pairgrep(block,...)
 PROTOTYPE: &@
 PPCODE:
 {
-    GV *agv,*bgv,*gv;
-    HV *stash;
-    CV *cv    = sv_2cv(block, &stash, &gv, 0);
+    GV *agv,*bgv;
+    CV *cv = sv_to_cv(block, "pairgrep");
     I32 ret_gimme = GIMME_V;
 
     /* This function never returns more than it consumed in arguments. So we
@@ -1100,9 +1105,8 @@ pairmap(block,...)
 PROTOTYPE: &@
 PPCODE:
 {
-    GV *agv,*bgv,*gv;
-    HV *stash;
-    CV *cv    = sv_2cv(block, &stash, &gv, 0);
+    GV *agv,*bgv;
+    CV *cv = sv_to_cv(block, "pairmap");
     SV **args_copy = NULL;
     I32 ret_gimme = GIMME_V;
 
