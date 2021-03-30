@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 5;
+use Test::More tests => 7;
 use List::Util qw(mesh mesh_longest mesh_shortest);
 
 is_deeply( [mesh ()], [],
@@ -22,3 +22,10 @@ is_deeply( [mesh_longest ['x', 'y', 'z'], ['X', 'Y']], [ 'x', 'X', 'y', 'Y', 'z'
 
 is_deeply( [mesh_shortest ['x', 'y', 'z'], ['X', 'Y']], [ 'x', 'X', 'y', 'Y' ],
   'mesh_shortest stops after shortest list' );
+
+# Non arrayref arguments throw exception
+ok( !defined eval { mesh 1, 2, 3 },
+  'non-reference argument throws exception' );
+
+ok( !defined eval { mesh +{ one => 1 } },
+  'reference to non array throws exception' );

@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 5;
+use Test::More tests => 7;
 use List::Util qw(zip zip_longest zip_shortest);
 
 is_deeply( [zip ()], [],
@@ -22,3 +22,10 @@ is_deeply( [zip_longest ['x', 'y', 'z'], ['X', 'Y']], [ ['x', 'X'], ['y', 'Y'], 
 
 is_deeply( [zip_shortest ['x', 'y', 'z'], ['X', 'Y']], [ ['x', 'X'], ['y', 'Y'] ],
   'zip_shortest stops after shortest list' );
+
+# Non arrayref arguments throw exception
+ok( !defined eval { zip 1, 2, 3 },
+  'non-reference argument throws exception' );
+
+ok( !defined eval { zip +{ one => 1 } },
+  'reference to non array throws exception' );
