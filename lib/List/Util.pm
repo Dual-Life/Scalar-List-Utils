@@ -16,7 +16,7 @@ our @EXPORT_OK  = qw(
   sample shuffle uniq uniqint uniqnum uniqstr zip zip_longest zip_shortest mesh mesh_longest mesh_shortest
   head tail pairs unpairs pairkeys pairvalues pairmap pairgrep pairfirst
 );
-our $VERSION    = "1.55";
+our $VERSION    = "1.56";
 our $XS_VERSION = $VERSION;
 $VERSION =~ tr/_//d;
 
@@ -658,7 +658,7 @@ all but the first C<$size> elements from C<@list>.
     my @result = zip [1..3], ['a'..'c'];
     # [1, 'a'], [2, 'b'], [3, 'c']
 
-I<Since version TODO.>
+I<Since version 1.56.>
 
 Returns a list of array references, composed of elements from the given list
 of array references. Each array in the returned list is composed of elements
@@ -699,7 +699,7 @@ explicit about that behaviour as compared to C<zip_shortest>.
     my @result = mesh [1..3], ['a'..'c'];
     # (1, 'a', 2, 'b', 3, 'c')
 
-I<Since version TODO.>
+I<Since version 1.56.>
 
 Returns a list of items collected from elements of the given list of array
 references. Each section of items in the returned list is composed of elements

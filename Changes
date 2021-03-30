@@ -1,3 +1,9 @@
+1.56 -- 2021-03-30
+	[CHANGES]
+	 * Added `List::Util::zip`, `List::Util::mesh` and related functions
+	   (RT129479)
+	 * Updated embedded ppport.h for Devel::PPPort v3.62
+
 1.55 -- 2020-04-09
 	[CHANGES]
 	 * Added List::Util::uniqint
