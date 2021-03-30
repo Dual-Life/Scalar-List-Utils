@@ -244,6 +244,11 @@ static double MY_callrand(pTHX_ CV *randcv)
     return ret;
 }
 
+enum {
+    ZIP_SHORTEST = 1,
+    ZIP_LONGEST  = 2,
+};
+
 MODULE=List::Util       PACKAGE=List::Util
 
 void
@@ -1567,11 +1572,17 @@ CODE:
 
 void
 zip(...)
+ALIAS:
+    zip_longest  = ZIP_LONGEST
+    zip_shortest = ZIP_SHORTEST
 PPCODE:
     UV nlists = items; /* number of lists */
     AV **lists;        /* inbound lists */
     UV len = 0;        /* length of longest inbound list = length of result */
     UV i;
+
+    if(!nlists)
+        XSRETURN(0);
 
     Newx(lists, nlists, AV *);
     SAVEFREEPV(lists);
@@ -1587,8 +1598,27 @@ PPCODE:
             croak("Expected an ARRAY reference to zip");
         av = lists[i] = (AV *)SvRV(arg);
 
-        if(av_count(av) > len)
+        if(!i) {
             len = av_count(av);
+            continue;
+        }
+
+        switch(ix) {
+            case 0: /* zip is alias to zip_longest */
+            case ZIP_LONGEST:
+                if(av_count(av) > len)
+                    len = av_count(av);
+                break;
+
+            case ZIP_SHORTEST:
+                if(av_count(av) < len)
+                    len = av_count(av);
+                break;
+
+            default:
+                fprintf(stderr, "TODO ix=%d\n", ix);
+                break;
+        }
     }
 
     EXTEND(SP, len);

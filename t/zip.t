@@ -3,8 +3,8 @@
 use strict;
 use warnings;
 
-use Test::More tests => 4;
-use List::Util qw(zip);
+use Test::More tests => 5;
+use List::Util qw(zip zip_longest zip_shortest);
 
 is_deeply( [zip ()], [],
   'zip empty returns empty');
@@ -15,5 +15,10 @@ is_deeply( [zip ['a'..'c']], [ ['a'], ['b'], ['c'] ],
 is_deeply( [zip ['one', 'two'], [1, 2]], [ [one => 1], [two => 2] ],
   'zip of two lists returns a list of pair lists' );
 
-is_deeply( [zip ['x', 'y', 'z'], ['X', 'Y']], [ ['x', 'X'], ['y', 'Y'], ['z', undef] ],
-  'zip extends short lists with undef' );
+# Unequal length arrays
+
+is_deeply( [zip_longest ['x', 'y', 'z'], ['X', 'Y']], [ ['x', 'X'], ['y', 'Y'], ['z', undef] ],
+  'zip_longest extends short lists with undef' );
+
+is_deeply( [zip_shortest ['x', 'y', 'z'], ['X', 'Y']], [ ['x', 'X'], ['y', 'Y'] ],
+  'zip_shortest stops after shortest list' );

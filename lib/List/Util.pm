@@ -13,7 +13,7 @@ require Exporter;
 our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw(
   all any first min max minstr maxstr none notall product reduce reductions sum sum0
-  sample shuffle uniq uniqint uniqnum uniqstr zip
+  sample shuffle uniq uniqint uniqnum uniqstr zip_longest zip_shortest zip
   head tail pairs unpairs pairkeys pairvalues pairmap pairgrep pairfirst
 );
 our $VERSION    = "1.55";
@@ -658,15 +658,22 @@ all but the first C<$size> elements from C<@list>.
     my @result = zip [1..3], ['a'..'c'];
     # [1, 'a'], [2, 'b'], [3, 'c']
 
+    my @result = zip_longest ...
+    my @result = zip_shortest ...
+
 I<Since version TODO.>
 
 Returns a list of array references, composed of elements from the given list
 of array references. Each array in the returned list is composed of elements
 at that corresponding position from each of the given input arrays.
 
-The length of the result will as long as the longest input array. If some of
-the input arrays are shorter than this, the missing elements will be filled
-with C<undef>.
+The different variations of the function differ in how they behave when given
+input arrays of differing lengths. C<zip_longest> will continue while any of
+the inputs still have elements, inserting C<undef> into the result if some
+input arrays have already run out. C<zip_shortest> will stop as soon as the
+shortest input runs out of elements, discarding any unused ones.
+
+The plain C<zip> function is an alias to C<zip_longest>.
 
 =head1 CONFIGURATION VARIABLES
 
