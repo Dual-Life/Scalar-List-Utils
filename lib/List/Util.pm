@@ -712,7 +712,7 @@ returned in one long flattened list, instead of being bundled into separate
 arrays.
 
 Because it returns a flat list of items, the C<mesh> function is particularly
-useful for building a hash out of two separate lists of keys and values:
+useful for building a hash out of two separate arrays of keys and values:
 
     my %hash = mesh \@keys, \@values;
 
