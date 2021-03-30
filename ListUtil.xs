@@ -1623,10 +1623,6 @@ PPCODE:
                 if(av_count(av) < len)
                     len = av_count(av);
                 break;
-
-            default:
-                fprintf(stderr, "TODO ix=%d\n", ix);
-                break;
         }
     }
 
