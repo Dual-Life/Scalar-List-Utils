@@ -662,7 +662,9 @@ I<Since version TODO.>
 
 Returns a list of array references, composed of elements from the given list
 of array references. Each array in the returned list is composed of elements
-at that corresponding position from each of the given input arrays.
+at that corresponding position from each of the given input arrays. If any
+input arrays run out of elements before others, then C<undef> will be inserted
+into the result to fill in the gaps.
 
 The C<zip> function is particularly handy for iterating over multiple arrays
 at the same time with a C<foreach> loop, taking one element from each:
@@ -680,16 +682,17 @@ so make sure to invoke it with references to arrays.
 For a function similar to the C<zip> function from C<List::MoreUtils>, see
 L<mesh>.
 
-    my @result = zip_longest ...
     my @result = zip_shortest ...
 
-These different variations of the function differ in how they behave when
-given input arrays of differing lengths. C<zip_longest> will continue while
-any of the inputs still have elements, inserting C<undef> into the result if
-some input arrays have already run out. C<zip_shortest> will stop as soon as
-the shortest input runs out of elements, discarding any unused ones.
+A variation of the function that differs in how it behaves when given input
+arrays of differing lengths. C<zip_shortest> will stop as soon as any one of
+the input arrays run out of elements, discarding any remaining unused values
+from the others.
 
-The plain C<zip> function is an alias to C<zip_longest>.
+    my @result = zip_longest ...
+
+C<zip_longest> is an alias to the C<zip> function, provided simply to be
+explicit about that behaviour as compared to C<zip_shortest>.
 
 =head2 mesh
 
@@ -700,7 +703,9 @@ I<Since version TODO.>
 
 Returns a list of items collected from elements of the given list of array
 references. Each section of items in the returned list is composed of elements
-at the corresponding position from each of the given input arrays.
+at the corresponding position from each of the given input arrays. If any
+input arrays run out of elements before others, then C<undef> will be inserted
+into the result to fill in the gaps.
 
 This is similar to L<zip>, except that all of the ranges in the result are
 returned in one long flattened list, instead of being bundled into separate
@@ -718,8 +723,9 @@ equivalent to C<List::MoreUtils::mesh> or C<List::MoreUtils::zip> (themselves
 aliases of each other). This function does not apply a prototype, so make sure
 to invoke it with references to arrays.
 
-    my @result = mesh_longest ...
     my @result = mesh_shortest ...
+
+    my @result = mesh_longest ...
 
 These variations are similar to those of L<zip>, in that they differ in
 behaviour when one of the input lists runs out of elements before the others.
