@@ -675,6 +675,14 @@ shortest input runs out of elements, discarding any unused ones.
 
 The plain C<zip> function is an alias to C<zip_longest>.
 
+The C<zip> function is particularly handy for iterating over multiple arrays
+at the same time with a C<foreach> loop, taking one element from each:
+
+    foreach ( zip \@xs, \@ys, \@zs ) {
+        my ($x, $y, $z) = @$_;
+        ...
+    }
+
 =head2 mesh
 
   my @result = mesh [1..3], ['a'..'c'];
@@ -692,6 +700,13 @@ at the corresponding position from each of the given input arrays.
 This is similar to L<zip>, except that all of the ranges in the result are
 returned in one long flattened list, instead of being bundled into separate
 arrays.
+
+Because it returns a flat list of items, the C<mesh> function is particularly
+useful for building a hash out of two separate lists of keys and values:
+
+    my %hash = mesh \@keys, \@values;
+
+    my $href = { mesh \@keys, \@values };
 
 =head1 CONFIGURATION VARIABLES
 
