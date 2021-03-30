@@ -658,22 +658,11 @@ all but the first C<$size> elements from C<@list>.
     my @result = zip [1..3], ['a'..'c'];
     # [1, 'a'], [2, 'b'], [3, 'c']
 
-    my @result = zip_longest ...
-    my @result = zip_shortest ...
-
 I<Since version TODO.>
 
 Returns a list of array references, composed of elements from the given list
 of array references. Each array in the returned list is composed of elements
 at that corresponding position from each of the given input arrays.
-
-The different variations of the function differ in how they behave when given
-input arrays of differing lengths. C<zip_longest> will continue while any of
-the inputs still have elements, inserting C<undef> into the result if some
-input arrays have already run out. C<zip_shortest> will stop as soon as the
-shortest input runs out of elements, discarding any unused ones.
-
-The plain C<zip> function is an alias to C<zip_longest>.
 
 The C<zip> function is particularly handy for iterating over multiple arrays
 at the same time with a C<foreach> loop, taking one element from each:
@@ -691,13 +680,21 @@ so make sure to invoke it with references to arrays.
 For a function similar to the C<zip> function from C<List::MoreUtils>, see
 L<mesh>.
 
+    my @result = zip_longest ...
+    my @result = zip_shortest ...
+
+These different variations of the function differ in how they behave when
+given input arrays of differing lengths. C<zip_longest> will continue while
+any of the inputs still have elements, inserting C<undef> into the result if
+some input arrays have already run out. C<zip_shortest> will stop as soon as
+the shortest input runs out of elements, discarding any unused ones.
+
+The plain C<zip> function is an alias to C<zip_longest>.
+
 =head2 mesh
 
   my @result = mesh [1..3], ['a'..'c'];
   # (1, 'a', 2, 'b', 3, 'c')
-
-  my @result = mesh_longest ...
-  my @result = mesh_shortest ...
 
 I<Since version TODO.>
 
@@ -720,6 +717,12 @@ B<NOTE> to users of L<List::MoreUtils>: This function is a non-prototyped
 equivalent to C<List::MoreUtils::mesh> or C<List::MoreUtils::zip> (themselves
 aliases of each other). This function does not apply a prototype, so make sure
 to invoke it with references to arrays.
+
+  my @result = mesh_longest ...
+  my @result = mesh_shortest ...
+
+These variations are similar to those of L<zip>, in that they differ in
+behaviour when one of the input lists runs out of elements before the others.
 
 =head1 CONFIGURATION VARIABLES
 
