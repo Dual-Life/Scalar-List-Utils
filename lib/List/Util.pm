@@ -683,6 +683,14 @@ at the same time with a C<foreach> loop, taking one element from each:
         ...
     }
 
+B<NOTE> to users of L<List::MoreUtils>: This function does not behave the same
+as C<List::MoreUtils::zip>, but is actually a non-prototyped equivalent to
+C<List::MoreUtils::zip_unflatten>. This function does not apply a prototype,
+so make sure to invoke it with references to arrays.
+
+For a function similar to the C<zip> function from C<List::MoreUtils>, see
+L<mesh>.
+
 =head2 mesh
 
   my @result = mesh [1..3], ['a'..'c'];
@@ -707,6 +715,11 @@ useful for building a hash out of two separate lists of keys and values:
     my %hash = mesh \@keys, \@values;
 
     my $href = { mesh \@keys, \@values };
+
+B<NOTE> to users of L<List::MoreUtils>: This function is a non-prototyped
+equivalent to C<List::MoreUtils::mesh> or C<List::MoreUtils::zip> (themselves
+aliases of each other). This function does not apply a prototype, so make sure
+to invoke it with references to arrays.
 
 =head1 CONFIGURATION VARIABLES
 
