@@ -247,6 +247,10 @@ static double MY_callrand(pTHX_ CV *randcv)
 enum {
     ZIP_SHORTEST = 1,
     ZIP_LONGEST  = 2,
+
+    ZIP_MESH          = 4,
+    ZIP_MESH_LONGEST  = ZIP_MESH|ZIP_LONGEST,
+    ZIP_MESH_SHORTEST = ZIP_MESH|ZIP_SHORTEST,
 };
 
 MODULE=List::Util       PACKAGE=List::Util
@@ -1573,13 +1577,18 @@ CODE:
 void
 zip(...)
 ALIAS:
-    zip_longest  = ZIP_LONGEST
-    zip_shortest = ZIP_SHORTEST
+    zip_longest   = ZIP_LONGEST
+    zip_shortest  = ZIP_SHORTEST
+    mesh          = ZIP_MESH
+    mesh_longest  = ZIP_MESH_LONGEST
+    mesh_shortest = ZIP_MESH_SHORTEST
 PPCODE:
     UV nlists = items; /* number of lists */
     AV **lists;        /* inbound lists */
     UV len = 0;        /* length of longest inbound list = length of result */
     UV i;
+    bool is_mesh = (ix & ZIP_MESH);
+    ix &= ~ZIP_MESH;
 
     if(!nlists)
         XSRETURN(0);
@@ -1621,24 +1630,37 @@ PPCODE:
         }
     }
 
-    EXTEND(SP, len);
+    EXTEND(SP, len * (is_mesh ? nlists : 1));
 
     for(i = 0; i < len; i++) {
         UV listi;
-        AV *ret = newAV();
-        av_extend(ret, nlists);
+        AV *ret;
+
+        if(is_mesh)
+            ;
+        else {
+            ret = newAV();
+            av_extend(ret, nlists);
+        }
 
         for(listi = 0; listi < nlists; listi++) {
             SV *item = (i < av_count(lists[listi])) ?
                 AvARRAY(lists[listi])[i] :
                 &PL_sv_undef;
-            av_push(ret, SvREFCNT_inc(item));
+
+            if(is_mesh)
+                mPUSHs(SvREFCNT_inc(item));
+            else
+                av_push(ret, SvREFCNT_inc(item));
         }
 
-        mPUSHs(newRV_noinc((SV *)ret));
+        if(is_mesh)
+            ;
+        else
+            mPUSHs(newRV_noinc((SV *)ret));
     }
 
-    XSRETURN(len);
+    XSRETURN(len * (is_mesh ? nlists : 1));
 
 MODULE=List::Util       PACKAGE=Scalar::Util
 

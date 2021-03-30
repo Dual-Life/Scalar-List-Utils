@@ -13,7 +13,7 @@ require Exporter;
 our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw(
   all any first min max minstr maxstr none notall product reduce reductions sum sum0
-  sample shuffle uniq uniqint uniqnum uniqstr zip_longest zip_shortest zip
+  sample shuffle uniq uniqint uniqnum uniqstr zip zip_longest zip_shortest mesh mesh_longest mesh_shortest
   head tail pairs unpairs pairkeys pairvalues pairmap pairgrep pairfirst
 );
 our $VERSION    = "1.55";
@@ -674,6 +674,24 @@ input arrays have already run out. C<zip_shortest> will stop as soon as the
 shortest input runs out of elements, discarding any unused ones.
 
 The plain C<zip> function is an alias to C<zip_longest>.
+
+=head2 mesh
+
+  my @result = mesh [1..3], ['a'..'c'];
+  # (1, 'a', 2, 'b', 3, 'c')
+
+  my @result = mesh_longest ...
+  my @result = mesh_shortest ...
+
+I<Since version TODO.>
+
+Returns a list of items collected from elements of the given list of array
+references. Each section of items in the returned list is composed of elements
+at the corresponding position from each of the given input arrays.
+
+This is similar to L<zip>, except that all of the ranges in the result are
+returned in one long flattened list, instead of being bundled into separate
+arrays.
 
 =head1 CONFIGURATION VARIABLES
 
