@@ -57,7 +57,7 @@ List::Util - A selection of general-utility list subroutines
 
       pairs unpairs pairkeys pairvalues pairfirst pairgrep pairmap
 
-      shuffle uniq uniqint uniqnum uniqstr
+      shuffle uniq uniqint uniqnum uniqstr zip mesh
     );
 
 =head1 DESCRIPTION
