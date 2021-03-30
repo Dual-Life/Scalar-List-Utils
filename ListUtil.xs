@@ -1565,6 +1565,51 @@ CODE:
         ST(0) = sv_2mortal(newSViv(retcount));
 }
 
+void
+zip(...)
+PPCODE:
+    UV nlists = items; /* number of lists */
+    AV **lists;        /* inbound lists */
+    UV len = 0;        /* length of longest inbound list = length of result */
+    UV i;
+
+    Newx(lists, nlists, AV *);
+    SAVEFREEPV(lists);
+
+    /* TODO: This may or maynot work on objects with arrayification overload */
+    /* Remember to unit test it */
+
+    for(i = 0; i < nlists; i++) {
+        SV *arg = ST(i);
+        AV *av;
+
+        if(!SvROK(arg) || SvTYPE(SvRV(arg)) != SVt_PVAV)
+            croak("Expected an ARRAY reference to zip");
+        av = lists[i] = (AV *)SvRV(arg);
+
+        if(av_count(av) > len)
+            len = av_count(av);
+    }
+
+    EXTEND(SP, len);
+
+    for(i = 0; i < len; i++) {
+        UV listi;
+        AV *ret = newAV();
+        av_extend(ret, nlists);
+
+        for(listi = 0; listi < nlists; listi++) {
+            SV *item = (i < av_count(lists[listi])) ?
+                AvARRAY(lists[listi])[i] :
+                &PL_sv_undef;
+            av_push(ret, SvREFCNT_inc(item));
+        }
+
+        mPUSHs(newRV_noinc((SV *)ret));
+    }
+
+    XSRETURN(len);
+
 MODULE=List::Util       PACKAGE=Scalar::Util
 
 void

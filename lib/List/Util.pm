@@ -13,7 +13,7 @@ require Exporter;
 our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw(
   all any first min max minstr maxstr none notall product reduce reductions sum sum0
-  sample shuffle uniq uniqint uniqnum uniqstr
+  sample shuffle uniq uniqint uniqnum uniqstr zip
   head tail pairs unpairs pairkeys pairvalues pairmap pairgrep pairfirst
 );
 our $VERSION    = "1.55";
@@ -652,6 +652,21 @@ all but the first C<$size> elements from C<@list>.
 
     @result = tail -2, qw( foo bar baz );
     # baz
+
+=head2 zip
+
+    my @result = zip [1..3], ['a'..'c'];
+    # [1, 'a'], [2, 'b'], [3, 'c']
+
+I<Since version TODO.>
+
+Returns a list of array references, composed of elements from the given list
+of array references. Each array in the returned list is composed of elements
+at that corresponding position from each of the given input arrays.
+
+The length of the result will as long as the longest input array. If some of
+the input arrays are shorter than this, the missing elements will be filled
+with C<undef>.
 
 =head1 CONFIGURATION VARIABLES
 
