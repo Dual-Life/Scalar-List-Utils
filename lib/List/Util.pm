@@ -693,8 +693,8 @@ The plain C<zip> function is an alias to C<zip_longest>.
 
 =head2 mesh
 
-  my @result = mesh [1..3], ['a'..'c'];
-  # (1, 'a', 2, 'b', 3, 'c')
+    my @result = mesh [1..3], ['a'..'c'];
+    # (1, 'a', 2, 'b', 3, 'c')
 
 I<Since version TODO.>
 
@@ -718,8 +718,8 @@ equivalent to C<List::MoreUtils::mesh> or C<List::MoreUtils::zip> (themselves
 aliases of each other). This function does not apply a prototype, so make sure
 to invoke it with references to arrays.
 
-  my @result = mesh_longest ...
-  my @result = mesh_shortest ...
+    my @result = mesh_longest ...
+    my @result = mesh_shortest ...
 
 These variations are similar to those of L<zip>, in that they differ in
 behaviour when one of the input lists runs out of elements before the others.
