@@ -1626,37 +1626,46 @@ PPCODE:
         }
     }
 
-    EXTEND(SP, len * (is_mesh ? nlists : 1));
+    if(is_mesh) {
+        UV retcount = len * nlists;
 
-    for(i = 0; i < len; i++) {
-        UV listi;
-        AV *ret;
+        EXTEND(SP, retcount);
 
-        if(is_mesh)
-            ;
-        else {
-            ret = newAV();
-            av_extend(ret, nlists);
-        }
+        for(i = 0; i < len; i++) {
+            UV listi;
 
-        for(listi = 0; listi < nlists; listi++) {
-            SV *item = (i < av_count(lists[listi])) ?
-                AvARRAY(lists[listi])[i] :
-                &PL_sv_undef;
+            for(listi = 0; listi < nlists; listi++) {
+                SV *item = (i < av_count(lists[listi])) ?
+                    AvARRAY(lists[listi])[i] :
+                    &PL_sv_undef;
 
-            if(is_mesh)
                 mPUSHs(SvREFCNT_inc(item));
-            else
-                av_push(ret, SvREFCNT_inc(item));
+            }
         }
 
-        if(is_mesh)
-            ;
-        else
-            mPUSHs(newRV_noinc((SV *)ret));
+        XSRETURN(retcount);
     }
+    else {
+        EXTEND(SP, len);
 
-    XSRETURN(len * (is_mesh ? nlists : 1));
+        for(i = 0; i < len; i++) {
+            UV listi;
+            AV *ret = newAV();
+            av_extend(ret, nlists);
+
+            for(listi = 0; listi < nlists; listi++) {
+                SV *item = (i < av_count(lists[listi])) ?
+                    AvARRAY(lists[listi])[i] :
+                    &PL_sv_undef;
+
+                av_push(ret, SvREFCNT_inc(item));
+            }
+
+            mPUSHs(newRV_noinc((SV *)ret));
+        }
+
+        XSRETURN(len);
+    }
 
 MODULE=List::Util       PACKAGE=Scalar::Util
 
