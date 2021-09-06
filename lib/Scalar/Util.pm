@@ -36,11 +36,6 @@ unless (defined &isvstring) {
 }
 
 sub export_fail {
-  if (grep { /^(?:weaken|isweak)$/ } @_ ) {
-    require Carp;
-    Carp::croak("Weak references are not implemented in the version of perl");
-  }
-
   if (grep { /^isvstring$/ } @_ ) {
     require Carp;
     Carp::croak("Vstrings are not implemented in the version of perl");
@@ -323,11 +318,6 @@ Return true if C<$var> is tainted.
 Module use may give one of the following errors during import.
 
 =over
-
-=item Weak references are not implemented in the version of perl
-
-The version of perl that you are using does not implement weak references, to
-use L</isweak> or L</weaken> you will need to use a newer release of perl.
 
 =item Vstrings are not implemented in the version of perl
 
