@@ -2029,12 +2029,13 @@ PPCODE:
         }
 
         if (old_data && HeVAL(old_data)) {
+            SV* old_val = HeVAL(old_data);
             SV* new_full_name = sv_2mortal(newSVpvn_flags(HvNAME(stash), HvNAMELEN_get(stash), HvNAMEUTF8(stash) ? SVf_UTF8 : 0));
             sv_catpvn(new_full_name, "::", 2);
             sv_catpvn_flags(new_full_name, nameptr, s - nameptr, utf8flag ? SV_CATUTF8 : SV_CATBYTES);
-            SvREFCNT_inc(HeVAL(old_data));
-            if (hv_store_ent(DBsub, new_full_name, HeVAL(old_data), 0) != NULL)
-                SvREFCNT_inc(HeVAL(old_data));
+            SvREFCNT_inc(old_val);
+            if (!hv_store_ent(DBsub, new_full_name, old_val, 0))
+                SvREFCNT_dec(old_val);
         }
     }
 
