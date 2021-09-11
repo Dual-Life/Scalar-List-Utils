@@ -1,3 +1,19 @@
+1.57 -- 2021-09-11
+	[CHANGES]
+	 * Added Scalar::Util::isbool() to track new core-supported boolean
+	   value nature on scalars
+	 * Fix various typoes in docs, code comments, etc...
+	 * Removed code conditional on whether SvWEAKREF is supported, as
+	   every perl since v5.6 supports it
+
+	[BUGFIXES]
+	 * Fix segfaults when an undefined subroutine is passed to
+	   block-taking subs (thanks ilmari)
+	 * Correct refcount handling on hv_store_ent to PL_DBsub in
+	   set_subname() (thanks nwc10)
+	 * Don't rely on Scalar::Util functions when unit-testing List::Util
+	   ones (thanks haarg)
+
 1.56 -- 2021-03-30
 	[CHANGES]
 	 * Added `List::Util::zip`, `List::Util::mesh` and related functions
