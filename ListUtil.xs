@@ -1780,11 +1780,7 @@ weaken(sv)
     SV *sv
 PROTOTYPE: $
 CODE:
-#ifdef SvWEAKREF
     sv_rvweaken(sv);
-#else
-    croak("weak references are not implemented in this release of perl");
-#endif
 
 void
 unweaken(sv)
@@ -1796,7 +1792,7 @@ CODE:
 #if defined(sv_rvunweaken)
     PERL_UNUSED_VAR(tsv);
     sv_rvunweaken(sv);
-#elif defined(SvWEAKREF)
+#else
     /* This code stolen from core's sv_rvweaken() and modified */
     if (!SvOK(sv))
         return;
@@ -1822,8 +1818,6 @@ CODE:
     SvRV_set(sv, SvREFCNT_inc_NN(tsv));
     SvROK_on(sv);
 #endif
-#else
-    croak("weak references are not implemented in this release of perl");
 #endif
 
 void
@@ -1831,12 +1825,8 @@ isweak(sv)
     SV *sv
 PROTOTYPE: $
 CODE:
-#ifdef SvWEAKREF
     ST(0) = boolSV(SvROK(sv) && SvWEAKREF(sv));
     XSRETURN(1);
-#else
-    croak("weak references are not implemented in this release of perl");
-#endif
 
 int
 readonly(sv)
@@ -2114,7 +2104,7 @@ BOOT:
     HV *lu_stash = gv_stashpvn("List::Util", 10, TRUE);
     GV *rmcgv = *(GV**)hv_fetch(lu_stash, "REAL_MULTICALL", 14, TRUE);
     SV *rmcsv;
-#if !defined(SvWEAKREF) || !defined(SvVOK) || !defined(SvIsBOOL)
+#if !defined(SvVOK) || !defined(SvIsBOOL)
     HV *su_stash = gv_stashpvn("Scalar::Util", 12, TRUE);
     GV *vargv = *(GV**)hv_fetch(su_stash, "EXPORT_FAIL", 11, TRUE);
     AV *varav;
@@ -2125,10 +2115,6 @@ BOOT:
     if(SvTYPE(rmcgv) != SVt_PVGV)
         gv_init(rmcgv, lu_stash, "List::Util", 10, TRUE);
     rmcsv = GvSVn(rmcgv);
-#ifndef SvWEAKREF
-    av_push(varav, newSVpv("weaken",6));
-    av_push(varav, newSVpv("isweak",6));
-#endif
 #ifndef SvVOK
     av_push(varav, newSVpv("isvstring",9));
 #endif
