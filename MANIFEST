@@ -12,6 +12,8 @@ README
 t/00version.t
 t/any-all.t
 t/blessed.t
+t/boolean-thr.t
+t/boolean.t
 t/dualvar.t
 t/exotic_names.t
 t/first.t
@@ -42,6 +44,7 @@ t/subname.t
 t/sum.t
 t/sum0.t
 t/tainted.t
+t/undefined-block.t
 t/uniq.t
 t/uniqnum.t
 t/weak.t
