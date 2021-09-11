@@ -1177,11 +1177,12 @@ PPCODE:
                     stack[reti++] = newSVsv(PL_stack_base[i + 1]);
         }
 
-        if (spill)
+        if (spill) {
             /* the POP_MULTICALL will trigger the SAVEFREESV above;
              * keep it alive  it on the temps stack instead */
             SvREFCNT_inc_simple_void_NN(spill);
             sv_2mortal((SV*)spill);
+        }
 
         POP_MULTICALL;
 
