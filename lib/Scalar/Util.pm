@@ -25,18 +25,7 @@ $VERSION =~ tr/_//d;
 require List::Util; # List::Util loads the XS
 List::Util->VERSION( $VERSION ); # Ensure we got the right XS version (RT#100863)
 
-our @EXPORT_FAIL;
-
-unless (defined &weaken) {
-  push @EXPORT_FAIL, qw(weaken);
-}
-unless (defined &isweak) {
-  push @EXPORT_FAIL, qw(isweak isvstring);
-}
-unless (defined &isvstring) {
-  push @EXPORT_FAIL, qw(isvstring);
-}
-
+# populating @EXPORT_FAIL is done in the XS code
 sub export_fail {
   if (grep { /^isvstring$/ } @_ ) {
     require Carp;
