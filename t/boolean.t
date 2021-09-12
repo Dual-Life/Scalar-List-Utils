@@ -8,7 +8,7 @@ use Test::More  (grep { /isbool/ } @Scalar::Util::EXPORT_FAIL)
     ? (skip_all => 'isbool is not supported on this perl')
     : (tests => 15);
 
-Scalar::Util->import("isbool");
+use Scalar::Util qw(isbool);
 
 # basic constants
 {
