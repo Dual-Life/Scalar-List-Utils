@@ -12,8 +12,6 @@ README
 t/00version.t
 t/any-all.t
 t/blessed.t
-t/boolean-thr.t
-t/boolean.t
 t/dualvar.t
 t/exotic_names.t
 t/first.t
