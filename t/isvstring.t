@@ -6,7 +6,7 @@ use warnings;
 $|=1;
 use Scalar::Util ();
 use Test::More  (grep { /isvstring/ } @Scalar::Util::EXPORT_FAIL)
-    ? (skip_all => 'isvstring requires XS version')
+    ? (skip_all => 'isvstring is not supported on this perl version')
     : (tests => 3);
 
 use Scalar::Util qw(isvstring);
