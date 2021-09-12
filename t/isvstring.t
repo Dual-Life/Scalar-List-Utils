@@ -9,7 +9,7 @@ use Test::More  (grep { /isvstring/ } @Scalar::Util::EXPORT_FAIL)
     ? (skip_all => 'isvstring requires XS version')
     : (tests => 3);
 
-Scalar::Util->import(qw[isvstring]);
+use Scalar::Util qw(isvstring);
 
 my $vs = ord("A") == 193 ? 241.75.240 : 49.46.48;
 
