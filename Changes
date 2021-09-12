@@ -1,3 +1,11 @@
+1.58 -- 2021-09-12
+	[CHANGES]
+	 * Removed Scalar::Util::isbool() as the API design for older perls
+	   isn't quite clear, and it doesn't do anything useful on any
+	   currently-released perl version
+	  * Tidy up the unnecessary bits of @EXPORT_FAIL
+	  * Use the new G_LIST constant rather than G_ARRAY
+
 1.57 -- 2021-09-11
 	[CHANGES]
 	 * Added Scalar::Util::isbool() to track new core-supported boolean
