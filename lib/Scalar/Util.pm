@@ -218,6 +218,16 @@ Returns true if the given variable is boolean in nature - that is, it is the
 result of a boolean operator (such as C<defined>, C<exists>, or a numerical or
 string comparison), or is a variable that is copied from one.
 
+On earlier versions of perl this function does not exist. You can test for
+this with something like:
+
+    use Scalar::Util;
+    use constant HAVE_ISBOOL => defined &Scalar::Util::isbool;
+
+    ...
+
+    if( HAVE_ISBOOL ) { ... Scalar::Util::isbool( $var ) ... }
+
 =head2 dualvar
 
     my $var = dualvar( $num, $string );
