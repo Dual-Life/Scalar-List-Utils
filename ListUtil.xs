@@ -1680,6 +1680,10 @@ CODE:
     ST(0) = boolSV(SvIsBOOL(sv));
     XSRETURN(1);
 #else
+    /* In all probability this won't be reachable from pure perl, because of
+     * the hv_delete() call in the BOOT section. But lets cover the corner-case
+     * that someone does somehow manage to find it
+     */
     croak("stable boolean values are not implemented in this release of perl");
 #endif
 
@@ -2125,6 +2129,10 @@ BOOT:
     av_push(varav, newSVpv("isvstring",9));
 #endif
 #ifndef SvIsBOOL
+    /* xsubpp doesn't easily support conditionally creating a function.
+     * Best we can do is delete it if it shouldn't exist
+     */
+    hv_delete(su_stash, "isbool", 6, 0);
     av_push(varav, newSVpv("isbool",6));
 #endif
 #ifdef REAL_MULTICALL
