@@ -970,7 +970,7 @@ PPCODE:
                 continue;
 
             POP_MULTICALL;
-            if(ret_gimme == G_ARRAY) {
+            if(ret_gimme == G_LIST) {
                 ST(0) = sv_mortalcopy(a);
                 ST(1) = sv_mortalcopy(b);
                 XSRETURN(2);
@@ -997,7 +997,7 @@ PPCODE:
             if(!SvTRUEx(*PL_stack_sp))
                 continue;
 
-            if(ret_gimme == G_ARRAY) {
+            if(ret_gimme == G_LIST) {
                 ST(0) = sv_mortalcopy(a);
                 ST(1) = sv_mortalcopy(b);
                 XSRETURN(2);
@@ -1052,7 +1052,7 @@ PPCODE:
             MULTICALL;
 
             if(SvTRUEx(*PL_stack_sp)) {
-                if(ret_gimme == G_ARRAY) {
+                if(ret_gimme == G_LIST) {
                     /* We can't mortalise yet or they'd be mortal too early */
                     stack[reti++] = newSVsv(a);
                     stack[reti++] = newSVsv(b);
@@ -1063,7 +1063,7 @@ PPCODE:
         }
         POP_MULTICALL;
 
-        if(ret_gimme == G_ARRAY)
+        if(ret_gimme == G_LIST)
             for(i = 0; i < reti; i++)
                 sv_2mortal(stack[i]);
     }
@@ -1081,7 +1081,7 @@ PPCODE:
             SPAGAIN;
 
             if(SvTRUEx(*PL_stack_sp)) {
-                if(ret_gimme == G_ARRAY) {
+                if(ret_gimme == G_LIST) {
                     ST(reti++) = sv_mortalcopy(a);
                     ST(reti++) = sv_mortalcopy(b);
                 }
@@ -1091,7 +1091,7 @@ PPCODE:
         }
     }
 
-    if(ret_gimme == G_ARRAY)
+    if(ret_gimme == G_LIST)
         XSRETURN(reti);
     else if(ret_gimme == G_SCALAR) {
         ST(0) = newSViv(reti);
@@ -1133,7 +1133,7 @@ PPCODE:
         AV *spill = NULL; /* accumulates results if too big for stack */
 
         dMULTICALL;
-        I32 gimme = G_ARRAY;
+        I32 gimme = G_LIST;
 
         UNUSED_VAR_newsp;
         PUSH_MULTICALL(cv);
@@ -1196,7 +1196,7 @@ PPCODE:
             av_clear(spill);
         }
 
-        if(ret_gimme == G_ARRAY)
+        if(ret_gimme == G_LIST)
             for(i = 0; i < reti; i++)
                 sv_2mortal(ST(i));
     }
@@ -1214,11 +1214,11 @@ PPCODE:
                 &PL_sv_undef;
 
             PUSHMARK(SP);
-            count = call_sv((SV*)cv, G_ARRAY);
+            count = call_sv((SV*)cv, G_LIST);
 
             SPAGAIN;
 
-            if(count > 2 && !args_copy && ret_gimme == G_ARRAY) {
+            if(count > 2 && !args_copy && ret_gimme == G_LIST) {
                 int n_args = items - argi;
                 Newx(args_copy, n_args, SV *);
                 SAVEFREEPV(args_copy);
@@ -1229,7 +1229,7 @@ PPCODE:
                 items = n_args;
             }
 
-            if(ret_gimme == G_ARRAY)
+            if(ret_gimme == G_LIST)
                 for(i = 0; i < count; i++)
                     ST(reti++) = sv_mortalcopy(SP[i - count + 1]);
             else
@@ -1239,7 +1239,7 @@ PPCODE:
         }
     }
 
-    if(ret_gimme == G_ARRAY)
+    if(ret_gimme == G_LIST)
         XSRETURN(reti);
 
     ST(0) = sv_2mortal(newSViv(reti));
@@ -1359,7 +1359,7 @@ CODE:
 
             seen_undef++;
 
-            if(GIMME_V == G_ARRAY)
+            if(GIMME_V == G_LIST)
                 ST(retcount) = arg;
             retcount++;
             continue;
@@ -1407,13 +1407,13 @@ CODE:
         hv_store_ent(seen, arg, &PL_sv_yes, 0);
 #endif
 
-        if(GIMME_V == G_ARRAY)
+        if(GIMME_V == G_LIST)
             ST(retcount) = SvOK(arg) ? arg : sv_2mortal(newSVpvn("", 0));
         retcount++;
     }
 
   finish:
-    if(GIMME_V == G_ARRAY)
+    if(GIMME_V == G_LIST)
         XSRETURN(retcount);
     else
         ST(0) = sv_2mortal(newSViv(retcount));
@@ -1563,13 +1563,13 @@ CODE:
         hv_store(seen, SvPVX(keysv), SvCUR(keysv), &PL_sv_yes, 0);
 #endif
 
-        if(GIMME_V == G_ARRAY)
+        if(GIMME_V == G_LIST)
             ST(retcount) = SvOK(arg) ? arg : sv_2mortal(newSViv(0));
         retcount++;
     }
 
   finish:
-    if(GIMME_V == G_ARRAY)
+    if(GIMME_V == G_LIST)
         XSRETURN(retcount);
     else
         ST(0) = sv_2mortal(newSViv(retcount));
