@@ -406,7 +406,7 @@ CODE:
                     IV i = SvIV(sv);
                     if (retiv == 0) /* avoid later division by zero */
                         break;
-                    if (retiv < 0) {
+                    if (retiv < -1) { /* avoid -1 because that causes SIGFPE */
                         if (i < 0) {
                             if (i >= IV_MAX / retiv) {
                                 retiv *= i;
@@ -420,7 +420,7 @@ CODE:
                             }
                         }
                     }
-                    else {
+                    else if (retiv > 0) {
                         if (i < 0) {
                             if (i >= IV_MIN / retiv) {
                                 retiv *= i;
