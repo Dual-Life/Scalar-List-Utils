@@ -548,7 +548,7 @@ CODE:
 {
     SV *ret = sv_newmortal();
     int index;
-    AV *retvals;
+    AV *retvals = NULL;
     GV *agv,*bgv;
     SV **args = &PL_stack_base[ax];
     CV *cv    = sv_to_cv(block, ix ? "reductions" : "reduce");
