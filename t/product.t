@@ -34,8 +34,9 @@ is( $v, 0, 'two 0');
 
 # RT139601 cornercases
 {
-  is( product(-1.0, 0), 0, 'product(-1.0, 0)' );
-  is( product(-1, 0), 0, 'product(-1, 0)' );
+  # Numify the result because some older perl versions see "-0" as a string
+  is( 0+product(-1.0, 0), 0, 'product(-1.0, 0)' );
+  is( 0+product(-1, 0), 0, 'product(-1, 0)' );
 }
 
 my $x = -3;
