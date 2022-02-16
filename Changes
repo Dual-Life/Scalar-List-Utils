@@ -1,3 +1,7 @@
+1.61 -- 2022-02-16
+	[BUGFIXES}
+	 * Fix some more signed comparison warnings (Perl5 #19429)
+
 1.60 -- 2021-10-08
 	[BUGFIXES]
 	 * Quiet some -Wsign-compare warnings by using `int` instead of `UV`
