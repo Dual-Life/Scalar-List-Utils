@@ -145,7 +145,7 @@ on these but C<reftype()> will return the underlying C structure type of
 C<"REGEXP"> in all capitals.
 
 I<Since Perl version 5.35.7> an equivalent function is available as
-C<builtin::refaddr>.
+C<builtin::reftype>.
 
 =head2 weaken
 
