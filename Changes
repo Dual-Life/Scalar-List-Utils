@@ -1,5 +1,13 @@
+1.62 -- 2022-03-17
+	[CHANGES]
+	 * Prepare for perl 5.35.10 release:
+	    + Skip the tainted tests if your perl was built without taint
+	      support
+	    + Document the existence of the `builtin::` equivalents for
+	      several Scalar::Util functions
+
 1.61 -- 2022-02-16
-	[BUGFIXES}
+	[BUGFIXES]
 	 * Fix some more signed comparison warnings (Perl5 #19429)
 
 1.60 -- 2021-10-08
