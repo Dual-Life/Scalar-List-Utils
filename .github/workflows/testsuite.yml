@@ -1,0 +1,172 @@
+name: testsuite
+
+on:
+  push:
+    branches:
+      - "*"
+    tags-ignore:
+      - "*"
+  pull_request:
+
+jobs:
+
+##
+## A very light and cheap workflow using the default ubuntu container
+##    a failure here will block all later workflows
+##
+
+  ubuntu:
+    env:
+      PERL_USE_UNSAFE_INC: 0
+      AUTHOR_TESTING: 1
+      AUTOMATED_TESTING: 1
+      RELEASE_TESTING: 1
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - run: perl -V
+      - name: Makefile.PL
+        run: perl -I$(pwd) Makefile.PL
+      - run: make test
+
+##
+## Test multiple versions of Perl using perl-tester
+##
+
+  linux:
+    name: "linux ${{ matrix.perl-version }}"
+    needs: [ubuntu]
+    env:
+      PERL_USE_UNSAFE_INC: 0
+      AUTHOR_TESTING: 1
+      AUTOMATED_TESTING: 1
+      RELEASE_TESTING: 1
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        perl-version:
+          [
+            "perl-tester:5.36",
+            "perl-tester:5.34",
+            "perl-tester:5.32",
+            "perl-tester:5.30",
+            "perl-tester:5.28",
+            "perl-tester:5.26",
+            "perl-tester:5.24",
+            "perl-tester:5.22",
+            "perl-tester:5.20",
+            "perl-tester:5.18",
+            "perl-tester:5.16",
+            "perl-tester:5.14",
+            "perl-tester:5.12",
+            "perl-tester:5.10",
+            "perl-tester:5.8",
+            "perl:5.6",
+          ]
+
+    container:
+      image: perldocker/${{ matrix.perl-version }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - run: perl -V
+      - name: Makefile.PL
+        run: perl -I$(pwd) Makefile.PL
+      - run: make test
+
+##
+## Testing on macOS
+##
+
+  macOS:
+    needs: [ubuntu, linux]
+    env:
+      PERL_USE_UNSAFE_INC: 0
+      AUTHOR_TESTING: 1
+      AUTOMATED_TESTING: 1
+      RELEASE_TESTING: 1
+
+    runs-on: macOS-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        perl-version: [latest]
+
+    steps:
+      - uses: actions/checkout@v3
+      - run: perl -V
+      - name: Makefile.PL
+        run: perl -I$(pwd) Makefile.PL
+      - run: make test
+
+##
+## Testing on windows
+##
+
+  windows:
+    needs: [ubuntu, linux]
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Perl
+        run: |
+          choco install strawberryperl
+          echo 'C:\strawberry\c\bin'         >> $GITHUB_PATH
+          echo 'C:\strawberry\perl\site\bin' >> $GITHUB_PATH
+          echo 'C:\strawberry\perl\bin'      >> $GITHUB_PATH
+      - run: perl -V
+      - run: perl Makefile.PL
+      - run: make
+      - name: Run Tests
+        run: make test
+        env:
+          AUTHOR_TESTING: 1
+          RELEASE_TESTING: 1
+
+##
+## Testing on windows: using multiple Perl versions
+##
+
+  # windows:
+  #   name: windows Perl v${{ matrix.perl-version }}
+  #   needs: [ubuntu, linux]
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       os: ["windows-latest"]
+  #       perl-version:
+  #         - "5.34"
+  #         - "5.32"
+  #         - "5.30"
+  #         - "5.28"
+  #         - "5.26"
+  #         - "5.24"
+  #         # - "5.22"
+  #         # - "5.20.3"
+  #         # - "5.18.4"
+  #         # - "5.16.3"
+  #         # - "5.14.4"
+  #         # - "5.12.5"
+  #         # - "5.10.1"
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - name: Set Up Perl
+  #       uses: shogo82148/actions-setup-perl@v1.16.0
+  #       with:
+  #         perl-version: ${{ matrix.perl-version }}
+  #     - run: perl -V
+  #     - run: perl Makefile.PL
+  #     - run: make
+  #     - name: Run Tests
+  #       run: make test
+  #       env:
+  #         AUTHOR_TESTING: 1
+  #         RELEASE_TESTING: 1
