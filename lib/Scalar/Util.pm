@@ -230,7 +230,7 @@ B<NOTE>: Copying a weak reference creates a normal, strong, reference.
     $weak = isweak($copy);              # false
 
 I<Since Perl version 5.35.7> an equivalent function is available as
-C<builtin::isweak>.
+C<builtin::is_weak>.
 
 =head1 OTHER FUNCTIONS
 
