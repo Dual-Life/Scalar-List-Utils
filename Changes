@@ -1,3 +1,10 @@
+1.63 -- 2022-08-08
+	[BUGFIXES]
+	 * Fix off-by-one in stack handling of head() / tail() (RT143905)
+	 * Fix documentation copy-paste error about builtin::reftype
+	 * Ensure exotic_names.t will work on EBCDIC platforms
+	 * Add basic Github CI workflow
+
 1.62 -- 2022-03-17
 	[CHANGES]
 	 * Prepare for perl 5.35.10 release:
