@@ -657,7 +657,7 @@ Change 365 on 2000/03/03 by <gbarr@pobox.com> (Graham Barr)
 
 	- Added auto-detection for a compiler and install the perl version
 	  if not found
-	- Better perl implemenation of reftype, should be thread-safe now
+	- Better perl implementation of reftype, should be thread-safe now
 
 Change 364 on 2000/03/03 by <gbarr@pobox.com> (Graham Barr)
 
