@@ -410,7 +410,7 @@ list; e.g.:
 I<Since version 1.29.>
 
 A convenient shortcut to operating on even-sized lists of pairs, this function
-returns a list of the the first values of each of the pairs in the given list.
+returns a list of the first values of each of the pairs in the given list.
 It is a more efficient version of
 
     @keys = pairmap { $a } @kvlist
@@ -422,7 +422,7 @@ It is a more efficient version of
 I<Since version 1.29.>
 
 A convenient shortcut to operating on even-sized lists of pairs, this function
-returns a list of the the second values of each of the pairs in the given list.
+returns a list of the second values of each of the pairs in the given list.
 It is a more efficient version of
 
     @values = pairmap { $b } @kvlist
