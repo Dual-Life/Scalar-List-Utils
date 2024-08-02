@@ -1,3 +1,11 @@
+1.64 -- 2024-08-02
+	[CHANGES]
+	 * On Perl version 5.40 or later, various `Scalar::Util` functions are
+	   now simply aliases to core-provided functions in `builtin::`:
+	    + blessed(), refaddr(), reftype(), weaken(), unweaken(), isweak()
+	 * Remember to list `head` and `tail` in `List::Util` SYNOPSIS
+	 * Various improvements to internal CI infrastructure
+
 1.63 -- 2022-08-08
 	[BUGFIXES]
 	 * Fix off-by-one in stack handling of head() / tail() (RT143905)
