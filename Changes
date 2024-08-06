@@ -1,3 +1,9 @@
+1.65 -- 2024-08-06
+	[BUGFIXES]
+	 * Update exotic names test to avoid single quote package separator
+	   (GH #128)
+	 * Don't loop forever in uniqnum.t (GH #130)
+
 1.64 -- 2024-08-02
 	[CHANGES]
 	 * On Perl version 5.40 or later, various `Scalar::Util` functions are
