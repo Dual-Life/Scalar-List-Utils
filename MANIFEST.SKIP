@@ -1,6 +1,7 @@
 MANIFEST.SKIP
 ^\.git/
 .gitignore
+^\.github/
 blib\b
 cover_db
 ^Makefile$
