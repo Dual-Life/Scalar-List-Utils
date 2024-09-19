@@ -1,3 +1,9 @@
+1.66 -- 2024-09-19
+	[BUGFIXES]
+	 * Apostrophe is no longer special in package names in recent Perl
+	   versions
+	 * Fix operator precedence issue in `t/uniqnum.t`
+
 1.65 -- 2024-08-06
 	[BUGFIXES]
 	 * Update exotic names test to avoid single quote package separator
