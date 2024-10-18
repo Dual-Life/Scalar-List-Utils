@@ -1605,7 +1605,8 @@ PPCODE:
         AV *av;
 
         if(!SvROK(arg) || SvTYPE(SvRV(arg)) != SVt_PVAV)
-            croak("Expected an ARRAY reference to zip");
+            croak("Expected an ARRAY reference to %s",
+                is_mesh ? "mesh" : "zip");
         av = lists[i] = (AV *)SvRV(arg);
 
         if(!i) {
