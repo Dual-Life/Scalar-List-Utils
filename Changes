@@ -1,8 +1,9 @@
-1.67 -- 2024-10-18
+1.68 -- 2024-10-18
 	[CHANGES]
 	 * Added (empty) Scalar::List::Utils module so that a module exists
 	   which matches the name of the distribution (GH #135)
 
+1.67 -- 2024-10-18
 	[BUGFIXES]
 	 * zip() and mesh() should not alias their input values into the
 	   returned results (RT156183)
