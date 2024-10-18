@@ -1,3 +1,13 @@
+1.67 -- 2024-10-18
+	[CHANGES]
+	 * Added (empty) Scalar::List::Utils module so that a module exists
+	   which matches the name of the distribution (GH #135)
+
+	[BUGFIXES]
+	 * zip() and mesh() should not alias their input values into the
+	   returned results (RT156183)
+	 * Exception message from mesh() should name the correct function
+
 1.66 -- 2024-09-19
 	[BUGFIXES]
 	 * Apostrophe is no longer special in package names in recent Perl

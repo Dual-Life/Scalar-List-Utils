@@ -2,7 +2,7 @@ package Scalar::List::Utils;
 use strict;
 use warnings;
 
-our $VERSION    = "1.63";
+our $VERSION    = "1.67";
 $VERSION =~ tr/_//d;
 
 1;
