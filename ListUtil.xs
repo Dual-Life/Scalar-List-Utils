@@ -1640,7 +1640,7 @@ PPCODE:
                     AvARRAY(lists[listi])[i] :
                     &PL_sv_undef;
 
-                mPUSHs(SvREFCNT_inc(item));
+                mPUSHs(newSVsv(item));
             }
         }
 
@@ -1659,7 +1659,7 @@ PPCODE:
                     AvARRAY(lists[listi])[i] :
                     &PL_sv_undef;
 
-                av_push(ret, SvREFCNT_inc(item));
+                av_push(ret, newSVsv(item));
             }
 
             mPUSHs(newRV_noinc((SV *)ret));
