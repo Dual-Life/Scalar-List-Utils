@@ -1369,8 +1369,9 @@ CODE:
             /* coerce to integer */
 #if PERL_VERSION >= 8
             /* int_amg only appeared in perl 5.8.0 */
-            if(SvAMAGIC(arg) && (arg = AMG_CALLun(arg, int)))
-                ; /* nothing to do */
+            SV *tmpsv;
+            if(SvAMAGIC(arg) && (tmpsv = AMG_CALLun(arg, int)))
+                arg = tmpsv;
             else
 #endif
             if(!SvOK(arg) || SvNOK(arg) || SvPOK(arg))

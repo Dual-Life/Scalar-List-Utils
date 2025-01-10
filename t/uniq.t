@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Config; # to determine ivsize
-use Test::More tests => 31;
+use Test::More tests => 35;
 use List::Util qw( uniqstr uniqint uniq );
 
 use Tie::Array;
@@ -96,6 +96,31 @@ is_deeply( [ uniqint 6.1, 6.2, 6.3 ],
     is_deeply( [ uniqint undef ],
                [ 0 ],
                'uniqint on undef coerces to zero' );
+}
+
+{
+    use Math::BigInt;
+    my ($obj1, $obj2) = map { Math::BigInt->new($_) } 5, 10;
+
+    is_deeply( [ uniqint $obj1, $obj1 ],
+               [ $obj1 ],
+               'uniqint removes repeated Math::BigInt objects' );
+
+    is_deeply( [ uniqint $obj1, $obj1, $obj2, $obj2 ],
+               [ $obj1, $obj2 ],
+               'uniqint removes subsequent Math::BigInt objects' );
+}
+
+{
+    my ($obj1, $obj2) = map { bless {}, "PackageWithoutIntOverload" } 1..2;
+
+    is_deeply( [ uniqint $obj1, $obj1 ],
+               [ $obj1 ],
+               'uniqint removes repeated objects with no int overload' );
+
+    is_deeply( [ uniqint $obj1, $obj1, $obj2, $obj2 ],
+               [ $obj1, $obj2 ],
+               'uniqint removes subsequent objects with no int overload' );
 }
 
 SKIP: {
