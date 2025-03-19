@@ -21,6 +21,28 @@ $VERSION =~ tr/_//d;
 require List::Util; # as it has the XS
 List::Util->VERSION( $VERSION ); # Ensure we got the right XS version (RT#100863)
 
+use constant CAN_SUB => $] >= 5.016;
+
+use if CAN_SUB, feature => 'current_sub';
+
+unless (CAN_SUB) {
+  push @EXPORT_OK, '__SUB__';
+  *__SUB__ = \&ROUTINE;
+}
+
+sub import {
+  my ($class, @args) = @_;
+  if (CAN_SUB) {
+    my @new_args = grep { $_ ne '__SUB__' } @args;
+    if (@args != @new_args) {
+      feature->import('current_sub');
+      @_ = ($class, @new_args);
+    }
+  }
+
+  goto &Exporter::import;
+}
+
 =head1 NAME
 
 Sub::Util - A selection of utility subroutines for subs and CODE references
