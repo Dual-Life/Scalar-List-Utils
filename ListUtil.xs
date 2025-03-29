@@ -1852,10 +1852,10 @@ CODE:
 #ifdef SvVOK
     SvGETMAGIC(sv);
     ST(0) = boolSV(SvVOK(sv));
-    XSRETURN(1);
 #else
-    croak("vstrings are not implemented in this release of perl");
+    ST(0) = boolSV(0);
 #endif
+    XSRETURN(1);
 
 SV *
 looks_like_number(sv)
@@ -2109,20 +2109,9 @@ BOOT:
     HV *lu_stash = gv_stashpvn("List::Util", 10, TRUE);
     GV *rmcgv = *(GV**)hv_fetch(lu_stash, "REAL_MULTICALL", 14, TRUE);
     SV *rmcsv;
-#if !defined(SvVOK)
-    HV *su_stash = gv_stashpvn("Scalar::Util", 12, TRUE);
-    GV *vargv = *(GV**)hv_fetch(su_stash, "EXPORT_FAIL", 11, TRUE);
-    AV *varav;
-    if(SvTYPE(vargv) != SVt_PVGV)
-        gv_init(vargv, su_stash, "Scalar::Util", 12, TRUE);
-    varav = GvAVn(vargv);
-#endif
     if(SvTYPE(rmcgv) != SVt_PVGV)
         gv_init(rmcgv, lu_stash, "List::Util", 10, TRUE);
     rmcsv = GvSVn(rmcgv);
-#ifndef SvVOK
-    av_push(varav, newSVpv("isvstring",9));
-#endif
 #ifdef REAL_MULTICALL
     sv_setsv(rmcsv, &PL_sv_yes);
 #else
