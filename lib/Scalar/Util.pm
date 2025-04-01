@@ -36,16 +36,6 @@ if( $] >= 5.040 ) {
   *isweak = \&{ $builtins->{is_weak} };  # renamed
 }
 
-# populating @EXPORT_FAIL is done in the XS code
-sub export_fail {
-  if (grep { /^isvstring$/ } @_ ) {
-    require Carp;
-    Carp::croak("Vstrings are not implemented in this version of perl");
-  }
-
-  @_;
-}
-
 # set_prototype has been moved to Sub::Util with a different interface
 sub set_prototype(&$)
 {
