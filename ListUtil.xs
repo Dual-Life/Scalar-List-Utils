@@ -1369,8 +1369,10 @@ CODE:
             /* coerce to integer */
 #if PERL_VERSION >= 8
             /* int_amg only appeared in perl 5.8.0 */
-            if(SvAMAGIC(arg) && (arg = AMG_CALLun(arg, int)))
-                ; /* nothing to do */
+            if(SvAMAGIC(arg)) {
+                if(!(arg = AMG_CALLun(arg, int)))
+                    croak("No \"int\" method found in overloaded package");
+            }
             else
 #endif
             if(!SvOK(arg) || SvNOK(arg) || SvPOK(arg))
