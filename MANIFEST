@@ -1,6 +1,7 @@
 Changes
 lib/List/Util.pm
 lib/List/Util/XS.pm
+lib/Scalar/List/Utils.pm
 lib/Scalar/Util.pm
 lib/Sub/Util.pm
 ListUtil.xs
