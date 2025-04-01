@@ -1,3 +1,9 @@
+1.69 -- 2025-04-01
+	[CHANGES]
+	 * Always allow `isvstring` to be exported even on Perl 5.6, where it
+	   just returns false
+	 * Fix string comparison logic that compares versions with `$]`
+
 1.68 -- 2024-10-18
 	[CHANGES]
 	 * Added (empty) Scalar::List::Utils module so that a module exists
