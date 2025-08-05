@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 use Config; # to determine nvsize
-use Test::More tests => 23;
+use Test::More tests => 22;
 use List::Util qw( uniqnum );
 
 is_deeply( [ uniqnum qw( 1 1.0 1E0 2 3 ) ],
@@ -26,74 +26,47 @@ is_deeply( [ uniqnum qw( 1 1.1 1.2 1.3 ) ],
                'uniqnum distinguishes large floats (stringified)' );
 }
 
-my ($uniq_count1, $uniq_count2, $equiv);
+my ($nv1, $nv2);
+
+# Assign values to $nv1 and $nv2 that differ by only 1 ULP and check that uniqnum
+# recognizes them as being unique.
+# Perl stringifies $nv1 and $nv2 to the same string - hence our interest in
+# verifying that $nv1 and $nv2 are, indeed, recognized as unique.
 
 if($Config{nvsize} == 8) {
-  # NV is either 'double' or 8-byte 'long double'
-
-  # The 2 values should be unequal - but just in case perl is buggy:
-  $equiv = 1 if 1.4142135623730951 == 1.4142135623730954;
-
-  $uniq_count1 = uniqnum (1.4142135623730951,
-                          1.4142135623730954 );
-
-  $uniq_count2 = uniqnum('1.4142135623730951',
-                         '1.4142135623730954' );
+    # NV is either 'double' or 8-byte 'long double'
+    $nv1 = 1.4142135623730951; # 0x1.6a09e667f3bcdp+0
+    $nv2 = 1.4142135623730954; # 0x1.6a09e667f3bcep+0
 }
 
 elsif(length(sqrt(2)) > 25) {
-  # NV is either IEEE 'long double' or '__float128' or doubledouble
+    # NV is either IEEE 'long double' or '__float128' or doubledouble
 
-  if(1 + (2 ** -1074) != 1) {
-    # NV is doubledouble
+    if(1 + (2 ** -1074) != 1) {
+        # NV is doubledouble
+        $nv1 = (1 + (2 ** -1074)); # 1 + 0x1p-1074
+        $nv2 = (1 + (2 ** -1073)); # 1 + 0x1p-1073
+    }
 
-    # The 2 values should be unequal - but just in case perl is buggy:
-    $equiv = 1 if 1 + (2 ** -1074) == 1 + (2 ** - 1073);
-
-    $uniq_count1 = uniqnum (1 + (2 ** -1074),
-                            1 + (2 ** -1073) );
-    # The 2 values should be unequal - but just in case perl is buggy:
-    $equiv = 1 if 4.0564819207303340847894502572035e31 == 4.0564819207303340847894502572034e31;
-
-    $uniq_count2 = uniqnum('4.0564819207303340847894502572035e31',
-                           '4.0564819207303340847894502572034e31' );
-  }
-
-  else {
-    # NV is either IEEE 'long double' or '__float128'
-
-    # The 2 values should be unequal - but just in case perl is buggy:
-    $equiv = 1 if 1005.10228292019306452029161597769015 == 1005.1022829201930645202916159776901;
-
-    $uniq_count1 = uniqnum (1005.10228292019306452029161597769015,
-                            1005.1022829201930645202916159776901 );
-
-    $uniq_count2 = uniqnum('1005.10228292019306452029161597769015',
-                           '1005.1022829201930645202916159776901' );
-  }
+    else {
+        # NV is either IEEE 'long double' or '__float128'
+        $nv1 = 1005.10228292019306452029161597769015;  # 0x3.ed1a2f36a52b28b8deb548dfef82p+8
+        $nv2 = 1005.10228292019306452029161597769005;  # 0x3.ed1a2f36a52b28b8deb548dfef81p+8
+    }
 }
 
 else {
-  # NV is extended precision 'long double'
-
-  # The 2 values should be unequal - but just in case perl is buggy:
-  $equiv = 1 if 10.770329614269008063 == 10.7703296142690080625;
-
-  $uniq_count1 = uniqnum (10.770329614269008063,
-                          10.7703296142690080625 );
-
-  $uniq_count2 = uniqnum('10.770329614269008063',
-                         '10.7703296142690080625' );
+    # NV is 80-bit extended precision 'long double'
+    $nv1 = 10.770329614269008063;  # 0xa.c53452546cf9aa2p+0
+    $nv2 = 10.7703296142690080625; # 0xa.c53452546cf9aa1p+0
 }
 
-if($equiv) {
-  is($uniq_count1, 1, 'uniqnum preserves uniqueness of high precision floats');
-  is($uniq_count2, 1, 'uniqnum preserves uniqueness of high precision floats (stringified)');
-}
+SKIP: {
+    # $nv1 and $nv2 should have been assigned different values, but perl could be buggy:
+    skip ( 'perl incorrectly assigned identical values to both test variables', 1 ) if $nv1 == $nv2;
 
-else {
-  is($uniq_count1, 2, 'uniqnum preserves uniqueness of high precision floats');
-  is($uniq_count2, 2, 'uniqnum preserves uniqueness of high precision floats (stringified)');
+    my $uniq_count = uniqnum( $nv1, $nv2 );
+    is( $uniq_count, 2, 'uniqnum preserves uniqueness of high precision floats' );
 }
 
 SKIP: {
@@ -130,7 +103,7 @@ if( $Config{ivsize} == 8 ) {
 }
 
 # Populate @in with UV-NV pairs of equivalent values.
-# Each of these values is exactly representable as
+# Each of these values is exactly representable as 
 # either a UV or an NV.
 
 my @in = (1 << $ls, 2 ** $ls,
@@ -181,7 +154,7 @@ if( $Config{ivsize} == 8 && $Config{nvsize} == 8 ) {
 }
 
 # uniqnum should discard each of the NVs as being a
-# duplicate of the preceding UV.
+# duplicate of the preceding UV. 
 
 is_deeply( [ uniqnum @in],
            [ @correct],

@@ -15,6 +15,11 @@
 #  include "ppport.h"
 #endif
 
+/* Detect "DoubleDouble" nvtype */
+#if defined(USE_LONG_DOUBLE) && LDBL_MANT_DIG == 106
+#  define NV_IS_DOUBLEDOUBLE
+#endif
+
 /* For uniqnum, define ACTUAL_NVSIZE to be the number *
  * of bytes that are actually used to store the NV    */
 
@@ -24,10 +29,22 @@
 #  define ACTUAL_NVSIZE NVSIZE
 #endif
 
-/* Detect "DoubleDouble" nvtype */
+/* Define some additional symbols for uniqint */
+#if ACTUAL_NVSIZE == 8
+#  define NV_DEC_PREC 17
+#  define NV_BUF_SIZE 32
 
-#if defined(USE_LONG_DOUBLE) && LDBL_MANT_DIG == 106
-#  define NV_IS_DOUBLEDOUBLE
+#elif ACTUAL_NVSIZE == 10
+#  define NV_DEC_PREC 21
+#  define NV_BUF_SIZE 32
+
+#elif defined(NV_IS_DOUBLEDOUBLE)
+#  define NV_DEC_PREC 33
+#  define NV_BUF_SIZE 48
+
+#else
+#  define NV_DEC_PREC 36
+#  define NV_BUF_SIZE 48
 #endif
 
 #ifndef PERL_VERSION_DECIMAL
@@ -1370,23 +1387,62 @@ CODE:
 #if PERL_VERSION >= 8
             /* int_amg only appeared in perl 5.8.0 */
             if(SvAMAGIC(arg) && (arg = AMG_CALLun(arg, int)))
-                ; /* nothing to do */
+              ; /* nothing to do */
             else
 #endif
             if(!SvOK(arg) || SvNOK(arg) || SvPOK(arg))
             {
-                /* Convert undef, NVs and PVs into a well-behaved int */
+                /* Convert undef, NVs and PVs to an integral value */
                 NV nv = SvNV(arg);
+                char buffer[NV_BUF_SIZE]; /* for when additional precision is needed    */
 
-                if(nv > (NV)UV_MAX)
-                    /* Too positive for UV - use NV */
-                    arg = newSVnv(Perl_floor(nv));
-                else if(nv < (NV)IV_MIN)
-                    /* Too negative for IV - use NV */
-                    arg = newSVnv(Perl_ceil(nv));
-                else if(nv > 0 && (UV)nv > (UV)IV_MAX)
+                if(nv != nv) {
+                    /* Leave all NaN values as NaNs. Use newSVnv(nv)                    */
+                    arg = newSVnv(nv);
+                }
+                else if(nv >= (NV)UV_MAX) {
+                    /* Too big for IV - use NV */
+                    if(nv > NV_MAX) {
+                        /* If nv > NV_MAX, then nv is +Inf.                              */
+                        arg = newSVnv(nv);
+                    }
+                    else {
+                        /* For each NV type, NV_DEC_PREC provides sufficient precision   *
+                         * as to allow uniqint to determine if floored NVs are unique.   *
+                         * (Perl itself does not always provide sufficient precision.)   *
+                         * NV_DEC_PREC is defined near the start of this file.           */
+                        sprintf(buffer, "%.*" NVgf, NV_DEC_PREC, Perl_floor(nv));
+                        arg = newSVpv(buffer, 0);
+                    }
+                }
+                else if(nv <= (NV)IV_MIN) {
+                    /* Too negative for UV - use NV */
+                    if(nv < -NV_MAX) {
+                        /* If nv < -NV_MAX, then nv is -Inf. Use newSVnv(nv)              */
+                        arg = newSVnv(nv);
+                    }
+                    else {
+                        /* For each NV type, NV_DEC_PREC provides sufficient precision   *
+                         * as to allow uniqint to determine if ceiled NVs are unique.    *
+                         * (Perl itself does not always provide sufficient precision.)   *
+                         * NV_DEC_PREC is defined near the start of this file.           */
+                        sprintf(buffer, "%.*" NVgf, NV_DEC_PREC, Perl_ceil(nv));
+                        arg = newSVpv(buffer, 0);
+                    }
+                }
+                else if(nv > 0 && (UV)nv > (UV)IV_MAX) {
                     /* Too positive for IV - use UV */
+#if defined(_MSC_VER) && _MSC_VER < 1900 && IVSIZE == 8 && NVSIZE == 8
+                    
+                    /* Less recent versions of Visual Studio make a mess of casting NVs  *
+                     * that are greater than 2 ** 63 and less than 2 ** 64 to the        *
+                     * correct UV. Hence, we use this workaround.                        */
+                   
+                    arg = newSVuv( 9223372036854775808 + (UV)(nv - 9223372036854775808.0) );
+#else 
                     arg = newSVuv(nv);
+#endif
+                }
                 else
                     /* Must now fit into IV */
                     arg = newSViv(nv);
@@ -1459,7 +1515,7 @@ CODE:
 #endif
         }
 #if NVSIZE > IVSIZE                          /* $Config{nvsize} > $Config{ivsize} */
-        /* Avoid altering arg's flags */
+        /* Avoid altering arg's flags */ 
         if(SvUOK(arg))      nv_arg = (NV)SvUV(arg);
         else if(SvIOK(arg)) nv_arg = (NV)SvIV(arg);
         else                nv_arg = SvNV(arg);
@@ -1484,9 +1540,9 @@ CODE:
              * that are allocated but never used. (It is only the 10-byte      *
              * extended precision long double that allocates bytes that are    *
              * never used. For all other NV types ACTUAL_NVSIZE == sizeof(NV). */
-            sv_setpvn(keysv, (char *) &nv_arg, ACTUAL_NVSIZE);
+            sv_setpvn(keysv, (char *) &nv_arg, ACTUAL_NVSIZE);  
         }
-#else                                    /* $Config{nvsize} == $Config{ivsize} == 8 */
+#else                                    /* $Config{nvsize} == $Config{ivsize} == 8 */ 
         if( SvIOK(arg) || !SvOK(arg) ) {
 
             /* It doesn't matter if SvUOK(arg) is TRUE */
@@ -1516,7 +1572,7 @@ CODE:
                  * Then subtract 1 so that all of the ("allowed") bits below the set bit *
                  * are 1 && all other ("disallowed") bits are set to 0.                  *
                  * (If the value prior to subtraction was 0, then subtracting 1 will set *
-                 * all bits - which is also fine.)                                       */
+                 * all bits - which is also fine.)                                       */ 
                 UV valid_bits = (lowest_set << 53) - 1;
 
                 /* The value of arg can be exactly represented by a double unless one    *
@@ -1525,9 +1581,9 @@ CODE:
                  * by -1 prior to performing that '&' operation - so multiply iv by sign.*/
                 if( !((iv * sign) & (~valid_bits)) ) {
                     /* Avoid altering arg's flags */
-                    nv_arg = uok ? (NV)SvUV(arg) : (NV)SvIV(arg);
+                    nv_arg = uok ? (NV)SvUV(arg) : (NV)SvIV(arg); 
                     sv_setpvn(keysv, (char *) &nv_arg, 8);
-                }
+                }          
                 else {
                     /* Read in the bytes, rather than the numeric value of the IV/UV as  *
                      * this is more efficient, despite having to sv_catpvn an extra byte.*/
