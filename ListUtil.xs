@@ -1514,8 +1514,11 @@ CODE:
                  * The neatest approach I could find was provided by roboticus at:       *
                  *     https://www.perlmonks.org/?node_id=11113490                       *
                  * First, identify the lowest set bit and assign its value to an IV.     *
-                 * Note that this value will always be > 0, and always a power of 2.     */
-                IV lowest_set = iv & -iv;
+                 * Note that this value will always be > 0, and always a power of 2.     * 
+                 *                                                                       *
+                 * (Yes, complementing and adding 1 is just taking the negative          *
+                 * on 2's complement machines, but not on 1's complement ones)           */
+                IV lowest_set = iv & (~iv + 1);
 
                 /* Second, shift it left 53 bits to get location of the first bit        *
                  * beyond arg's highest "allowed" set bit.                                                    *
