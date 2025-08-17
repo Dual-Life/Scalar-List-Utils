@@ -1495,6 +1495,9 @@ CODE:
             sv_setpvn(keysv, (char *) &nv_arg, ACTUAL_NVSIZE);
         }
 #else                                    /* $Config{nvsize} == $Config{ivsize} == 8 */
+#  ifndef NEGATE_2UV    /* Assumes iv < 0; avoids undefined behavior if iv == IV_MIN */
+#    define NEGATE_2UV(iv) ((UV) -((iv) + 1) + 1U)
+#  endif
         if( SvIOK(arg) || !SvOK(arg) ) {
 
             /* It doesn't matter if SvUOK(arg) is TRUE */
@@ -1502,10 +1505,9 @@ CODE:
 
             /* use "0" for all zeros */
             if(iv == 0) sv_setpvs(keysv, "0");
-
             else {
                 int uok = SvUOK(arg);
-                int sign = ( iv > 0 || uok ) ? 1 : -1;
+                UV uv = (iv > 0 || uok) ? iv : NEGATE_2UV(iv);
 
                 /* Set keysv to the bytes of SvNV(arg) if and only if the integer value  *
                  * held by arg can be represented exactly as a double - ie if there are  *
@@ -1513,29 +1515,34 @@ CODE:
                  * most significant set bit.                                             *
                  * The neatest approach I could find was provided by roboticus at:       *
                  *     https://www.perlmonks.org/?node_id=11113490                       *
-                 * First, identify the lowest set bit and assign its value to an IV.     *
-                 * Note that this value will always be > 0, and always a power of 2.     * 
-                 *                                                                       *
+                 * First, identify the lowest set bit.  The word will look like          *
+                 * this, with a rightmost set bit in position 's':                       *
+                 * ('x's are the values above that bit, and 'y's are their               *
+                 * complements so 'x&y' yields 0)                                        *
+                 *               s                                                       *
+                 *  x..xxxxxxxxxx100..00      Original                                   *
+                 *  y..yyyyyyyyyy011..11      Complement                                 *
+                 *  y..yyyyyyyyyy100..00      Add 1                                      *
+                 *  0..0000000000100..00      AND with the original                      *
                  * (Yes, complementing and adding 1 is just taking the negative          *
-                 * on 2's complement machines, but not on 1's complement ones)           */
-                IV lowest_set = iv & (~iv + 1);
+                 * on 2's complement machines, but not on 1's complement ones,           *
+                 * and some compilers complain about negating an unsigned.)              */
+                UV lowest_set = uv & (~uv + 1);
 
-                /* Second, shift it left 53 bits to get location of the first bit        *
-                 * beyond arg's highest "allowed" set bit.                                                    *
-                 * NOTE: If lowest set bit is initially far enough left, then this left  *
-                 * shift operation will result in a value of 0, which is fine.           *
-                 * Then subtract 1 so that all of the ("allowed") bits below the set bit *
-                 * are 1 && all other ("disallowed") bits are set to 0.                  *
-                 * (If the value prior to subtraction was 0, then subtracting 1 will set *
-                 * all bits - which is also fine.)                                       */
-                UV valid_bits = (lowest_set << NV_PRESERVES_UV_BITS) - 1;
-
-
-                /* The value of arg can be exactly represented by a double unless one    *
-                 * or more of its "disallowed" bits are set - ie if iv & (~valid_bits)   *
-                 * is untrue. However, if (iv < 0 && !SvUOK(arg)) we need to multiply iv *
-                 * by -1 prior to performing that '&' operation - so multiply iv by sign.*/
-                if( !((iv * sign) & (~valid_bits)) ) {
+                /* Shift it left by the number of bits in the mantissa, let's            *
+                 * say the mantissa contains 9 bits                                      *
+                 *      |<--9-->|                                                        *
+                                 s                                                       *
+                 *  0..0000000000100..00   From above                                    *
+                 *  0..0100000000000..00   Shift                                         *
+                 *  0..0011111111111..11   Subtract 1                                    *
+                 *  1..1100000000000..00   Complement                                    *
+                 *  x..xx00000000000..00   AND with original                             *
+                 *                                                                       *
+                 * If the result is 0, all the 'x's were 0, meaning there were           *
+                 * no bits set outside what fits in the mantissa; otherwise it           *
+                 * can't be represented by an NV losslessly.                             */
+                if ((uv & (~ ((lowest_set << NV_PRESERVES_UV_BITS) - 1))) == 0) {
                     /* Avoid altering arg's flags */
                     nv_arg = uok ? (NV)SvUV(arg) : (NV)SvIV(arg);
                     sv_setpvn(keysv, (char *) &nv_arg, 8);
