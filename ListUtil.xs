@@ -1458,6 +1458,9 @@ CODE:
             SvNV(arg); /* SvIV() sets SVf_IOK even on floats on 5.6 */
 #endif
         }
+#ifndef NV_PRESERVES_UV_BITS
+#  define NV_PRESERVES_UV_BITS 53
+#endif
 #if PERL_VERSION < 6
 #  if NVSIZE > IVSIZE               /* $Config{nvsize} > $Config{ivsize} */
 #    define NV_PRESERVES_UV
@@ -1522,7 +1525,8 @@ CODE:
                  * are 1 && all other ("disallowed") bits are set to 0.                  *
                  * (If the value prior to subtraction was 0, then subtracting 1 will set *
                  * all bits - which is also fine.)                                       */
-                UV valid_bits = (lowest_set << 53) - 1;
+                UV valid_bits = (lowest_set << NV_PRESERVES_UV_BITS) - 1;
+
 
                 /* The value of arg can be exactly represented by a double unless one    *
                  * or more of its "disallowed" bits are set - ie if iv & (~valid_bits)   *
