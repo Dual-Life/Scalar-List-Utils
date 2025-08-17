@@ -680,7 +680,7 @@ C<List::MoreUtils::zip_unflatten>. This function does not apply a prototype,
 so make sure to invoke it with references to arrays.
 
 For a function similar to the C<zip> function from C<List::MoreUtils>, see
-L<mesh>.
+L</mesh>.
 
     my @result = zip_shortest ...
 
@@ -707,7 +707,7 @@ at the corresponding position from each of the given input arrays. If any
 input arrays run out of elements before others, then C<undef> will be inserted
 into the result to fill in the gaps.
 
-This is similar to L<zip>, except that all of the ranges in the result are
+This is similar to L</zip>, except that all of the ranges in the result are
 returned in one long flattened list, instead of being bundled into separate
 arrays.
 
@@ -727,7 +727,7 @@ to invoke it with references to arrays.
 
     my @result = mesh_longest ...
 
-These variations are similar to those of L<zip>, in that they differ in
+These variations are similar to those of L</zip>, in that they differ in
 behaviour when one of the input lists runs out of elements before the others.
 
 =head1 CONFIGURATION VARIABLES
