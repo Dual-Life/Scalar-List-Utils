@@ -1477,7 +1477,7 @@ CODE:
 
         /* for NaN, use the platform's normal stringification */
         else if (nv_arg != nv_arg) sv_setpvf(keysv, "%" NVgf, nv_arg);
-#ifdef NV_IS_DOUBLEDOUBLE
+#  ifdef NV_IS_DOUBLEDOUBLE
         /* If the least significant double is zero, it could be either 0.0     *
          * or -0.0. We therefore ignore the least significant double and       *
          * assign to keysv the bytes of the most significant double only.      */
@@ -1485,7 +1485,7 @@ CODE:
             double double_arg = (double)nv_arg;
             sv_setpvn(keysv, (char *) &double_arg, 8);
         }
-#endif
+#  endif
         else {
             /* Use the byte structure of the NV.                               *
              * ACTUAL_NVSIZE == sizeof(NV) minus the number of bytes           *
