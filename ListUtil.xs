@@ -1458,7 +1458,12 @@ CODE:
             SvNV(arg); /* SvIV() sets SVf_IOK even on floats on 5.6 */
 #endif
         }
-#if NVSIZE > IVSIZE                          /* $Config{nvsize} > $Config{ivsize} */
+#if PERL_VERSION < 6
+#  if NVSIZE > IVSIZE               /* $Config{nvsize} > $Config{ivsize} */
+#    define NV_PRESERVES_UV
+#  endif
+#endif
+#ifdef NV_PRESERVES_UV
         /* Avoid altering arg's flags */
         if(SvUOK(arg))      nv_arg = (NV)SvUV(arg);
         else if(SvIOK(arg)) nv_arg = (NV)SvIV(arg);
